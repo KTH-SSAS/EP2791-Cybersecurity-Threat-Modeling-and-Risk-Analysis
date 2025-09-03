@@ -4,7 +4,9 @@ This is a graphical tool for doing calculations according to [YACRAF](https://li
 
 This tool allows calculations inherent to the threat modeling to be set up and calculated using graphical block diagrams, where one can place, drag, and connect different blocks across various `Views`. The tool aims to allow for (i) the automation of the calculation process, where any changes to any block automatically propagate through the system and (ii) the simulation/analysis of various system configurations.
 
+
 # Table of Contents
+0. [Repository Structure](#Repository-structure)
 1. [Dependencies](#Dependencies)
 2. [Running the YACRAF Calculator](#running-the-YACRAF-calculator)
 3. [GUI Overview](#GUI-Overview)
@@ -23,6 +25,20 @@ This tool allows calculations inherent to the threat modeling to be set up and c
 7. [FAQ](#FAQ)
 
 
+
+## Repository Structure
+This repository is organized into several directories, each serving a specific purpose:
+```
+├── config/ # Configuration files (paths, settings, coordinates, etc.)
+├── course-material/ # EP2790 course content, slides, notes, and examples
+├── img/ # Diagrams and SVG files used in the course
+├── saves/ # Saved scenarios and custom examples
+├── scripts/ # Utility scripts (attack paths, defenses, data export etc.)
+├── src/ # Source code (core logic, models, GUI, views)
+├── testing/ # Test scripts and experiments
+├── README.md # Main documentation (this file)
+└── test.py # Example entry point for testing
+```
 
 ## Dependencies
 
