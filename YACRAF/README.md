@@ -72,9 +72,11 @@ python3 main.py
 
 The default saves of the program contain examples of the YACRAF metamodel, including accompanying system-model examples. The following default saves exist:
 
-1. `example_single`: Example based on the illustrative example found in Section 4 of the YACRAF paper, where the YACRAF metamodel is defined in the corresponding `Metamodel Views`, and the calculations are performed in the `System Views`
-2. `example_triangle`: Same as `example_single`, except using triangle distributions whenever applicable
-3. `custom`: Same `Metamodel Views` as `exampel_triangle`, but with blank `System Views` to simplify the creation of a new threat model for a different system using the YACRAF metamodel
+1. `example_single`: Example based on the illustrative example found in Section 4 of the YACRAF paper, where the YACRAF metamodel is defined in the corresponding `Metamodel Views`, and the calculations are performed in the `System Views`.
+2. `example_triangle`: Same as `example_single`, except using triangle distributions whenever applicable.
+3. `Cloud`: A small example of a threat model for a cloud service provider, adapted from this [example](https://www.nccgroup.com/research-blog/threat-modelling-cloud-platform-services-by-example-google-cloud-storage/) and represented using the YACRAF metamodel. 
+4. `custom`: Same `Metamodel Views` as `exampel_triangle`, but with blank `System Views` to simplify the creation of a new threat model for a different system using the YACRAF metamodel.
+
 
 ## GUI Overview
 
