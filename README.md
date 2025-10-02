@@ -8,7 +8,7 @@ This repository is a companion to the course and works **together with KTH Canva
 - **This GitHub repository** complements Canvas by providing course-related tools, additional resources, and examples.  
 
 To succeed in the course, you are expected to **check both Canvas and GitHub regularly**.  
-If you are not a KTH student, please see the [Non-KTH Users](#-non-kth-users) section.  
+If you are not a KTH student, please see the [Non-KTH Users](#non-kth-users) section.  
 
 ---
 ## Feedback & Remarks  
