@@ -6,7 +6,6 @@ This tool allows calculations inherent to the threat modeling to be set up and c
 
 
 # Table of Contents
-0. [Repository Structure](#Repository-structure)
 1. [Dependencies](#Dependencies)
 2. [Running the YACRAF Calculator](#running-the-YACRAF-calculator)
 3. [GUI Overview](#GUI-Overview)
@@ -25,20 +24,6 @@ This tool allows calculations inherent to the threat modeling to be set up and c
 7. [FAQ](#FAQ)
 
 
-
-## Repository Structure
-This repository is organized into several directories, each serving a specific purpose:
-```
-├── config/ # Configuration files (paths, settings, coordinates, etc.)
-├── course-material/ # EP2790 course content, slides, notes, and examples
-├── img/ # Diagrams and SVG files used in the course
-├── saves/ # Saved scenarios and custom examples
-├── scripts/ # Utility scripts (attack paths, defenses, data export etc.)
-├── src/ # Source code (core logic, models, GUI, views)
-├── testing/ # Test scripts and experiments
-├── README.md # Main documentation (this file)
-└── test.py # Example entry point for testing
-```
 
 ## Dependencies
 
