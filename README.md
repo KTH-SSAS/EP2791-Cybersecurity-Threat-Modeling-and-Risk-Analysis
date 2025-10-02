@@ -19,20 +19,20 @@ We welcome feedback to improve both the course and the tools.
 - Before submitting, check whether a similar issue already exists.  
 - When opening a new issue, please follow this format:  
 ```bash
-[Category(YACRAFT/COURSE)] – Short description
+[Category(YACRAF/COURSE)] – Short description
     Detailed explanation...
 ```
 For example: 
 ```bash
 [Course] – Assignment 2 instructions unclear  
-Not sure if we should submit only the YACRAFT results or also a short explanation. An example submission would help.  
+Not sure if we should submit only the YACRAF results or also a short explanation. An example submission would help.  
 ```
 
 ## Non-KTH Users  
 
-If you found this repository through the [YACRAFT]() paper or by other means:  
+If you found this repository through the [YACRAF]() paper or by other means:  
 
-- You are welcome to use the **YACRAFT tools** and explore the course material.  
+- You are welcome to use the **YACRAF tools** and explore the course material.  
 - You will **not** have access to the KTH Canvas platform.  
 - If you find an issue with the tools or wish to suggest improvements, please open an **Issue** or **Pull Request**.  
 - Check the **examples** folder for guidance on how the tools work.  
