@@ -54,5 +54,6 @@ In this folder you’ll find links to the **course lecture videos**. Watch them 
 
 
 - **Lecture 5 — Phase 5 Risk Assessment and Recommendations  → [Lecture video ▶](https://play.kth.se/playlist/dedicated/0_eeoaqjho/0_l4e9lww3)**
+    
     In this lecture, we’ll aggregate it all: combine likelihood and impact into overall risk, compare protection scenarios, and deliver clear, prioritized recommendations for reducing risk.
 
