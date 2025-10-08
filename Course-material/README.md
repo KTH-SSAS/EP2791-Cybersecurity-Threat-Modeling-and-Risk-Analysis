@@ -1,4 +1,4 @@
-# EP2791 — Course Materials
+# Course Materials
 
 This directory contains the official materials for EP2791, organized into two subdirectories:
 
