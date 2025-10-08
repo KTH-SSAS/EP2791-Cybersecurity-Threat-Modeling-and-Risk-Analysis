@@ -1,5 +1,0 @@
-configurations/YACRAF 1.pickle
-configurations/YACRAF 2.pickle
-setups/Loss events, Abuse cases, and Attackers.pickle
-setups/Attack tree hacktivist.pickle
-setups/Attack tree organized crime group.pickle

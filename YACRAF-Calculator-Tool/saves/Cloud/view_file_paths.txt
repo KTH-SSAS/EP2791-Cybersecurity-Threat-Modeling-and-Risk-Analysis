@@ -1,0 +1,5 @@
+configurations/YACRAF 1.pickle
+configurations/YACRAF 2.pickle
+setups/Loss event.pickle
+setups/Attack tree.pickle
+setups/Setup 3.pickle
