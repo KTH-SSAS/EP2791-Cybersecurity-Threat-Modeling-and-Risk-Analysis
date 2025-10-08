@@ -24,10 +24,6 @@ This tool allows calculations inherent to the threat modeling to be set up and c
 7. [FAQ](#FAQ)
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 1094520cf10118c3513d4c97fd3428d6de02391a
 ## Dependencies
 
 The program utilizes Tkinter for its GUI and NumPy for its calculations. If not already installed, Tkinter can on Debian-based Linux distributions (such as Ubuntu) be installed using:
