@@ -1,0 +1,1 @@
+Overall, the risk aggregation method in Yacraf largely follows the FAIR method. Biggest change are details around how system resilience is estimated, what FAIR labels “vulnerability” (since FAIR does not deploy attack trees/graphs). Primary and secondary loss have been merged, and frequencies have been replaced with probabilities.
