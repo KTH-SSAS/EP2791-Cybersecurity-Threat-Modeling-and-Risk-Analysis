@@ -93,7 +93,9 @@ The save button in the bottom left corner ((3) in the below figure) saves the cu
 
 ### Working with Metamodel Views
 
-**Note on the meta-model**: You generally should not change the meta-model. In almost all cases, your work should be done by adding/editing instances and values, not by altering classes/attributes. Please only consider a meta-model change with strong justification, and keep in mind that it can break examples and scripts.
+**Note on the meta-model**: You generally should not change the meta-model, it encodes YACRAF out of the box. In almost all cases, your work should be done by adding/editing instances and values, not by altering classes/attributes. Please only consider a meta-model change with strong justification, and keep in mind that it can break examples and scripts. 
+
+So most likely you should skip over this section!
 
 #### Creating Classes and Attributes
 
