@@ -3,4 +3,3 @@ The provided running example is not a full or complete Example as required for g
 
 Example models may be subject to change during the course. The files in the "original DFDs" folder were created using [draw.io](https://www.draw.io/). Files with the .xml extension can be opened and edited using the draw.io tool. 
 
-There are also videos that explain the models. These videos are provided in standard formats (e.g., .mp4) and can be played with common media players such as [VLC](https://www.videolan.org/vlc/). 
