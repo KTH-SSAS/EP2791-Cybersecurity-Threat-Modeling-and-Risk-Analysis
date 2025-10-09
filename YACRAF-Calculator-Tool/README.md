@@ -5,6 +5,7 @@ This is a graphical tool for doing calculations according to [YACRAF](https://li
 This tool allows calculations inherent to the threat modeling to be set up and calculated using graphical block diagrams, where one can place, drag, and connect different blocks across various `Views`. The tool aims to allow for (i) the automation of the calculation process, where any changes to any block automatically propagate through the system and (ii) the simulation/analysis of various system configurations.
 
 
+
 # Table of Contents
 1. [Dependencies](#dependencies)
 2. [Running the YACRAF Calculator](#running-the-yacraf-calculator)
@@ -91,6 +92,8 @@ The save button in the bottom left corner ((3) in the below figure) saves the cu
 ![Image of a configured YACRAF metamodel within a metamodel view](img/configuration_view.svg)
 
 ### Working with Metamodel Views
+
+**Note on the meta-model**: You generally should not change the meta-model. In almost all cases, your work should be done by adding/editing instances and values, not by altering classes/attributes. Please only consider a meta-model change with strong justification, and keep in mind that it can break examples and scripts.
 
 #### Creating Classes and Attributes
 
