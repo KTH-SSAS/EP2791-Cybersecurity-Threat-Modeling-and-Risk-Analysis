@@ -1,4 +1,4 @@
-# Cybersecurity Threat Modelling and Risk Analysis 
+# Cybersecurity Threat Modeling and Risk Analysis 
 
 Welcome to the official repository of **KTH’s courses EP2790 – Security Analysis of Large-Scale Computer Systems, and EP279V - Cyber Security Analysis**.  
 
