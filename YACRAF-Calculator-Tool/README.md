@@ -149,13 +149,14 @@ Pressing the add connection button at the top ((4) in the above figure) creates 
 
 1. Add a scalar that is applied to input values obtained through the `Connection`, where the appearing indicator (see (7)) can be dragged along the path of the `Connection`
 
-##### Calculating Values
+#### Calculating Values
 
 The calculate button at the top (see (8)) calculates the values of all `Attributes` that do not have a manual input entry field. Calculated are the `Attributes` of all `Classes` in all `System Views`. In the case of the above figure, the `Attribute` indicated by (9) has been calculated using the corresponding `Attribute` values of its input `Classes`. The input `Attributes` in question are highlighted when the `Attribute` is selected.
 
 #### Scripts and Customization
 
 Scripts to visualize or analyze different scenarios, such as finding the most optimal order of implementing defense mechanisms or enumerating and visualizing the easiest attack paths, can be created using Python scripts that interface to the tool. Scripts are created and explained in detail in the `scripts` directory.
+we provide three scripts: ``optimal_order_defense.py``: Calculates the best order for implementing defenses. ``enumerate_easiest_attack.py``: Identifies the easiest attack paths. ``show_critical_instances.py``: Highlights critical system components. 
 
 Note: Computationally heavy scripts could take some time to complete. The corresponding button will appear pressed (have changed color) while the script is running.
 
