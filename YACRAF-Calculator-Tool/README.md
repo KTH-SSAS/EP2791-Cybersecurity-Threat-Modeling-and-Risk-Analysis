@@ -156,7 +156,7 @@ The calculate button at the top (see (8)) calculates the values of all `Attribut
 #### Scripts and Customization
 
 Scripts to visualize or analyze different scenarios, such as finding the most optimal order of implementing defense mechanisms or enumerating and visualizing the easiest attack paths, can be created using Python scripts that interface to the tool. Scripts are created and explained in detail in the `scripts` directory.
-we provide three scripts: ``optimal_order_defense.py``: Calculates the best order for implementing defenses. ``enumerate_easiest_attack.py``: Identifies the easiest attack paths. ``show_critical_instances.py``: Highlights critical system components. 
+We provide three scripts: ``Attack_Paths.py``: marks, in a YACRAF view, the easiest previous attack step for a chosen attack event by scanning inputs and comparing global difficulty values. ``Disable_Defenses.py``: temporarily turns off all defense mechanisms by overriding their Impact values to zero, then recalculates outcome. ``Export to CSV.py``: exports YACRAF data for Loss events, Abuse cases, and Attackers to a CSV-style table (headers + rows) after recalculating values.
 
 Note: Computationally heavy scripts could take some time to complete. The corresponding button will appear pressed (have changed color) while the script is running.
 
@@ -348,11 +348,9 @@ We recommend using the custom save to design your own threat models.
 
 **A22:** The available scripts include:
 
-- **optimal_order_defense.py:** Calculates the best order for implementing defenses.
-
-- **enumerate_easiest_attack.py:** Identifies the easiest attack paths.
-
-- **show_critical_instances.py:** Highlights critical system components.
+ - ``Attack_Paths.py``: marks, in a YACRAF view, the easiest previous attack step for a chosen attack event by scanning inputs and comparing global difficulty values.
+ - ``Disable_Defenses.py``: temporarily turns off all defense mechanisms by overriding their Impact values to zero, then recalculates outcome.
+ - ``Export to CSV.py``: exports YACRAF data for Loss events, Abuse cases, and Attackers to a CSV-style table (headers + rows) after recalculating values.
 
 
 
