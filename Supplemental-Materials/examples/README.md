@@ -1,5 +1,0 @@
-## Examples
-The provided running example is not a full or complete Example as required for grading. It is intended to serve as a source of inspiration, to help you get started, and to illustrate some key concepts. Please note that the example may contain errors, so it is important to approach it with care and critical thinking. (Some of the examples are a few years old and smaller updates are constantly done in the course at large). Using the example for inspiration does not mean copying. Copying constitutes plagiarism. Each individual is fully responsible for their own work, and the reports submitted for grading must be developed by the individual who submits them. This case is entirely fictitious. (In fact, none of the teachers have any real-world insight into this type of company). 
-
-Example models may be subject to change during the course. The files in the "original DFDs" folder were created using [draw.io](https://www.draw.io/). Files with the .xml extension can be opened and edited using the draw.io tool. 
-
