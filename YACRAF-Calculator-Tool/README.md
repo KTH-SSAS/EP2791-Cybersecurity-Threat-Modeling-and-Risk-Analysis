@@ -4,7 +4,8 @@ This is a graphical tool for doing calculations according to [YACRAF](https://li
 
 This tool allows calculations inherent to the threat modeling to be set up and calculated using graphical block diagrams, where one can place, drag, and connect different blocks across various `Views`. The tool aims to allow for (i) the automation of the calculation process, where any changes to any block automatically propagate through the system and (ii) the simulation/analysis of various system configurations.
 
-**Disclaimer**: The YACRAF calculator is a prototype software. It was not developed as a comercial product, fulfilling all the requirements that would come with that, but as a best effort prototype for education and research. It is intended assist practical use of YACRAF, but is by no means the only way to do YACRAF-based risk analysis. The code may contain bugs so using it is at your own risk, and all results needs to be cross-checeked. Any help with improving any dimension of the tool is most welcome - looking forward to your pull request! :)  Having all that said - we hope you find the tool useful. 
+**Disclaimer**: The YACRAF calculator is a prototype software. It was not developed as a comercial product, fulfilling all the requirements that would come with that, but as a best effort prototype for education and research. It is intended assist practical use of YACRAF, but is by no means the only way to do YACRAF-based risk analysis. The code may contain bugs so using it is at your own risk, and all results needs to be cross-checeked. Any help with improving any dimension of the tool is most welcome - looking forward to your pull request! :)  
+Having all that said - we hope you find the tool useful. 
 
 # Table of Contents
 1. [Dependencies](#dependencies)
