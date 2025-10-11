@@ -1,6 +1,6 @@
 # Cybersecurity Threat Modeling and Risk Analysis 
 
-Welcome to the official repository of **KTH’s courses EP2791 – Security Analysis of Large-Scale Computer Systems, and EP279V - Cyber Security Analysis**.  
+Welcome to the official repository of **KTH’s courses EP2791 – Cybersecurity Threat Modeling and Risk Analysis, and EP279V - Cyber Security Analysis**.  
 
 This repository complements the courses' KTH Canvas pages, the primary platform for assignments and announcements, by providing course materials, the YACRAF calculator tool, and supplemental resources. Course material holds the core teaching content: the lectures subfolder contains video recordings and slides for Phases 0–5. It also provides examples, runnable walk-throughs that demonstrate each step of the methodology, including sample inputs/outputs for the YACRAF calculator. Supplemental materials add depth with reference papers, extended notes (e.g., ThreatModeling-LLM.pdf), and additional worked examples. The YACRAF calculator tool contains the calculator itself with usage instructions and example scenarios. Please read the ``README.md`` in each directory before proceeding.
 
