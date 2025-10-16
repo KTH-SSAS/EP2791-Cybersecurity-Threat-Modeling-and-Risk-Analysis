@@ -190,7 +190,7 @@ We provide a set of short tutorial videos that walk you through the tool, from s
 
 
 ## Reporting bugs with the YACRAF tool 
-If you hit a bug while using the YACRAF calculator or examples, please open a **GitHub Issue** (preferred) or email us. **Before you file the issue**, please update to the **latest commit/release** and try again, and check **existing issues** to avoid duplicates.
+If you hit a bug while using the Yacraf calculator or examples, please open a **GitHub Issue** (preferred) or email us. **Before you file the issue**, please update to the **latest commit/release** and try again, and check **existing issues** to avoid duplicates.
 
 
 ## Contribute to YACRAF
