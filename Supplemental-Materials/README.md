@@ -3,7 +3,7 @@
 This folder contains **optional** resources for deeper understanding and alternative viewpoints.  
 They’re helpful when you want more background, but **not required** to complete the course.
 
-Use this when you need extra context for a specific YACRAF phase, or for general threat-modeling reading.
+Use this when you need extra context for a specific Yacraf phase, or for general threat-modeling reading.
 
 We also include an example that shows how to work through the different phases. It doesn’t use Yacraf calculator tool, but it’s helpful if you get stuck or want another perspective. You can use this example to understand the intent of each phase before applying Yacraf.
 
