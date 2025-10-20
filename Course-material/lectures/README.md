@@ -30,9 +30,8 @@ In this folder you’ll find links to the **course lecture videos**. Watch them 
 
 
 - **Lecture 3a — Phase 3: Additional Comments → [Lecture video ▶](https://play.kth.se/playlist/dedicated/0_eeoaqjho/0_e7siw0ke)**
-
-
-
+    
+    This short lecture offers extra insights and clarifications on the threat analysis phase. 
 
 
 - **Lecture 4 — Phase 4 Attack and Resilience Analysis → [Lecture video ▶](https://play.kth.se/playlist/dedicated/0_eeoaqjho/0_0tz0nn66)**
