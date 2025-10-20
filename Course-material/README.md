@@ -11,14 +11,14 @@ This directory contains the official materials for EP2791, organized into two su
 
 The course is structures the Yacraf in phases, and **the Yacraf tool is not intended for all of them**. The Yacraf tool supports the risk calcualtions defined in the framework, however it is not supporting the modeling of business and IT-systems architectue. For this, other tools are better. 
 
-## Threat modeling meta models
+## Threat modeling languages
 
-Even though Yacraf does not mandate any specific language for describing business and IT-systems architectiures it does suggest a taxonomy that support the architecture modeling as is explained in (Phases 1 and 2 in the material)[https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/edit/master/Course-material/lectures/README.md]. From a Yacraf point of view, the important thing is that the architectural modeling supports the development of *Loss Events, Abuse Cases*, etc. that drives the risk calculations.  
+Even though Yacraf does not mandate any specific language for describing business and IT-systems architectiures it does suggest a taxonomy that support the architecture modeling as is explained in [Phases 1 and 2 in the material](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/edit/master/Course-material/lectures/README.md). From a Yacraf point of view, the important thing is that the architectural modeling supports the development of *Loss Events, Abuse Cases*, etc. that drives the risk calculations.  
 
 Traditional threat modeling primarily uses Data Flow Diagrams (DFDs), extended with trust boundaries, to describe the system architecture. [Learn more about DFDs here.](https://online.visual-paradigm.com/knowledge/software-design/dfd-using-yourdon-and-demarco/)
 
 ## Recommended Tools
-A general recommendation would be to use [**draw.io**](https://draw.io) for the threat modelling in this course. This is a very flexible general diagramming and data modeling tool that allows you to do model with very few imposed restrictions.
+A general recommendation would be to use [**draw.io**](https://draw.io) for the architecture modeling in this course. This is a very flexible general diagramming and data modeling tool that allows you to do model with very few imposed restrictions.
 
 Other tools of interest are for instance: 
 - [**Lucidchart**](https://www.lucidchart.com) – user-friendly diagramming platform (similar to Visio).  
