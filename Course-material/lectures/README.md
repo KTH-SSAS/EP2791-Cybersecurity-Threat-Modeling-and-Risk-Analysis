@@ -1,6 +1,5 @@
 ## Lectures
-In this folder you’ll find links to the **course lecture videos**. Watch them in order (Phase 0 → Phase 5). Each lecture introduces a phase of the Yacraf that you’ll use for the assignement. (All lectures were not recorded at the same point in time and extended and complimentary material has been added over time. A red star in the slide deck is indicating where material has been added.)    
-
+In this folder you’ll find links to the **course lecture videos**. It is recommended that you initially watch them in order (Phase 0 → Phase 5, as they appear). Later you might want to return to them as needed. Each lecture introduces a phase of the Yacraf that you’ll use for the assignement. The presented material is also avialble a slide deck: [EP2790-HT2024_v1-all.pdf](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/blob/master/Course-material/lectures/EP2790-HT2024_v1-all.pdf). (All lectures were not recorded at the same point in time and extended and complimentary material has been added over time. A red star in the slide deck is indicating where material has been added.)    
 
 
 - **Lecture 0 — Preliminaries for Cyber Threat Modeling & Risk Analysis → [Lecture video ▶](https://play.kth.se/playlist/dedicated/0_eeoaqjho/0_kih95sxw)** 
