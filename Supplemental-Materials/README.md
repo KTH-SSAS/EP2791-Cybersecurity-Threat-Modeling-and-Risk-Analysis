@@ -9,6 +9,17 @@ We also include an example that shows how to work through the different phases. 
 
 
 ## Per-phase extras
+
+### Using UML Diagrams in Conceptual Modeling
+
+For a quick introduction to UML in the context of conceptual modeling, we recommend the following short videos:
+
+-  [Object diagrams](https://www.youtube.com/watch?v=OkxNKOAcOC0)
+-  [Class diagram, part 1](https://www.youtube.com/watch?v=enx416yT55M)
+-  [Class diagram, part 1](https://www.youtube.com/watch?v=KtCQDKZ64sY&pp=QAA%3D)
+
+Note that UML was developed primarily for software design and code generation; in conceptual modeling, not all UML constructs are relevant, and examples drawn from software contexts can feel slightly misaligned. When watching, interpret scenarios like the “Frogger game” as stand-ins for the real-world domain you wish to model, focusing on how objects, classes, and relationships capture domain semantics rather than implementation details.
+
 ### Business Analysis 
 
 ### System Definition and Decomposition 
