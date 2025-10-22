@@ -1,5 +1,5 @@
 ## Note on the supplemental example (legacy material)
-This running example is old course material and does not use Yacraf tools calculator. It’s provided as supplemental inspiration only, to see how one might think through the phases using a more general method, not as a model for grading. It may be outdated or contain errors, so read it critically, cross-check against the current syllabus and Yacraf templates, and use it to understand intent and structure rather than to copy.
+This running example is older course material and does not use Yacraf tool calculator. It is provided as supplemental material for inspiration and for a deeper understanding. Even though it may contain some parts or details that are outdated or contain errors, it still follows the overall Yacraf method and can thus be used for acquiring deeper knowledge. But, read it critically, cross-check against the current syllabus and Yacraf templates, and use it to understand intent and structure rather than to copy.
 
 
 ## Examples by Phase
