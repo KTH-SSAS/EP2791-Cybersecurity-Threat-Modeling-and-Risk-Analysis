@@ -1,6 +1,6 @@
 # Course Material
 
-This directory contains the official materials for the course, organized into two main subdirectories:
+The main study material for this course is the [Yet another cybersecurity risk assessment framework (Yacraf)](https://link.springer.com/article/10.1007/s10207-023-00713-y). To complement this paper, this directory contains the key material for the course, organized into two main subdirectories:
 
 - [**Lectures**](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/blob/master/Course-material/lectures); that contains the lecture slides and recorded videos, organized by Yacraf phases (0–5). 
 
