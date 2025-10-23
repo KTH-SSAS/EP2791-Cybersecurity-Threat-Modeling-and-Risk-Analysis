@@ -17,7 +17,7 @@ For a quick introduction to UML in the context of conceptual modeling, we recomm
 
 Note that UML was developed primarily for software design and code generation; in conceptual modeling, not all UML constructs are relevant, and examples drawn from software contexts can feel slightly misaligned. When watching, interpret scenarios like the “Frogger game” as stand-ins for the real-world domain you wish to model, focusing on how objects, classes, and relationships capture domain semantics rather than implementation details.
 
-### Business Analysis 
+### Business Analysis - Phase 1 
 **Suggested readings**
 - **Business Analysis Canvas** — article/overview can be found [here] (https://www.batimes.com/articles/business-analysis-canvas-roadmap-to-effective-ba-excellence.html).
 -  CATWOE looks at what a company wants to achieve, and which solutions can influence the stakeholders: intro [note](https://www.toolshero.com/problem-solving/catwoe-analysis/), and a short YouTube [video](https://www.youtube.com/watch?v=lvQYLIzE9gE) explainer *“What is CATWOE?”*.
