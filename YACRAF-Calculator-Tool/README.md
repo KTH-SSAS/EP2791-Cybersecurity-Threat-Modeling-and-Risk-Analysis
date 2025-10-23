@@ -1,10 +1,10 @@
 # YACRAF calculator
 
-This is a graphical tool for doing calculations according to [YACRAF](https://link.springer.com/article/10.1007/s10207-023-00713-y) used in the KTH courses EP2790, EP2791, and EP279V.
+This is a graphical tool for doing calculations according to [Yacraf](https://link.springer.com/article/10.1007/s10207-023-00713-y) used in the KTH courses EP2790, EP2791, and EP279V.
 
 This tool allows calculations inherent to the threat modeling to be set up and calculated using graphical block diagrams, where one can place, drag, and connect different blocks across various `Views`. The tool aims to allow for (i) the automation of the calculation process, where any changes to any block automatically propagate through the system and (ii) the simulation/analysis of various system configurations.
 
-**Disclaimer**: The YACRAF calculator is a prototype software. It was not developed as a comercial product, fulfilling all the requirements that would come with that, but as a best effort prototype for education and research. It is intended assist practical use of YACRAF, but is by no means the only way to do YACRAF-based risk analysis. The code may contain bugs so using it is at your own risk, and all results needs to be cross-checeked. Any help with improving any dimension of the tool is most welcome - looking forward to your pull request! :)  
+**Disclaimer**: The Yacraf calculator is a prototype software. It was not developed as a comercial product, fulfilling all the requirements that would come with that, but as a best effort prototype for education and research. It is intended assist practical use of Yacraf, but is by no means the only way to do Yacraf-based risk analysis. The code may contain bugs so using it is at your own risk, and all results needs to be cross-checeked. Known bugs are reported under Issues. Any help with improving any dimension of the tool is most welcome - looking forward to your pull request! :)  
 Having all that said - we hope you find the tool useful. 
 
 # Table of Contents
