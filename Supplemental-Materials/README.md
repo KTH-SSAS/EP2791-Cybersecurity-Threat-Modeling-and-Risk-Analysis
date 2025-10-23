@@ -22,7 +22,7 @@ Note that UML was developed primarily for software design and code generation; i
 - **Business Analysis Canvas** — article/overview can be found [here] (https://www.batimes.com/articles/business-analysis-canvas-roadmap-to-effective-ba-excellence.html).
 -  CATWOE looks at what a company wants to achieve, and which solutions can influence the stakeholders: intro [note](https://www.toolshero.com/problem-solving/catwoe-analysis/), and a short YouTube [video](https://www.youtube.com/watch?v=lvQYLIzE9gE) explainer *“What is CATWOE?”*.
 
-### System Definition and Decomposition 
+### System Definition and Decomposition - Phase 2
 
 **Suggested readings & tools**
 - **DFDs** — short primer/guide [here](https://www.lucidchart.com/pages/data-flow-diagram).
@@ -64,7 +64,7 @@ It is beneficial to understand and review a number of key concepts around ICT sy
 
 
 
-### Threat Analysis 
+### Threat Analysis - Phase 3
 **Suggested readings**
 - **MITRE ATT&CK (Groups):** catalog of known actors and behaviors [here](https://attack.mitre.org/groups/).  
   *Note:* this is a U.S./Western perspective—use it as inspiration, not ground truth.
@@ -73,7 +73,7 @@ It is beneficial to understand and review a number of key concepts around ICT sy
 - **Organization-specific profiling:** guide to building your own threat profiles [here](https://www.sans.org/reading-room/whitepapers/threats/creating-threat-profile-organization-35492).
 - **STIX (Structured Threat Information Expression):** language for describing actors/campaigns [here](https://oasis-open.github.io/cti-documentation/stix/intro).
 
-### Attack and Resilience Analysis 
+### Attack and Resilience Analysis - Phase 4
 Use this subsection to quickly deepen Phase 4: find and rate vulnerabilities, name and structure attacks (trees/graphs), and pick defenses that actually break the paths—links below are short, practical primers.
 
 #### Security properties (start here)
@@ -92,7 +92,7 @@ Use this subsection to quickly deepen Phase 4: find and rate vulnerabilities, na
 - **Attack trees/graphs** — Schneier’s “Attack Trees”: [here](https://www.schneier.com/academic/archives/1999/12/attack_trees.html) · step-by-step guide/thesis: [here](https://essay.utwente.nl/79133/1/Sonderen_MA_EEMCS.pdf)
 - **Web/app specifics** — OWASP Cheat Sheet: Web Service Security: [here](https://cheatsheetseries.owasp.org/cheatsheets/Web_Service_Security_Cheat_Sheet.html)
 
-### Risk Assessment and Recommendations 
+### Risk Assessment and Recommendations - Phase 5
 
 **Suggested readings**
 - Short articles giving perspective on risk roll-up and communicating recommendations: 
