@@ -1,7 +1,7 @@
 ## Lectures
 In this folder you’ll find links to the **course lecture videos**. Watch them in order (Phase 0 → Phase 5). Each lecture introduces a phase of the Yacraf that you’ll use for the assignement. All lectures were not recorded at the same point in time and extended and complimentary material has been added over time. A red star in the slide deck is indicating where material has been added. The folder also includes the PDF course slides and PNG diagrams of the risk calculator framework and threat modeling language for better readability
 
-
+- **Intro Lecture from 2025-10-27 → [Lecture video ▶](https://play.kth.se/media/EP2790+EP279V-Intro+Lecture/0_qyrtjym5?st=50)**
 
 - **Lecture 0 — Preliminaries for Cyber Threat Modeling & Risk Analysis → [Lecture video ▶](https://play.kth.se/playlist/dedicated/0_eeoaqjho/0_kih95sxw)** 
 
