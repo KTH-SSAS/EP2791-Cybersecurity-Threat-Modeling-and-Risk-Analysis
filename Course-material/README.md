@@ -4,7 +4,7 @@ The main study material for this course is the [Yet another cybersecurity risk a
 
 - [**Lectures**](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/blob/master/Course-material/lectures); that contains the lecture slides and recorded videos, organized by Yacraf phases (0–5). 
 
-- **Worked examples** 
+- **Worked examples** (Coming soon..)
 
 
 # Complementary Tools (Beyond Yacraf)
