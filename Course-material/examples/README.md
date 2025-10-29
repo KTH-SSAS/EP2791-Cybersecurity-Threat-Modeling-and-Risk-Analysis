@@ -13,7 +13,7 @@ For reminder, the goal of Phase 2 is to build a clear understanding of the compa
 
 3. Anticipate where failures in these activities could create real business impact later in the analysis.
 
-In the legacy example, we consider a e-scooter company. The company’s primary business goal is “rent out more scooters than any other company in Stockholm.” To support this, the company defines several operational objectives:
+In the legacy example, we consider an e-scooter company. The company’s primary business goal is “rent out more scooters than any other company in Stockholm.” To support this, the company defines several operational objectives:
 
 - Collect and utilize ride data to improve scooter quality and the customer experience. This involves the scooters themselves, the backend systems, and analytics platforms that process usage data.
 
