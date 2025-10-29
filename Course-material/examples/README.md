@@ -1,6 +1,6 @@
 ## Examples
 
-
+...soon to appear. 
 
 ## About the Business Architecture Modelling
 The cloud example that we provide does not include business architecture modelling (Phase 2). If you are struggling with this part and feel that you need an example, we advise you to look at the [legacy_example](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/Supplemental-Materials/examples_legacy) provided in the supplementary material.
