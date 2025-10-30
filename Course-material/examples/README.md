@@ -1,6 +1,16 @@
 ## Examples
 
-...soon to appear. 
+The example we are providing is related to the application with Google Cloud infrustructure. It includes [cloud infrustructure scheme](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/blob/master/Course-material/examples/Cloud_example_infrustructure.png), [YACRAF-tool model](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/YACRAF-Calculator-Tool/saves/Cloud) and a set of [explaining videos](https://play.kth.se/playlist/dedicated/0_yxqycc9v/). The topics covered in videos are:
+
+1. Infrustructure description
+
+2. Explanation of Attackers, Abuse cases and Loss events
+
+3. Explanation of Attack paths
+
+4. Mapping of attack paths to infrustructure scheme
+
+5. Explanation of defence mechanisms
 
 ## About the Business Architecture Modelling
 The cloud example that we provide does not include business architecture modelling (Phase 2). If you are struggling with this part and feel that you need an example, we advise you to look at the [legacy_example](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/Supplemental-Materials/examples_legacy) provided in the supplementary material.
