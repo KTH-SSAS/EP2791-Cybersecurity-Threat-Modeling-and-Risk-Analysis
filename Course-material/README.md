@@ -9,7 +9,7 @@ The main study material for this course is the [Yet another cybersecurity risk a
 
 # Complementary Tools (Beyond the Yacraf calcualtion tool)
 
-The course is structures the Yacraf in phases, and **the Yacraf tool is not intended for all of them**. The Yacraf tool supports the risk calcualtions defined in the framework, however it is not supporting the modeling of business and IT-systems architectue. For this, other tools are better. 
+Yacraf is organized in phases, but **the Yacraf tool is not intended for all of them**. The Yacraf tool supports the risk calcualtions defined in the framework, however it is not supporting the modeling of business and IT-systems architectue. For this, other tools are better. 
 
 ## Threat modeling languages
 
