@@ -1,16 +1,20 @@
 ## Examples
 
-The example we are providing is related to the application with Google Cloud infrustructure. It includes [cloud infrustructure scheme](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/blob/master/Course-material/examples/Cloud_example_infrustructure.png), [YACRAF-tool model](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/YACRAF-Calculator-Tool/saves/Cloud) and a set of [explaining videos](https://play.kth.se/playlist/dedicated/0_yxqycc9v/). The topics covered in videos are:
+The example is presenting a threat model for the GCP-service-based application with YACRAF-tool. It includes [cloud infrustructure scheme](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/blob/master/Course-material/examples/Cloud_example_infrustructure.png), [YACRAF-tool model](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/YACRAF-Calculator-Tool/saves/Cloud) and a set of [explaining videos](https://play.kth.se/playlist/dedicated/0_yxqycc9v/). The videos are arranged in a playist and cover the topics:
 
-1. Infrustructure description
+1. [Infrustructure description](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_n8o3qpzp)
 
-2. Explanation of Attackers, Abuse cases and Loss events
+2. [Explanation of Attackers, Abuse cases and Loss events](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_aukm919d)
 
-3. Explanation of Attack paths
+3. [Explanation of attack three for Theft of GCP credentials abuse case](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_0tsn1yu7)
 
-4. Mapping of attack paths to infrustructure scheme
+4. [Explanation of attack three for Theft of GCP credentials abuse case with relation to infrastructure scheme](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_wk1207ev)
 
-5. Explanation of defence mechanisms
+5. [Explanation of attack tree for Log deletion abuse case with relation to infrastructure scheme](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_ak24jq0k)
+
+6. [Explanation of defence mechanisms](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_ach0pio6)
+
+YACRAF-tool model contains two attackers, three associated abuse cases and three loss events. Each abuse case has a related tab with attack tree and defence mechanisms. We provide two simplified attack trees and one more complex, with two path described in details.
 
 ## About the Business Architecture Modelling
 The cloud example that we provide does not include business architecture modelling (Phase 2). If you are struggling with this part and feel that you need an example, we advise you to look at the [legacy_example](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/Supplemental-Materials/examples_legacy) provided in the supplementary material.
