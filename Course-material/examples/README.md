@@ -4,7 +4,7 @@ The example is presenting a threat model with YACRAF-tool. It includes [cloud in
 
 1. Infrustructure description → [video 1 ▶](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_n8o3qpzp)
 
-his video explains the cloud infrastructure scheme, focusing on internal components and data flows.
+This video explains the cloud infrastructure scheme, focusing on internal components and data flows.
 
 2. Explanation of Attackers, Abuse cases and Loss events → [video 2 ▶](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_aukm919d)
 
