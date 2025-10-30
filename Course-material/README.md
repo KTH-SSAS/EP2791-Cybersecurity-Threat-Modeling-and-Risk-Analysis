@@ -1,13 +1,13 @@
-# Course Material
+# Main Course Material
 
 The main study material for this course is the [Yet another cybersecurity risk assessment framework (Yacraf)](https://link.springer.com/article/10.1007/s10207-023-00713-y). To complement this paper, this directory contains the key material for the course, organized into two main subdirectories:
 
 - [**Lectures**](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/blob/master/Course-material/lectures); that contains the lecture slides and recorded videos, organized by Yacraf phases (0–5). 
 
-- **Worked examples** (Coming soon..)
+- [**Example**](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/Course-material/examples); as an inspiration to get started in using the Yacraf tool a small example centered around three abuse cases is provided.  
 
 
-# Complementary Tools (Beyond Yacraf)
+# Complementary Tools (Beyond the Yacraf calcualtion tool)
 
 The course is structures the Yacraf in phases, and **the Yacraf tool is not intended for all of them**. The Yacraf tool supports the risk calcualtions defined in the framework, however it is not supporting the modeling of business and IT-systems architectue. For this, other tools are better. 
 
