@@ -18,7 +18,7 @@ Even though Yacraf does not mandate any specific language for describing busines
 Traditional threat modeling primarily uses Data Flow Diagrams (DFDs), extended with trust boundaries, to describe the system architecture. [Learn more about DFDs here.](https://online.visual-paradigm.com/knowledge/software-design/dfd-using-yourdon-and-demarco/)
 
 ## Recommended Tools
-A general recommendation would be to use [**draw.io**](https://draw.io) for the architecture modeling in this course. This is a very flexible general diagramming and data modeling tool that allows you to do model with very few imposed restrictions.
+A general recommendation is to use [**draw.io**](https://draw.io) for the architecture modeling in this course. This is a very flexible general diagramming and data modeling tool that allows you to do model with very few imposed restrictions. On the other hand it provides weak support for creating semantically consistent and Yacraf-aligned models, so be careful.
 
 Other tools of interest are for instance: 
 - [**Lucidchart**](https://www.lucidchart.com) – user-friendly diagramming platform (similar to Visio).  
