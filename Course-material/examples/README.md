@@ -22,7 +22,7 @@ This video explains how the attack path is related to the infrastructure scheme.
 
 This video explains the attack tree associated with Log deletion abuse cases in relation to the infrastructure scheme. The video describes the relation between MITRE ATT&CK techniques and attack path nodes, and explains the insider attacker’s intentions.
 
-6. Explanation of defense mechanisms → [video 4 ▶] (https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_ach0pio6)
+6. Explanation of defense mechanisms → [video 4 ▶](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_ach0pio6)
 
 This video explains the defense mechanisms, how to connect defense mechanisms to the attack tree and how defense mechanisms affect the difficulty scores of attack path nodes.
 
