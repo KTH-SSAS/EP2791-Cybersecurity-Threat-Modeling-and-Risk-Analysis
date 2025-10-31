@@ -1,0 +1,6 @@
+configurations/YACRAF 1.pickle
+configurations/YACRAF 2.pickle
+setups/Loss event.pickle
+setups/Attack tree: Theft of GCP credentials.pickle
+setups/Attack tree: Anauthenticated access to bucket.pickle
+setups/Attack tree: Log deletion.pickle
