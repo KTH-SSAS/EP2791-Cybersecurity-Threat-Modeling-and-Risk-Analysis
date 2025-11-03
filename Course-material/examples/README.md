@@ -1,6 +1,6 @@
 ## Examples
 
-The example is presenting a threat model with YACRAF-tool. It is based on [this cloud infrastructure example](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/blob/master/Course-material/examples/Cloud_example_infrustructure.png), as an inspiration to create [this YACRAF-tool model](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/YACRAF-Calculator-Tool/saves/Cloud). The YACRAF-tool model contains two attackers, three associated abuse cases and three loss events. Each abuse case has a related tab with an attack tree and defense mechanisms. We provide two simplified attack trees and one more complex one, with two paths described in detail. This material is explained in a number of videos:
+The example presents a threat model with YACRAF-tool. It is based on [this cloud infrastructure example](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/blob/master/Course-material/examples/Cloud_example_infrustructure.png), as an inspiration to create [this YACRAF-tool model](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/YACRAF-Calculator-Tool/saves/Cloud). The YACRAF-tool model contains two attackers, three associated abuse cases, and three loss events. Each abuse case has a related tab with an attack tree and defense mechanisms. We provide two simplified attack trees and one more complex one, with two paths described in detail. This material is explained in a number of videos:
 
 1. Infrustructure description → [video 1 ▶](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_n8o3qpzp)
 
@@ -16,7 +16,7 @@ This video goes through one path of the attack tree for the Theft of GCP credent
 
 4. Explanation the Theft of GCP credentials abuse case and its relation to the infrastructure → [video 4 ▶](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_wk1207ev)
 
-This video explains how the attack path is related to the infrastructure scheme. The video follows one path for the attack tree related to the Theft of GCP credentials abuse case — compromising IAM services. The attack path is explained from the perspective of infrastructure modules.
+This video explains how the attack path is related to the infrastructure scheme. The video follows one path for the attack tree related to the Theft of GCP credentials abuse case,  compromising IAM services. The attack path is explained from the perspective of infrastructure modules.
 
 5. Explanation for a Log deletion abuse case and its relation to the infrastructure → [video 5 ▶](https://play.kth.se/playlist/dedicated/0_yxqycc9v/0_ak24jq0k)
 
@@ -26,10 +26,10 @@ This video explains the attack tree associated with Log deletion abuse cases in 
 
 This video explains the defense mechanisms, how to connect defense mechanisms to the attack tree and how defense mechanisms affect the difficulty scores of attack path nodes.
 
-This [article](https://www.nccgroup.com/research-blog/threat-modelling-cloud-platform-services-by-example-google-cloud-storage/) provides another inteprretation of the threat modelling for the same cloud infrastructure. It uses STRIDE model and identifies different set of attackers, assets and threats. Please note, that our YACRAF example provides different variation of the threat model, however the article still can be considered as a source of inspiration.
+This [article](https://www.nccgroup.com/research-blog/threat-modelling-cloud-platform-services-by-example-google-cloud-storage/) provides another interpretation of the threat modeling for the same cloud infrastructure. It uses the STRIDE model and identifies a different set of attackers, assets, and threats. Please note, that our YACRAF example provides a different variation of the threat model; however, the article still can be considered as a source of inspiration.
 
 ##### Running the model
-To open the YACRAF-tool model see the [full tool instructions](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/YACRAF-Calculator-Tool#running-the-yacraf-calculator), or just follow these steps:
+To open the YACRAF-tool model, see the [full tool instructions](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/YACRAF-Calculator-Tool#running-the-yacraf-calculator), or just follow these steps:
 
 Step 1: Make sure you have installed YACRAF-tool.
 
