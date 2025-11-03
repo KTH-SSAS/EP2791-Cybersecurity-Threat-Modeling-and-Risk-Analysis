@@ -36,6 +36,7 @@ Step 3: Run the command
 ```
 python3 main.py Cloud
 ```
+This [article](https://www.nccgroup.com/research-blog/threat-modelling-cloud-platform-services-by-example-google-cloud-storage/) provides another inteprretation of the threat modelling for the same cloud infrastructure. It uses STRIDE model and identifies different set of attackers, assets and threats. Please note, that our YACRAF example provides different variation of the threat model, however the article still can be considered as a source of inspiration.
 
 ## About the Business Architecture Modelling
 The cloud example that we provide does not include business architecture modelling (Phase 2). If you are struggling with this part and feel that you need an example, we advise you to look at the [legacy_example](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/Supplemental-Materials/examples_legacy) provided in the supplementary material.
