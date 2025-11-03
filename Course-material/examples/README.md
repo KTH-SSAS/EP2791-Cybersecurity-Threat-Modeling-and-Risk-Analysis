@@ -31,7 +31,7 @@ This [article](https://www.nccgroup.com/research-blog/threat-modelling-cloud-pla
 ##### Running the model
 To open the YACRAF-tool model see the [full tool instructions](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/YACRAF-Calculator-Tool#running-the-yacraf-calculator), or just follow these steps:
 
-Step 1: Make sure you have installed YACRAF-tool from [here](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/tree/master/YACRAF-Calculator-Tool).
+Step 1: Make sure you have installed YACRAF-tool.
 
 Step 2: Navigate to the tool root directory.
 
