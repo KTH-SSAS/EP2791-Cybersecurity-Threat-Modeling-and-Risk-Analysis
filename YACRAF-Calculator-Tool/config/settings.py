@@ -27,7 +27,7 @@ class Settings:
                         self.__canvas_height = int(value)
                         
                     elif variable == "NUM_SAMPLES":
-                        self.__num_samples = int(value) # Number of samples when comparing two triangle distributions
+                        self.__num_samples = int(value) # Number of Monte Carlo samples for distribution calculations
                         
                     elif variable == "WARN_DUPLICATE_NAMES":
                         self.__warn_duplicate_names = value == "True"
