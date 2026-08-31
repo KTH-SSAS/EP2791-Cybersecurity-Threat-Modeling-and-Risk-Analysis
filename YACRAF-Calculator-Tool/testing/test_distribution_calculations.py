@@ -1,0 +1,113 @@
+import os
+import sys
+import types
+import unittest
+
+import numpy as np
+
+
+TOOL_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(TOOL_DIRECTORY, "src"))
+sys.path.insert(0, os.path.join(TOOL_DIRECTORY, "src", "blocks_calculation"))
+
+# general_calculations imports GUI configuration constants, but the statistical
+# engine itself has no GUI dependency. A blank module keeps these tests headless.
+sys.modules.setdefault("config", types.ModuleType("config"))
+
+from general_calculations import (  # noqa: E402
+    CalculationTypeAND,
+    CalculationTypeOR,
+    CalculationTypeSampleTriangle,
+    DistributionValue,
+    _distribution_from_input,
+    parse_distribution_spec,
+    reset_distribution_sampling_cache,
+)
+
+
+class TestDistributionSpecifications(unittest.TestCase):
+    def setUp(self):
+        reset_distribution_sampling_cache(seed=7)
+
+    def sampled(self, specification):
+        return _distribution_from_input(specification, 20000, object()).get_samples()
+
+    def test_supported_distributions(self):
+        uniform = self.sampled(("uniform", 2.0, 5.0))
+        triangular = self.sampled(("triangular", 2.0, 3.0, 5.0))
+        normal = self.sampled(("normal", 2.0, 3.0))
+        lognormal = self.sampled(("lognormal", 4.0, 1.5))
+
+        self.assertTrue(np.all((uniform >= 2) & (uniform <= 5)))
+        self.assertTrue(np.all((triangular >= 2) & (triangular <= 5)))
+        self.assertTrue(np.all(normal >= 0))
+        self.assertTrue(np.all(lognormal > 0))
+        self.assertAlmostEqual(float(np.median(lognormal)), 4.0, delta=0.1)
+
+    def test_legacy_triangle_is_accepted(self):
+        self.assertEqual(parse_distribution_spec((1.0, 2.0, 3.0)),
+                         ("triangular", 1.0, 2.0, 3.0))
+
+    def test_invalid_cost_distributions_are_rejected(self):
+        for specification in (("uniform", -1.0, 2.0),
+                              ("triangular", 1.0, 3.0, 2.0),
+                              ("normal", 1.0, -1.0),
+                              ("lognormal", 0.0, 1.5)):
+            with self.subTest(specification=specification):
+                with self.assertRaises(ValueError):
+                    parse_distribution_spec(specification)
+
+
+class TestAttackPlanAggregation(unittest.TestCase):
+    def atomic(self, key, samples):
+        return DistributionValue.atomic(np.asarray(samples, dtype=float), key)
+
+    def test_or_is_selected_per_sample(self):
+        route_a = self.atomic("A", [6, 20])
+        route_b = self.atomic("B", [14, 5])
+        local_c = self.atomic("C", [2, 2])
+
+        entry = CalculationTypeOR.calculate_output_value([route_a, route_b], 2)
+        foothold = CalculationTypeAND.calculate_output_value([entry, local_c], 2)
+
+        np.testing.assert_allclose(foothold.get_samples(), [8, 7])
+
+    def test_shared_prerequisites_are_counted_once(self):
+        # The nine-node example from the README. The two samples make a
+        # different entry route cheapest, while all later local costs are fixed.
+        a = self.atomic("A", [6, 20])
+        b = self.atomic("B", [14, 5])
+        c = self.atomic("C", [2, 2])
+        d = self.atomic("D", [10, 10])
+        e = self.atomic("E", [4, 4])
+        f = self.atomic("F", [8, 8])
+        g = self.atomic("G", [12, 12])
+        h = self.atomic("H", [5, 5])
+        i = self.atomic("I", [7, 7])
+
+        entry = DistributionValue.combine_and([DistributionValue.combine_or([a, b]), c])
+        privilege = DistributionValue.combine_and([entry, d])
+        discovery = DistributionValue.combine_and([entry, e])
+        credentials = DistributionValue.combine_and([privilege, f])
+        monitoring = DistributionValue.combine_and([privilege, g])
+        staging = DistributionValue.combine_and([discovery, credentials, h])
+        exfiltration = DistributionValue.combine_and([staging, monitoring, i])
+
+        # Sample 1 uses A: 6+2+10+4+8+12+5+7 = 54.
+        # Sample 2 uses B: 5+2+10+4+8+12+5+7 = 53.
+        np.testing.assert_allclose(exfiltration.get_samples(), [54, 53])
+        self.assertEqual(len(exfiltration.get_plans()), 2)
+        self.assertTrue(all(len(plan) == 8 for plan in exfiltration.get_plans()))
+
+    def test_probability_of_success_compares_aligned_samples(self):
+        effort = DistributionValue.empirical([40, 60, 80, 30])
+        global_cost = DistributionValue.empirical([50, 55, 70, 45])
+
+        probability = CalculationTypeSampleTriangle.calculate_output_value(
+            [effort, global_cost], 4
+        )
+        np.testing.assert_allclose(probability, [0.5])
+
+
+if __name__ == "__main__":
+    unittest.main()
