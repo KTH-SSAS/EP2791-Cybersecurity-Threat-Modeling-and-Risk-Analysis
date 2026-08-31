@@ -104,7 +104,7 @@ A new metamodel `Class` is created by pressing the add class button in the top l
 
 1. Its name
 2. Their displayed order in the `Class`
-3. The value type of the `Attribute`, such as a single number, probability, or a triangle distribution (the (T) at (4) indicates that the `Attribute` value is a triangle distribution)
+3. The value type of the `Attribute`, such as a single number, probability, a legacy triangle distribution, or a sampled distribution (the (D) suffix identifies the latter)
 4. Hide it from the corresponding `System Views`, meaning it is only visible in the `Metamodel Views` (useful for calculations requiring several steps)
 
 Similarly, the `Class` itself can also be edited. In particular:
@@ -158,6 +158,32 @@ Pressing the add connection button at the top ((4) in the above figure) creates 
 #### Calculating Values
 
 The calculate button at the top (see (8)) calculates the values of all `Attributes` that do not have a manual input entry field. Calculated are the `Attributes` of all `Classes` in all `System Views`. In the case of the above figure, the `Attribute` indicated by (9) has been calculated using the corresponding `Attribute` values of its input `Classes`. The input `Attributes` in question are highlighted when the `Attribute` is selected.
+
+#### Distribution-valued attack costs
+
+The sampled distribution value type `(D)` is intended for local attacker cost, global attacker cost, and attacker effort. A manual value starts with the distribution name followed by its parameters:
+
+```
+uniform / minimum / maximum
+triangular / minimum / mode / maximum
+normal / mean / standard deviation
+lognormal / median / geometric standard deviation
+```
+
+Examples are `uniform / 2 / 5`, `triangular / 2 / 3 / 5`, `normal / 4 / 1`, and `lognormal / 6 / 1.5`. Cost distributions must be non-negative. Normal inputs are therefore sampled from a normal distribution truncated at zero. Legacy three-number triangle inputs such as `2 / 3 / 5` continue to work.
+
+Select a manually entered distribution attribute and press `E` to choose one of these templates in the GUI. The template remains editable so the scenario-specific parameters can be entered. A calculated distribution is displayed as `P10 / P50 / P90`.
+
+Distribution-valued `AND` and `OR` calculations use the number of Monte Carlo samples configured under `Settings`:
+
+1. Every local cost is sampled once per calculation run.
+2. `OR` retains the cheapest feasible attack plan separately in every sample.
+3. `AND` combines the required plans by set union, so shared prerequisite attack events are charged once.
+4. Strict supersets are pruned because all local costs are non-negative.
+
+Consequently, the global value at an attack event is the empirical distribution of the cheapest complete plan reaching that event. The distribution comparison calculation estimates the probability that its first input is greater than its second input; it can therefore calculate probability of success by comparing sampled attacker effort with sampled global cost.
+
+For attack-cost calculations, keep configuration scalars at `1` and offsets at `0`. Applying another affine transform to a complete path is supported numerically, but intentionally drops its atomic attack-plan provenance; subsequent gates can then no longer remove shared prerequisites.
 
 #### Scripts and Customization
 
@@ -369,5 +395,4 @@ We recommend using the custom save to design your own threat models.
 #### Q24: How do I activate scripts in the YACRAF calculator?
 
 **A24:** Once the calculator is running, a button for each script will appear in the bottom right corner of the System Views. You can click the button to execute the script and see the results within the interface.
-
 
