@@ -59,7 +59,9 @@ class GUISetupAttribute(GUIModelingBlock):
         self.set_input_attributes_highlight(True)
          
     def open_options(self):
-        pass
+        if self.has_manually_entered_value() and self.__configuration_attribute_gui.get_value_type() == ValueTypeDistribution:
+            from options import Options
+            return Options.setup_attribute(self.get_model(), self.get_view(), self)
         
     def unhighlight(self):
         super().unhighlight()
@@ -129,7 +131,16 @@ class GUISetupAttribute(GUIModelingBlock):
             
     def update_linked_entry_text(self):
         for linked_setup_attribute_gui in self.get_model().get_linked_setup_attributes_gui(self):
-        	linked_setup_attribute_gui.set_displayed_value(self.__entry_value.get_entry_text())
+            linked_setup_attribute_gui.set_displayed_value(self.__entry_value.get_entry_text())
+
+    def set_distribution_template(self, text, update_linked=True):
+        """Set a valid editable template selected from the distribution GUI."""
+        if self.__entry_value is not None:
+            self.__entry_value.set_entry_text(text)
+
+        if update_linked:
+            for linked_setup_attribute_gui in self.get_model().get_linked_setup_attributes_gui(self):
+                linked_setup_attribute_gui.set_distribution_template(text, False)
         	
     def has_manually_entered_value(self):
         return self.__entry_value != None
@@ -205,4 +216,11 @@ class GUISetupAttribute(GUIModelingBlock):
         self.__setup_class_gui.remove_setup_attribute_gui(self)
         
     def save_state(self):
-        return super().save_state() | {"value": self.__setup_attribute.get_value()}
+        value = self.__setup_attribute.get_value()
+
+        # Calculated samples are regenerated on load. Persisting thousands of
+        # draws per attribute would make save files unnecessarily large.
+        if value is not None and len(value) == 1 and isinstance(value[0], DistributionValue):
+            value = (str(value[0]),)
+
+        return super().save_state() | {"value": value}
