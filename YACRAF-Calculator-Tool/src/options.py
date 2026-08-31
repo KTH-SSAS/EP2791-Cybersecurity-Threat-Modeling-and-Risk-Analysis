@@ -190,6 +190,23 @@ class Options:
                                              1, \
                                              setup_view.get_name(), \
                                              lambda setup_view=setup_view: model.create_linked_setup_class_gui(setup_class_gui, setup_view))
+
+    @staticmethod
+    def setup_attribute(model, view, setup_attribute_gui):
+        """Offer end users valid templates for a manual distribution value."""
+        options = Options(model, view, 2, 4, "Distribution")
+        distributions = (
+            ("Uniform\nmin / max", "uniform / 0 / 1"),
+            ("Triangular\nmin / mode / max", "triangular / 0 / 0.5 / 1"),
+            ("Normal (truncated at 0)\nmean / standard deviation", "normal / 1 / 0.2"),
+            ("Lognormal\nmedian / geometric std. dev.", "lognormal / 1 / 1.5"),
+        )
+
+        for column, (label, template) in enumerate(distributions):
+            options.add_label(0, column, label)
+            options.add_button(1, column, "Use", lambda template=template: setup_attribute_gui.set_distribution_template(template))
+
+        return options
             
     @staticmethod
     def connection(model, view, connection):

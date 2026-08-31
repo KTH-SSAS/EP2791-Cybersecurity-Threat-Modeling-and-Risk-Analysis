@@ -14,6 +14,10 @@ def convert_value_to_string(value):
     final_value = []
     
     for element in value:
+        if hasattr(element, "to_display_string"):
+            final_value.append(element.to_display_string())
+            continue
+
         try:
             rounded_value = round(float(element), DECIMALS_WHEN_ROUNDING)
             

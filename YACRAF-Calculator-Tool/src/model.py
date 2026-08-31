@@ -450,6 +450,10 @@ class Model:
         """
         Calculates the values of setup attributes
         """
+        # Manual local-cost distributions are sampled once per calculation and
+        # reused wherever the same attack step appears in the graph.
+        reset_distribution_sampling_cache()
+
         seen_instances = {} # Key: Instance name, Value: List of GUI setup classes
         seen_linked_groups = set()
         
