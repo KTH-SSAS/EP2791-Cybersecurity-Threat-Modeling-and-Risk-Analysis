@@ -8,6 +8,18 @@ from connection_gui import GUIConnection
 from helper_functions_general import delete_all
 from config import *
 
+
+def migrate_legacy_yacraf_distribution(class_name, attribute_name, value_type):
+    """Upgrade the bundled triangle-cost model without breaking old saves."""
+    attack_cost_attribute = class_name in ("Attack event AND", "Attack event OR") and \
+                            attribute_name in ("Local difficulty", "Global difficulty", "TEMP")
+    attacker_effort_attribute = class_name == "Abuse case" and attribute_name == "Effort spent"
+
+    if value_type == ValueTypeTriangleDistribution and (attack_cost_attribute or attacker_effort_attribute):
+        return ValueTypeDistribution
+
+    return value_type
+
 class ConfigurationView(View):
     """
     Class managing a configuration view
@@ -159,8 +171,13 @@ class ConfigurationView(View):
                             configuration_attribute_gui = configuration_class_gui.get_configuration_attributes_gui()[-1]
                             
                             # Set configuration attribute data
-                            configuration_attribute_gui.set_name(saved_states_configuration_attribute_gui["name"])
-                            configuration_attribute_gui.set_value_type(saved_states_configuration_attribute_gui["value_type"])
+                            attribute_name = saved_states_configuration_attribute_gui["name"]
+                            configuration_attribute_gui.set_name(attribute_name)
+                            configuration_attribute_gui.set_value_type(migrate_legacy_yacraf_distribution(
+                                saved_states_configuration_class_gui["name"],
+                                attribute_name,
+                                saved_states_configuration_attribute_gui["value_type"]
+                            ))
                             configuration_attribute_gui.set_input_scalar(saved_states_configuration_attribute_gui["input_scalar"])
                             configuration_attribute_gui.set_input_offset(saved_states_configuration_attribute_gui["input_offset"])
                             configuration_attribute_gui.set_hidden(saved_states_configuration_attribute_gui["is_hidden"])
