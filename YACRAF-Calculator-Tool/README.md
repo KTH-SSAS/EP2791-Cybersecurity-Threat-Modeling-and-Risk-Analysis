@@ -176,7 +176,9 @@ Select a manually entered distribution attribute and press `E` to choose one of 
 
 Under `Settings`, the end user can choose the number of Monte Carlo samples and whether calculated results are summarized as `P0 / P50 / P100` or `P5 / P50 / P95`. The selected labels and values are shown directly in each calculated distribution field after pressing `Calculate`. At least one sample is always used.
 
-To inspect more than three quantiles, select a distribution-valued attribute of an attack event or loss event and press `E`, then choose `Plot distribution`. The resulting window contains both a density histogram and the full empirical cumulative distribution, with the selected result percentiles marked. Manual local distributions and calculated global/risk distributions can both be plotted.
+The attack-event probability-of-success calculation has two selectable modes. `Single success ratio` retains the original scalar calculation: the fraction of aligned samples in which attacker effort is strictly greater than global cost. `Conditional PoS distribution` instead evaluates the empirical attacker-effort survival function at every global-cost sample. For global cost sample `g`, the returned sample is `Pr(effort > g)`. This mode assumes attacker effort and global cost are independent; the mean of its samples estimates the scalar probability of success, while its percentiles describe how conditional success varies across plausible global costs. A distribution-valued probability remains sampled when multiplied into a loss-risk calculation.
+
+To inspect more than three quantiles, select a distribution-valued attribute of an attack event or loss event and press `E`, then choose `Plot distribution`. The resulting window contains both a density histogram and the full empirical cumulative distribution, with the selected result percentiles marked. Manual local distributions, calculated global/risk distributions, and attack-event PoS distributions can all be plotted.
 
 Distribution-valued `AND` and `OR` calculations use the number of Monte Carlo samples configured under `Settings`:
 
