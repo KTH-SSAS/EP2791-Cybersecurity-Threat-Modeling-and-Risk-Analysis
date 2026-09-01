@@ -10,12 +10,15 @@ from config import *
 
 
 def migrate_legacy_yacraf_distribution(class_name, attribute_name, value_type):
-    """Upgrade the bundled triangle-cost model without breaking old saves."""
+    """Upgrade bundled attack and loss distributions without breaking saves."""
     attack_cost_attribute = class_name in ("Attack event AND", "Attack event OR") and \
                             attribute_name in ("Local difficulty", "Global difficulty", "TEMP")
     attacker_effort_attribute = class_name == "Abuse case" and attribute_name == "Effort spent"
+    loss_attribute = class_name == "Loss event" and attribute_name in ("Magnitude", "Risk")
+    actor_risk_attribute = class_name == "Actor" and attribute_name == "Risk"
 
-    if value_type == ValueTypeTriangleDistribution and (attack_cost_attribute or attacker_effort_attribute):
+    if value_type == ValueTypeTriangleDistribution and \
+       (attack_cost_attribute or attacker_effort_attribute or loss_attribute or actor_risk_attribute):
         return ValueTypeDistribution
 
     return value_type
