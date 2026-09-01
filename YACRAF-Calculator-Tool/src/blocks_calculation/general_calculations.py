@@ -6,6 +6,7 @@ from config import *
 
 _distribution_rng = np.random.default_rng()
 _distribution_sample_cache = {}
+_distribution_display_percentiles = (0.05, 0.5, 0.95)
 
 
 def reset_distribution_sampling_cache(seed=None):
@@ -16,6 +17,22 @@ def reset_distribution_sampling_cache(seed=None):
 
     if seed is not None:
         _distribution_rng = np.random.default_rng(seed)
+
+
+def configure_distribution_display(percentiles):
+    """Configure the three quantiles shown for sampled results."""
+    global _distribution_display_percentiles
+
+    percentiles = tuple(float(percentile) for percentile in percentiles)
+    if len(percentiles) != 3 or percentiles[1] != 0.5 or \
+       not 0 <= percentiles[0] <= percentiles[1] <= percentiles[2] <= 1:
+        raise ValueError("Display percentiles must be lower / 0.5 / upper")
+
+    _distribution_display_percentiles = percentiles
+
+
+def get_distribution_display_percentiles():
+    return _distribution_display_percentiles
 
 
 class DistributionValue:
@@ -92,7 +109,9 @@ class DistributionValue:
     def get_source_samples(self):
         return self.__source_samples
 
-    def get_quantiles(self, probabilities=(0.1, 0.5, 0.9)):
+    def get_quantiles(self, probabilities=None):
+        if probabilities is None:
+            probabilities = get_distribution_display_percentiles()
         return np.quantile(self.get_samples(), probabilities)
 
     def apply_affine(self, scalar, offset=0):
@@ -161,14 +180,16 @@ class DistributionValue:
         return float(self) < float(other)
 
     def __str__(self):
-        quantiles = self.get_quantiles()
+        probabilities = get_distribution_display_percentiles()
+        quantiles = self.get_quantiles(probabilities)
         formatted = []
 
-        for value in quantiles:
+        for probability, value in zip(probabilities, quantiles):
             rounded_value = round(float(value), 3)
             if rounded_value == int(rounded_value):
                 rounded_value = int(rounded_value)
-            formatted.append(str(rounded_value))
+            percentile = round(probability * 100)
+            formatted.append(f"P{percentile}={rounded_value}")
 
         return " / ".join(formatted)
 
@@ -283,6 +304,11 @@ def _distribution_from_input(input_value, num_samples, source_key, *, triangle_o
         _distribution_sample_cache[cache_key] = DistributionValue.atomic(samples, source_key)
 
     return _distribution_sample_cache[cache_key]
+
+
+def distribution_from_input(input_value, num_samples, source_key):
+    """Return aligned samples for a manual distribution-valued attribute."""
+    return _distribution_from_input(input_value, num_samples, source_key)
 
 
 def _as_distribution_value(value, num_samples):
