@@ -12,6 +12,7 @@ class Settings:
         self.__canvas_width = 800
         self.__canvas_height = 600
         self.__num_samples = 10000
+        self.__percentile_range = 5
         self.__warn_duplicate_names = True
         self.__save_name = save_name
         
@@ -27,7 +28,10 @@ class Settings:
                         self.__canvas_height = int(value)
                         
                     elif variable == "NUM_SAMPLES":
-                        self.__num_samples = int(value) # Number of Monte Carlo samples for distribution calculations
+                        self.set_num_samples(value) # Number of Monte Carlo samples for distribution calculations
+
+                    elif variable == "PERCENTILE_RANGE":
+                        self.set_percentile_range(value)
                         
                     elif variable == "WARN_DUPLICATE_NAMES":
                         self.__warn_duplicate_names = value == "True"
@@ -50,7 +54,18 @@ class Settings:
         return self.__num_samples
         
     def set_num_samples(self, num_samples):
-        self.__num_samples = num_samples
+        self.__num_samples = max(1, int(num_samples))
+
+    def get_percentile_range(self):
+        return self.__percentile_range
+
+    def get_distribution_percentiles(self):
+        lower_percentile = self.__percentile_range / 100
+        return lower_percentile, 0.5, 1 - lower_percentile
+
+    def set_percentile_range(self, percentile_range):
+        percentile_range = int(percentile_range)
+        self.__percentile_range = percentile_range if percentile_range in (0, 5) else 5
         
     def warns_duplicate_names(self):
         return self.__warn_duplicate_names
@@ -66,6 +81,7 @@ class Settings:
             for variable, value in [("CANVAS_WIDTH", self.__canvas_width), \
                                     ("CANVAS_HEIGHT", self.__canvas_height), \
                                     ("NUM_SAMPLES", self.__num_samples), \
+                                    ("PERCENTILE_RANGE", self.__percentile_range), \
                                     ("WARN_DUPLICATE_NAMES", self.__warn_duplicate_names), \
                                     ("SAVE_NAME", self.__save_name)]:
                 file_settings.write(f"{variable} = {value}\n")
