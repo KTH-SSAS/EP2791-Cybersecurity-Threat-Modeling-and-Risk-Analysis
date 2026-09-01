@@ -13,6 +13,7 @@ class Settings:
         self.__canvas_height = 600
         self.__num_samples = 10000
         self.__percentile_range = 5
+        self.__pos_calculation_mode = "ratio"
         self.__warn_duplicate_names = True
         self.__save_name = save_name
         
@@ -32,6 +33,9 @@ class Settings:
 
                     elif variable == "PERCENTILE_RANGE":
                         self.set_percentile_range(value)
+
+                    elif variable == "POS_CALCULATION_MODE":
+                        self.set_pos_calculation_mode(value)
                         
                     elif variable == "WARN_DUPLICATE_NAMES":
                         self.__warn_duplicate_names = value == "True"
@@ -66,6 +70,13 @@ class Settings:
     def set_percentile_range(self, percentile_range):
         percentile_range = int(percentile_range)
         self.__percentile_range = percentile_range if percentile_range in (0, 5) else 5
+
+    def get_pos_calculation_mode(self):
+        return self.__pos_calculation_mode
+
+    def set_pos_calculation_mode(self, calculation_mode):
+        calculation_mode = str(calculation_mode).strip().lower()
+        self.__pos_calculation_mode = calculation_mode if calculation_mode in ("ratio", "distribution") else "ratio"
         
     def warns_duplicate_names(self):
         return self.__warn_duplicate_names
@@ -82,6 +93,7 @@ class Settings:
                                     ("CANVAS_HEIGHT", self.__canvas_height), \
                                     ("NUM_SAMPLES", self.__num_samples), \
                                     ("PERCENTILE_RANGE", self.__percentile_range), \
+                                    ("POS_CALCULATION_MODE", self.__pos_calculation_mode), \
                                     ("WARN_DUPLICATE_NAMES", self.__warn_duplicate_names), \
                                     ("SAVE_NAME", self.__save_name)]:
                 file_settings.write(f"{variable} = {value}\n")
