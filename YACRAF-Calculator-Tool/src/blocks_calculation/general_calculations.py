@@ -7,6 +7,7 @@ from config import *
 _distribution_rng = np.random.default_rng()
 _distribution_sample_cache = {}
 _distribution_display_percentiles = (0.05, 0.5, 0.95)
+_pos_calculation_mode = "ratio"
 
 
 def reset_distribution_sampling_cache(seed=None):
@@ -33,6 +34,21 @@ def configure_distribution_display(percentiles):
 
 def get_distribution_display_percentiles():
     return _distribution_display_percentiles
+
+
+def configure_pos_calculation(mode):
+    """Choose whether probability-of-success returns a ratio or distribution."""
+    global _pos_calculation_mode
+
+    mode = str(mode).strip().lower()
+    if mode not in ("ratio", "distribution"):
+        raise ValueError("PoS calculation mode must be ratio or distribution")
+
+    _pos_calculation_mode = mode
+
+
+def get_pos_calculation_mode():
+    return _pos_calculation_mode
 
 
 class DistributionValue:
@@ -129,6 +145,12 @@ class DistributionValue:
         if np.all(self.get_samples() >= 0):
             return self
         return DistributionValue.empirical(np.maximum(self.get_samples(), 0))
+
+    def clip_probability(self):
+        samples = self.get_samples()
+        if np.all((samples >= 0) & (samples <= 1)):
+            return self
+        return DistributionValue.empirical(np.clip(samples, 0, 1))
 
     @staticmethod
     def __merge_sources(distribution_values):
@@ -332,7 +354,10 @@ def combine_values(value_type, calculation_type, input_setup_attributes, setup_i
     calculated_value = value_type.calculation_default(num_samples)
     input_values = []
     use_distribution_sampling = value_type == ValueTypeDistribution or any(
-        input_setup_attribute.get_value_type() == ValueTypeDistribution
+        input_setup_attribute.get_value_type() == ValueTypeDistribution or
+        (input_setup_attribute.get_current_value() is not None and
+         len(input_setup_attribute.get_current_value()) == 1 and
+         isinstance(input_setup_attribute.get_current_value()[0], DistributionValue))
         for input_setup_attribute in input_setup_attributes
     )
     
@@ -354,7 +379,9 @@ def combine_values(value_type, calculation_type, input_setup_attributes, setup_i
         if not input_value_type.is_correct_input_value(input_value):
             return ("SETUP ERROR",)
             
-        if use_distribution_sampling and input_value_type == ValueTypeDistribution:
+        if len(input_value) == 1 and isinstance(input_value[0], DistributionValue):
+            input_value = input_value[0]
+        elif use_distribution_sampling and input_value_type == ValueTypeDistribution:
             input_value = _distribution_from_input(input_value, num_samples, id(input_setup_attribute))
         elif use_distribution_sampling and input_value_type == ValueTypeTriangleDistribution:
             input_value = _distribution_from_input(input_value, num_samples, id(input_setup_attribute), triangle_only=True)
@@ -567,6 +594,13 @@ class ValueTypeProbability(ValueType):
         if len(input_value) != 1:
             print(f"Warning: The input {input_value} did not contain exactly one value for the attribute value type {ValueTypeProbability.symbol()}")
             return False
+
+        elif isinstance(input_value[0], DistributionValue):
+            samples = input_value[0].get_samples()
+            if np.any((samples < 0) | (samples > 1)):
+                print("Warning: The probability distribution in the input is not in [0, 1]")
+                return False
+            return True
             
         elif not isinstance(input_value[0], float):
             print(f"Warning: The input {input_value[0]} could not be converted to a float for the attribute value type {ValueTypeProbability.symbol()}")
@@ -580,6 +614,9 @@ class ValueTypeProbability(ValueType):
                 
     @staticmethod
     def adjust_to_range(value):
+        if isinstance(value, DistributionValue):
+            return value.clip_probability()
+
         if value[0] < 0:
             value[0] = 0
             
@@ -856,7 +893,7 @@ class CalculationTypeSampleTriangle(CalculationType):
         
     @staticmethod
     def explaination():
-        return "Sample two distributions, probability that (1) > (2)"
+        return "Compare effort (1) > cost (2), using the configured PoS mode"
         
     @staticmethod
     def number_of_inputs():
@@ -880,8 +917,20 @@ class CalculationTypeSampleTriangle(CalculationType):
             # Sample current triangle distribution
             sampled_values.append(np.random.triangular(a, b, c, num_samples))
             
-        # Compare samples
-        return np.array([np.array(np.sum(sampled_values[0] > sampled_values[1]) / num_samples)])
+        effort_samples, global_cost_samples = sampled_values
+
+        if get_pos_calculation_mode() == "distribution":
+            # Conditional PoS for every plausible global cost. The empirical
+            # effort survival function assumes effort and cost are independent.
+            sorted_effort = np.sort(effort_samples)
+            num_effort_samples = len(sorted_effort)
+            num_greater = num_effort_samples - np.searchsorted(
+                sorted_effort, global_cost_samples, side="right"
+            )
+            return DistributionValue.empirical(num_greater / num_effort_samples)
+
+        # Existing scalar estimator based on aligned success/failure samples.
+        return np.array([np.array(np.sum(effort_samples > global_cost_samples) / num_samples)])
         
 class CalculationTypeQualitative(CalculationType):
     @staticmethod
