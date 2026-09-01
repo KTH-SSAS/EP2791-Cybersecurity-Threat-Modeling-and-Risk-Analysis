@@ -9,6 +9,7 @@ import numpy as np
 TOOL_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(TOOL_DIRECTORY, "src"))
 sys.path.insert(0, os.path.join(TOOL_DIRECTORY, "src", "blocks_calculation"))
+sys.path.insert(0, os.path.join(TOOL_DIRECTORY, "config"))
 
 # general_calculations imports GUI configuration constants, but the statistical
 # engine itself has no GUI dependency. A blank module keeps these tests headless.
@@ -16,18 +17,22 @@ sys.modules.setdefault("config", types.ModuleType("config"))
 
 from general_calculations import (  # noqa: E402
     CalculationTypeAND,
+    CalculationTypeMultiplication,
     CalculationTypeOR,
     CalculationTypeSampleTriangle,
     DistributionValue,
     _distribution_from_input,
+    configure_distribution_display,
     parse_distribution_spec,
     reset_distribution_sampling_cache,
 )
+from settings import Settings  # noqa: E402
 
 
 class TestDistributionSpecifications(unittest.TestCase):
     def setUp(self):
         reset_distribution_sampling_cache(seed=7)
+        configure_distribution_display((0.05, 0.5, 0.95))
 
     def sampled(self, specification):
         return _distribution_from_input(specification, 20000, object()).get_samples()
@@ -56,6 +61,25 @@ class TestDistributionSpecifications(unittest.TestCase):
             with self.subTest(specification=specification):
                 with self.assertRaises(ValueError):
                     parse_distribution_spec(specification)
+
+    def test_display_percentiles_are_configurable(self):
+        distribution = DistributionValue.empirical([1, 2, 3, 4])
+
+        configure_distribution_display((0, 0.5, 1))
+        self.assertEqual(str(distribution), "P0=1 / P50=2.5 / P100=4")
+
+        configure_distribution_display((0.05, 0.5, 0.95))
+        self.assertEqual(str(distribution), "P5=1.15 / P50=2.5 / P95=3.85")
+
+    def test_sampling_settings_are_validated(self):
+        sampling_settings = Settings()
+        sampling_settings.set_num_samples(0)
+        self.assertEqual(sampling_settings.get_num_samples(), 1)
+
+        sampling_settings.set_percentile_range(0)
+        self.assertEqual(sampling_settings.get_distribution_percentiles(), (0, 0.5, 1))
+        sampling_settings.set_percentile_range(7)
+        self.assertEqual(sampling_settings.get_distribution_percentiles(), (0.05, 0.5, 0.95))
 
 
 class TestAttackPlanAggregation(unittest.TestCase):
@@ -107,6 +131,15 @@ class TestAttackPlanAggregation(unittest.TestCase):
             [effort, global_cost], 4
         )
         np.testing.assert_allclose(probability, [0.5])
+
+    def test_loss_risk_keeps_the_full_sample_distribution(self):
+        magnitude = DistributionValue.empirical([100, 200, 300])
+        probability = np.asarray([0.1])
+
+        risk = CalculationTypeMultiplication.calculate_output_value(
+            [magnitude, probability], 3
+        )
+        np.testing.assert_allclose(risk.get_samples(), [10, 20, 30])
 
 
 if __name__ == "__main__":
