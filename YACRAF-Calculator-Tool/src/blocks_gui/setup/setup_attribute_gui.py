@@ -151,7 +151,7 @@ class GUISetupAttribute(GUIModelingBlock):
         current_value = self.__setup_attribute.get_current_value()
         has_distribution_value = current_value is not None and len(current_value) == 1 and \
                                  isinstance(current_value[0], DistributionValue)
-        return event_type in ("Attack event AND", "Attack event OR", "Loss event") and \
+        return event_type in ("Attack event AND", "Attack event OR", "Abuse case", "Loss event") and \
                (self.__configuration_attribute_gui.get_value_type() == ValueTypeDistribution or
                 has_distribution_value)
 
