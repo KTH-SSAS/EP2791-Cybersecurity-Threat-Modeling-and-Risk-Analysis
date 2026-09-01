@@ -21,18 +21,45 @@ from general_calculations import (  # noqa: E402
     CalculationTypeOR,
     CalculationTypeSampleTriangle,
     DistributionValue,
+    ValueTypeDistribution,
+    ValueTypeProbability,
     _distribution_from_input,
+    combine_values,
     configure_distribution_display,
+    configure_pos_calculation,
     parse_distribution_spec,
     reset_distribution_sampling_cache,
 )
 from settings import Settings  # noqa: E402
 
 
+class InputAttribute:
+    def __init__(self, value_type, value):
+        self.value_type = value_type
+        self.value = (value,)
+
+    def get_value_type(self):
+        return self.value_type
+
+    def get_current_value(self):
+        return self.value
+
+
+class OutputAttribute:
+    @staticmethod
+    def get_input_scalar():
+        return 1
+
+    @staticmethod
+    def get_input_offset():
+        return 0
+
+
 class TestDistributionSpecifications(unittest.TestCase):
     def setUp(self):
         reset_distribution_sampling_cache(seed=7)
         configure_distribution_display((0.05, 0.5, 0.95))
+        configure_pos_calculation("ratio")
 
     def sampled(self, specification):
         return _distribution_from_input(specification, 20000, object()).get_samples()
@@ -81,8 +108,16 @@ class TestDistributionSpecifications(unittest.TestCase):
         sampling_settings.set_percentile_range(7)
         self.assertEqual(sampling_settings.get_distribution_percentiles(), (0.05, 0.5, 0.95))
 
+        sampling_settings.set_pos_calculation_mode("distribution")
+        self.assertEqual(sampling_settings.get_pos_calculation_mode(), "distribution")
+        sampling_settings.set_pos_calculation_mode("unsupported")
+        self.assertEqual(sampling_settings.get_pos_calculation_mode(), "ratio")
+
 
 class TestAttackPlanAggregation(unittest.TestCase):
+    def setUp(self):
+        configure_pos_calculation("ratio")
+
     def atomic(self, key, samples):
         return DistributionValue.atomic(np.asarray(samples, dtype=float), key)
 
@@ -132,6 +167,34 @@ class TestAttackPlanAggregation(unittest.TestCase):
         )
         np.testing.assert_allclose(probability, [0.5])
 
+    def test_probability_of_success_can_return_a_distribution(self):
+        effort = DistributionValue.empirical([2, 4, 6, 8])
+        global_cost = DistributionValue.empirical([3, 5, 7, 9])
+        configure_pos_calculation("distribution")
+
+        probability = CalculationTypeSampleTriangle.calculate_output_value(
+            [effort, global_cost], 4
+        )
+
+        self.assertIsInstance(probability, DistributionValue)
+        np.testing.assert_allclose(probability.get_samples(), [0.75, 0.5, 0.25, 0])
+
+    def test_probability_value_type_keeps_the_pos_distribution(self):
+        configure_pos_calculation("distribution")
+
+        probability = combine_values(
+            ValueTypeProbability,
+            CalculationTypeSampleTriangle,
+            [InputAttribute(ValueTypeDistribution, DistributionValue.empirical([2, 4, 6, 8])),
+             InputAttribute(ValueTypeDistribution, DistributionValue.empirical([3, 5, 7, 9]))],
+            [None, None],
+            OutputAttribute(),
+            4,
+        )[0]
+
+        self.assertIsInstance(probability, DistributionValue)
+        np.testing.assert_allclose(probability.get_samples(), [0.75, 0.5, 0.25, 0])
+
     def test_loss_risk_keeps_the_full_sample_distribution(self):
         magnitude = DistributionValue.empirical([100, 200, 300])
         probability = np.asarray([0.1])
@@ -140,6 +203,22 @@ class TestAttackPlanAggregation(unittest.TestCase):
             [magnitude, probability], 3
         )
         np.testing.assert_allclose(risk.get_samples(), [10, 20, 30])
+
+    def test_probability_distribution_propagates_into_loss_risk(self):
+        magnitude = DistributionValue.empirical([100, 200, 300])
+        probability = DistributionValue.empirical([0.2, 0.5, 0.8])
+
+        risk = combine_values(
+            ValueTypeDistribution,
+            CalculationTypeMultiplication,
+            [InputAttribute(ValueTypeDistribution, magnitude),
+             InputAttribute(ValueTypeProbability, probability)],
+            [None, None],
+            OutputAttribute(),
+            3,
+        )[0]
+
+        np.testing.assert_allclose(risk.get_samples(), [20, 100, 240])
 
 
 if __name__ == "__main__":
