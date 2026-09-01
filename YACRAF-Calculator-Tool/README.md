@@ -31,16 +31,16 @@ Having all that said - we hope you find the tool useful.
 
 ## Dependencies
 
-The program utilizes Tkinter for its GUI and NumPy for its calculations. If not already installed, Tkinter can on Debian-based Linux distributions (such as Ubuntu) be installed using:
+The program utilizes Tkinter for its GUI, NumPy for its calculations, and Matplotlib for distribution plots. If not already installed, Tkinter can on Debian-based Linux distributions (such as Ubuntu) be installed using:
 
 ```
 sudo apt install python3-tk
 ```
 
-NumPy can be installed using:
+The Python dependencies can be installed using:
 
 ```
-pip install numpy
+pip install -r requirements.txt
 ```
 
 Make sure the Python installation is not outdated. The known minimum requirement is Python 3.7, where 3.10 was used during the program's development. You may also need to update NumPy if you get an error related to it when booting the program.
@@ -159,9 +159,9 @@ Pressing the add connection button at the top ((4) in the above figure) creates 
 
 The calculate button at the top (see (8)) calculates the values of all `Attributes` that do not have a manual input entry field. Calculated are the `Attributes` of all `Classes` in all `System Views`. In the case of the above figure, the `Attribute` indicated by (9) has been calculated using the corresponding `Attribute` values of its input `Classes`. The input `Attributes` in question are highlighted when the `Attribute` is selected.
 
-#### Distribution-valued attack costs
+#### Distribution-valued attack costs and losses
 
-The sampled distribution value type `(D)` is intended for local attacker cost, global attacker cost, and attacker effort. A manual value starts with the distribution name followed by its parameters:
+The sampled distribution value type `(D)` is intended for local attacker cost, global attacker cost, attacker effort, loss magnitude, loss risk, and aggregated actor risk. A manual value starts with the distribution name followed by its parameters:
 
 ```
 uniform / minimum / maximum
@@ -172,7 +172,11 @@ lognormal / median / geometric standard deviation
 
 Examples are `uniform / 2 / 5`, `triangular / 2 / 3 / 5`, `normal / 4 / 1`, and `lognormal / 6 / 1.5`. Cost distributions must be non-negative. Normal inputs are therefore sampled from a normal distribution truncated at zero. Legacy three-number triangle inputs such as `2 / 3 / 5` continue to work.
 
-Select a manually entered distribution attribute and press `E` to choose one of these templates in the GUI. The template remains editable so the scenario-specific parameters can be entered. A calculated distribution is displayed as `P10 / P50 / P90`.
+Select a manually entered distribution attribute and press `E` to choose one of these templates in the GUI. The template remains editable so the scenario-specific parameters can be entered. The bundled triangle-based saves are migrated on load for attack costs, attacker effort, loss magnitude, loss risk, and actor risk.
+
+Under `Settings`, the end user can choose the number of Monte Carlo samples and whether calculated results are summarized as `P0 / P50 / P100` or `P5 / P50 / P95`. The selected labels and values are shown directly in each calculated distribution field after pressing `Calculate`. At least one sample is always used.
+
+To inspect more than three quantiles, select a distribution-valued attribute of an attack event or loss event and press `E`, then choose `Plot distribution`. The resulting window contains both a density histogram and the full empirical cumulative distribution, with the selected result percentiles marked. Manual local distributions and calculated global/risk distributions can both be plotted.
 
 Distribution-valued `AND` and `OR` calculations use the number of Monte Carlo samples configured under `Settings`:
 
@@ -395,4 +399,3 @@ We recommend using the custom save to design your own threat models.
 #### Q24: How do I activate scripts in the YACRAF calculator?
 
 **A24:** Once the calculator is running, a button for each script will appear in the bottom right corner of the System Views. You can click the button to execute the script and see the results within the interface.
-
