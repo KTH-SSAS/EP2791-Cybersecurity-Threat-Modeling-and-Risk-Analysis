@@ -454,6 +454,7 @@ class Model:
         # reused wherever the same attack step appears in the graph.
         reset_distribution_sampling_cache()
         configure_distribution_display(settings.get_distribution_percentiles())
+        configure_pos_calculation(settings.get_pos_calculation_mode())
 
         seen_instances = {} # Key: Instance name, Value: List of GUI setup classes
         seen_linked_groups = set()

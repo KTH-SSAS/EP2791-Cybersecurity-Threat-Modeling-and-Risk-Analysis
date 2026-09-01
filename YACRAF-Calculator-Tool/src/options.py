@@ -95,6 +95,16 @@ class Options:
             initial_percentile_button, "P5 / P50 / P95", settings.get_percentile_range() == 5,
             lambda: settings.set_percentile_range(5)
         )
+
+        options.add_label(2, 1, "Attack-event PoS calculation (applies on Calculate):")
+        initial_pos_button = options.add_radio_button(
+            3, 1, "Single success ratio", settings.get_pos_calculation_mode() == "ratio",
+            lambda: settings.set_pos_calculation_mode("ratio")
+        )
+        options.add_linked_radio_button(
+            initial_pos_button, "Conditional PoS distribution", settings.get_pos_calculation_mode() == "distribution",
+            lambda: settings.set_pos_calculation_mode("distribution")
+        )
         
     @staticmethod
     def configuration_class(model, view, configuration_class_gui, configuration_views):
