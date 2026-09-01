@@ -1,5 +1,5 @@
 from general_gui import GUIModelingBlock
-from helper_functions_general import convert_grid_coordinate_to_actual, get_font, get_text_that_fits
+from helper_functions_general import convert_string_to_value, convert_grid_coordinate_to_actual, get_font, get_text_that_fits
 from pressable_entry import PressableEntry
 from config import *
 
@@ -59,7 +59,8 @@ class GUISetupAttribute(GUIModelingBlock):
         self.set_input_attributes_highlight(True)
          
     def open_options(self):
-        if self.has_manually_entered_value() and self.__configuration_attribute_gui.get_value_type() == ValueTypeDistribution:
+        is_distribution = self.__configuration_attribute_gui.get_value_type() == ValueTypeDistribution
+        if is_distribution and (self.has_manually_entered_value() or self.can_plot_distribution()):
             from options import Options
             return Options.setup_attribute(self.get_model(), self.get_view(), self)
         
@@ -141,6 +142,34 @@ class GUISetupAttribute(GUIModelingBlock):
         if update_linked:
             for linked_setup_attribute_gui in self.get_model().get_linked_setup_attributes_gui(self):
                 linked_setup_attribute_gui.set_distribution_template(text, False)
+
+    def can_plot_distribution(self):
+        event_type = self.__setup_class_gui.get_configuration_name()
+        return event_type in ("Attack event AND", "Attack event OR", "Loss event") and \
+               self.__configuration_attribute_gui.get_value_type() == ValueTypeDistribution
+
+    def get_distribution_value(self):
+        if self.__entry_value is not None:
+            value = convert_string_to_value(self.__entry_value.get_entry_text())
+        else:
+            value = self.__setup_attribute.get_current_value()
+
+        if value is not None and len(value) == 1 and isinstance(value[0], DistributionValue):
+            return value[0]
+
+        return distribution_from_input(value, settings.get_num_samples(), id(self.__setup_attribute))
+
+    def plot_distribution(self):
+        from tkinter import messagebox
+
+        try:
+            from distribution_plot import plot_distribution
+
+            distribution_value = self.get_distribution_value()
+            title = f"{self.__setup_class_gui.get_configuration_name()}: {self.__setup_class_gui.get_name()} — {self.get_name()}"
+            plot_distribution(distribution_value, title, settings.get_distribution_percentiles())
+        except (ImportError, TypeError, ValueError) as error:
+            messagebox.showerror("Could not plot distribution", str(error))
         	
     def has_manually_entered_value(self):
         return self.__entry_value != None
