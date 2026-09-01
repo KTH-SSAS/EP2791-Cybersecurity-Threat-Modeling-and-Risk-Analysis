@@ -2,6 +2,7 @@ import os
 import sys
 import types
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -31,6 +32,7 @@ from general_calculations import (  # noqa: E402
     reset_distribution_sampling_cache,
 )
 from settings import Settings  # noqa: E402
+import helper_functions_general  # noqa: E402
 
 
 class InputAttribute:
@@ -112,6 +114,39 @@ class TestDistributionSpecifications(unittest.TestCase):
         self.assertEqual(sampling_settings.get_pos_calculation_mode(), "distribution")
         sampling_settings.set_pos_calculation_mode("unsupported")
         self.assertEqual(sampling_settings.get_pos_calculation_mode(), "ratio")
+
+    def test_long_percentile_text_is_wrapped_and_fitted(self):
+        class Canvas:
+            @staticmethod
+            def itemcget(label, option):
+                return "Arial 11"
+
+        class Font:
+            def __init__(self, family, size, weight):
+                self.size = size
+
+            def measure(self, text):
+                return len(text) * self.size
+
+        config_module = sys.modules["config"]
+        config_module.LENGTH_UNIT = 25
+        config_module.FONT = ("Arial", 11)
+        config_module.FONT_DECREASE_LINE_BREAK = 3
+        config_module.OUTLINE_WIDTH = 1
+        config_module.DECIMALS_WHEN_ROUNDING = 3
+
+        percentile_text = "P5=123456.789 / P50=234567.891 / P95=345678.912"
+        with patch.object(helper_functions_general.tkfont, "Font", Font):
+            fitted_text, fitted_font = helper_functions_general.get_text_that_fits(
+                Canvas(), object(), percentile_text, 5, False, 25
+            )
+
+        maximum_width = 5 * 25 - 2
+        self.assertIn("\n", fitted_text)
+        self.assertLessEqual(
+            max(len(line) * fitted_font[1] for line in fitted_text.split("\n")),
+            maximum_width,
+        )
 
 
 class TestAttackPlanAggregation(unittest.TestCase):
