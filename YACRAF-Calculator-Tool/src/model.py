@@ -453,6 +453,7 @@ class Model:
         # Manual local-cost distributions are sampled once per calculation and
         # reused wherever the same attack step appears in the graph.
         reset_distribution_sampling_cache()
+        configure_distribution_display(settings.get_distribution_percentiles())
 
         seen_instances = {} # Key: Instance name, Value: List of GUI setup classes
         seen_linked_groups = set()
