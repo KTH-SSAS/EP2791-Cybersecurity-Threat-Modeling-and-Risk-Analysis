@@ -59,7 +59,10 @@ class GUISetupAttribute(GUIModelingBlock):
         self.set_input_attributes_highlight(True)
          
     def open_options(self):
-        is_distribution = self.__configuration_attribute_gui.get_value_type() == ValueTypeDistribution
+        current_value = self.__setup_attribute.get_current_value()
+        is_distribution = self.__configuration_attribute_gui.get_value_type() == ValueTypeDistribution or \
+                          (current_value is not None and len(current_value) == 1 and
+                           isinstance(current_value[0], DistributionValue))
         if is_distribution and (self.has_manually_entered_value() or self.can_plot_distribution()):
             from options import Options
             return Options.setup_attribute(self.get_model(), self.get_view(), self)
@@ -145,8 +148,12 @@ class GUISetupAttribute(GUIModelingBlock):
 
     def can_plot_distribution(self):
         event_type = self.__setup_class_gui.get_configuration_name()
+        current_value = self.__setup_attribute.get_current_value()
+        has_distribution_value = current_value is not None and len(current_value) == 1 and \
+                                 isinstance(current_value[0], DistributionValue)
         return event_type in ("Attack event AND", "Attack event OR", "Loss event") and \
-               self.__configuration_attribute_gui.get_value_type() == ValueTypeDistribution
+               (self.__configuration_attribute_gui.get_value_type() == ValueTypeDistribution or
+                has_distribution_value)
 
     def get_distribution_value(self):
         if self.__entry_value is not None:
