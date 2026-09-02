@@ -37,6 +37,90 @@ class TestDistributionExample(unittest.TestCase):
         self.assertEqual(get_save_name(["main.py"]), "example_distribution")
         self.assertEqual(get_save_name(["main.py", "custom"]), "custom")
 
+    def test_example_loads_both_linked_metamodel_views(self):
+        view_paths_file = os.path.join(EXAMPLE_DIRECTORY, "view_file_paths.txt")
+        with open(view_paths_file, "r") as file_with_paths:
+            view_paths = [line.strip() for line in file_with_paths]
+
+        self.assertEqual(
+            view_paths,
+            [
+                "configurations/YACRAF 1.pickle",
+                "configurations/YACRAF 2.pickle",
+                "setups/Distribution example.pickle",
+            ],
+        )
+
+        second_configuration_path = os.path.join(
+            EXAMPLE_DIRECTORY, "configurations", "YACRAF 2.pickle"
+        )
+        with open(second_configuration_path, "rb") as configuration_file:
+            _, configuration_classes, configuration_inputs = pickle.load(
+                configuration_file
+            )
+
+        self.assertEqual(
+            [item["name"] for item in configuration_classes],
+            ["Attack event AND", "Attack event OR"],
+        )
+        self.assertTrue(any(
+            item["calculation_type"] == CalculationTypeSampleTriangle
+            for item in configuration_inputs
+        ))
+
+        # Linked configuration classes accumulate their calculation inputs
+        # across both metamodel views. Verify that every operation with a fixed
+        # arity is complete after those views are combined.
+        configured_inputs = {}
+        calculation_types = {}
+
+        for relative_path in view_paths[:2]:
+            configuration_path = os.path.join(EXAMPLE_DIRECTORY, relative_path)
+            with open(configuration_path, "rb") as configuration_file:
+                _, classes, inputs = pickle.load(configuration_file)
+
+            attributes_by_id = {}
+            possible_output_positions = []
+            for class_index, configuration_class in enumerate(classes):
+                group_number = configuration_class["linked_group_number"]
+                if group_number is None:
+                    class_key = (relative_path, class_index)
+                else:
+                    class_key = ("linked", group_number)
+
+                for attribute_index, attribute in enumerate(
+                        configuration_class["configuration_attributes_gui"]):
+                    attribute_key = (class_key, attribute_index)
+                    attributes_by_id[attribute["configuration_attribute_gui"]] = attribute_key
+                    attribute_y = configuration_class["y"] + attribute_index + 1
+                    possible_output_positions.extend([
+                        (configuration_class["x"] - 1, attribute_y, attribute_key),
+                        (configuration_class["x"] + 6, attribute_y, attribute_key),
+                    ])
+
+            for configuration_input in inputs:
+                output_x = configuration_input["x"]
+                output_y = configuration_input["y"]
+                nearest_output = min(
+                    possible_output_positions,
+                    key=lambda position: ((position[0] - output_x) ** 2 +
+                                          (position[1] - output_y) ** 2),
+                )
+                distance_squared = ((nearest_output[0] - output_x) ** 2 +
+                                    (nearest_output[1] - output_y) ** 2)
+                self.assertLess(distance_squared, 0.01)
+                output_key = nearest_output[2]
+                calculation_types[output_key] = configuration_input["calculation_type"]
+                configured_inputs.setdefault(output_key, set()).update(
+                    attributes_by_id[connection["start_block"]]
+                    for connection in configuration_input["connections"]
+                )
+
+        for output_key, calculation_type in calculation_types.items():
+            required_inputs = calculation_type.number_of_inputs()
+            if required_inputs is not None:
+                self.assertEqual(len(configured_inputs[output_key]), required_inputs)
+
     def test_example_contains_the_screenshot_graph(self):
         configuration_path = os.path.join(
             EXAMPLE_DIRECTORY, "configurations", "YACRAF 1.pickle"
