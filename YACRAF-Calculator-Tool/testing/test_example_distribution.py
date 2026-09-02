@@ -116,6 +116,7 @@ class TestDistributionExample(unittest.TestCase):
                 ("Normal-cost route", "Combined attack"),
                 ("Triangular-cost route", "Combined attack"),
                 ("Combined attack", "Example loss"),
+                ("Example abuse case", "Example loss"),
             ],
         )
 
@@ -153,14 +154,31 @@ class TestDistributionExample(unittest.TestCase):
         magnitude = _distribution_from_input(
             values["Example loss"][1], sample_count, "magnitude"
         )
+        abuse_values = values["Example abuse case"]
+        probability_of_contact = 0.1 * sum(value[0] for value in abuse_values[:2]) / 2
+        action_factors = [
+            abuse_values[4][0],
+            abuse_values[5][0],
+            10 - abuse_values[2][0],
+            10 - abuse_values[3][0],
+        ]
+        probability_of_action = 0.1 * sum(action_factors) / len(action_factors)
+        threat_event_probability = probability_of_contact * probability_of_action
+        loss_probability = threat_event_probability * probability_of_success
         risk = CalculationTypeMultiplication.calculate_output_value(
-            [magnitude, 0.2 * probability_of_success], sample_count
+            [magnitude, loss_probability], sample_count
         )
 
         self.assertEqual(len(global_cost.get_samples()), sample_count)
         self.assertAlmostEqual(global_cost.get_samples().mean(), 22.0, delta=0.4)
         self.assertGreater(probability_of_success, 0)
         self.assertLess(probability_of_success, 1)
+        self.assertAlmostEqual(probability_of_contact, 0.4)
+        self.assertAlmostEqual(probability_of_action, 0.5)
+        self.assertAlmostEqual(threat_event_probability, 0.2)
+        self.assertAlmostEqual(loss_probability,
+                               0.2 * probability_of_success)
+        self.assertNotAlmostEqual(loss_probability, probability_of_success)
         self.assertEqual(len(risk.get_samples()), sample_count)
         self.assertTrue((risk.get_samples() >= 0).all())
 
