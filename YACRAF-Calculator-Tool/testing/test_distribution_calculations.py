@@ -148,6 +148,33 @@ class TestDistributionSpecifications(unittest.TestCase):
             maximum_width,
         )
 
+    def test_numeric_setting_value_is_accepted_by_text_fitting(self):
+        class Canvas:
+            @staticmethod
+            def itemcget(label, option):
+                return "Arial 11"
+
+        class Font:
+            def __init__(self, family, size, weight):
+                self.size = size
+
+            def measure(self, text):
+                return len(text) * self.size
+
+        config_module = sys.modules["config"]
+        config_module.LENGTH_UNIT = 25
+        config_module.FONT = ("Arial", 11)
+        config_module.FONT_DECREASE_LINE_BREAK = 3
+        config_module.OUTLINE_WIDTH = 1
+        config_module.DECIMALS_WHEN_ROUNDING = 3
+
+        with patch.object(helper_functions_general.tkfont, "Font", Font):
+            fitted_text, _ = helper_functions_general.get_text_that_fits(
+                Canvas(), object(), 10000, 7, False, 25
+            )
+
+        self.assertEqual(fitted_text, "10000")
+
 
 class TestAttackPlanAggregation(unittest.TestCase):
     def setUp(self):
