@@ -115,6 +115,18 @@ class TestDistributionSpecifications(unittest.TestCase):
         sampling_settings.set_pos_calculation_mode("unsupported")
         self.assertEqual(sampling_settings.get_pos_calculation_mode(), "ratio")
 
+    def test_fixed_arity_warning_names_the_actual_calculation(self):
+        with patch("builtins.print") as print_warning:
+            is_valid = ValueTypeProbability.correctly_connected(
+                CalculationTypeSampleTriangle, [object()]
+            )
+
+        self.assertFalse(is_valid)
+        print_warning.assert_called_once_with(
+            "Warning: Calculation type T requires exactly 2 input attributes "
+            "in the configuration"
+        )
+
     def test_long_percentile_text_is_wrapped_and_fitted(self):
         class Canvas:
             @staticmethod
