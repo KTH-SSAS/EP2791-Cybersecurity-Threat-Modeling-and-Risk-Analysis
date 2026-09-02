@@ -452,7 +452,7 @@ class ValueType:
         number_of_inputs = calculation_type.number_of_inputs()
         
         if number_of_inputs != None and len(input_configuration_attributes) != number_of_inputs:
-            print(f"Warning: Calculation type {CalculationTypeDivision.symbol()} require exactly {number_of_inputs} input attributes in the configuration")
+            print(f"Warning: Calculation type {calculation_type.symbol()} requires exactly {number_of_inputs} input attributes in the configuration")
             return False
             
         return True
