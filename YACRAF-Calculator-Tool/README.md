@@ -50,21 +50,24 @@ Make sure the Python installation is not outdated. The known minimum requirement
 After navigating to the main directory, run the program using:
 
 ```
-python3 main.py <save_name>
-```
-
-Specifying a save name that does not currently exist will create a completely new save. To see which saves currently exist, run:
-
-```
 python3 main.py
 ```
 
+This opens `example_distribution`, a small distribution-valued attack graph described below. To open or create a different save, specify its name:
+
+```
+python3 main.py <save_name>
+```
+
+Specifying a save name that does not currently exist creates a completely new save. To list the existing saves without opening the GUI, run `python3 main.py --list`.
+
 The default saves of the program contain examples of the YACRAF metamodel, including accompanying system-model examples. The following default saves exist:
 
-1. `example_single`: Example based on the illustrative example found in Section 4 of the YACRAF paper, where the YACRAF metamodel is defined in the corresponding `Metamodel Views`, and the calculations are performed in the `System Views`.
-2. `example_triangle`: Same as `example_single`, except using triangle distributions whenever applicable.
-3. `Cloud`: A small example of a threat model for a cloud service provider, adapted from this [example](https://www.nccgroup.com/research-blog/threat-modelling-cloud-platform-services-by-example-google-cloud-storage/) and represented using the YACRAF metamodel. 
-4. `custom`: Same `Metamodel Views` as `exampel_triangle`, but with blank `System Views` to simplify the creation of a new threat model for a different system using the YACRAF metamodel.
+1. `example_distribution`: The default startup example. Two alternative attack events with `normal / 10 / 2` and `triangular / 5 / 10 / 15` local difficulty feed an AND event with `uniform / 1 / 3` local difficulty. An abuse case supplies `triangular / 20 / 25 / 30` effort, and the terminal event feeds a loss with `triangular / 100 / 500 / 1000` magnitude.
+2. `example_single`: Example based on the illustrative example found in Section 4 of the YACRAF paper, where the YACRAF metamodel is defined in the corresponding `Metamodel Views`, and the calculations are performed in the `System Views`.
+3. `example_triangle`: Same as `example_single`, except using triangle distributions whenever applicable.
+4. `Cloud`: A small example of a threat model for a cloud service provider, adapted from this [example](https://www.nccgroup.com/research-blog/threat-modelling-cloud-platform-services-by-example-google-cloud-storage/) and represented using the YACRAF metamodel.
+5. `custom`: Same `Metamodel Views` as `example_triangle`, but with blank `System Views` to simplify the creation of a new threat model for a different system using the YACRAF metamodel.
 
 
 ## GUI Overview
@@ -263,6 +266,8 @@ Improvements are welcome: refactoring, scripts, docs, examples, you name it. For
 - **example_single:** Based on Section 4 of the YACRAF paper.  
 
 - **example_triangle:** Similar to `example_single` but with triangle distributions.  
+
+- **example_distribution:** The default five-node distribution example, containing an abuse case, two alternative attack routes, a combined attack event, and a loss event.
 
 - **custom:** Blank System Views with the YACRAF metamodel for creating your own models.  
 
