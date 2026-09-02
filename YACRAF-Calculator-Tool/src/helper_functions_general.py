@@ -216,6 +216,11 @@ def get_text_that_fits(canvas, label, text, text_width, is_bold, length_unit):
     Returns the text and its corresponding font required for the specified text to fit within the specified grid text width
     """
     from config import OUTLINE_WIDTH
+
+    # Canvas labels also receive numeric values, for example the Monte Carlo
+    # sample count in General settings.  Normalise them before the wrapping
+    # logic uses string operations.
+    text = str(text)
     
     actual_maximum_text_width = convert_grid_coordinate_to_actual(text_width, 0, length_unit)[0] - 2 * OUTLINE_WIDTH
     font = get_font(length_unit, canvas_and_label=(canvas, label))
