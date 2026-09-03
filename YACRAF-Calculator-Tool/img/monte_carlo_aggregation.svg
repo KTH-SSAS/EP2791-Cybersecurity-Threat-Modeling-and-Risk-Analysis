@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="570" viewBox="0 0 1200 570" role="img" aria-labelledby="title desc">
+  <title id="title">Sample-aligned Monte Carlo aggregation of attack costs</title>
+  <desc id="desc">Two alternative local-cost distributions feed an OR event, whose cheapest route in each sample is combined with a third local cost at an AND event. A table shows three samples and their resulting global costs.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font: 700 25px system-ui, sans-serif; fill: #0f172a; }
+      .heading { font: 700 18px system-ui, sans-serif; fill: #0f172a; }
+      .body { font: 16px system-ui, sans-serif; fill: #334155; }
+      .small { font: 14px system-ui, sans-serif; fill: #475569; }
+      .mono { font: 15px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #0f172a; }
+      .node { stroke: #334155; stroke-width: 2; rx: 10; }
+      .edge { fill: none; stroke: #334155; stroke-width: 2.5; marker-end: url(#arrow); }
+      .grid { stroke: #94a3b8; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="570" fill="#ffffff"/>
+  <text x="40" y="42" class="title">Global cost is aggregated sample by sample</text>
+  <text x="40" y="70" class="body">Each local distribution is drawn once per calculation run; the same sample index flows through the graph.</text>
+
+  <rect x="55" y="105" width="230" height="76" class="node" fill="#dbeafe"/>
+  <text x="170" y="134" text-anchor="middle" class="heading">Route A</text>
+  <text x="170" y="160" text-anchor="middle" class="body">local cost distribution</text>
+  <rect x="55" y="215" width="230" height="76" class="node" fill="#dbeafe"/>
+  <text x="170" y="244" text-anchor="middle" class="heading">Route B</text>
+  <text x="170" y="270" text-anchor="middle" class="body">local cost distribution</text>
+
+  <rect x="410" y="160" width="220" height="86" class="node" fill="#fef3c7"/>
+  <text x="520" y="192" text-anchor="middle" class="heading">Attack event OR</text>
+  <text x="520" y="220" text-anchor="middle" class="body">minimum per sample</text>
+
+  <rect x="410" y="290" width="220" height="76" class="node" fill="#dbeafe"/>
+  <text x="520" y="319" text-anchor="middle" class="heading">Step C</text>
+  <text x="520" y="345" text-anchor="middle" class="body">local cost distribution</text>
+
+  <rect x="765" y="202" width="250" height="92" class="node" fill="#dcfce7"/>
+  <text x="890" y="236" text-anchor="middle" class="heading">Terminal event AND</text>
+  <text x="890" y="264" text-anchor="middle" class="body">OR route + step C</text>
+
+  <path d="M285 143 C345 143 350 183 410 190" class="edge"/>
+  <path d="M285 253 C345 253 350 223 410 216" class="edge"/>
+  <path d="M630 203 C690 203 705 228 765 238" class="edge"/>
+  <path d="M630 328 C705 328 705 278 765 260" class="edge"/>
+
+  <text x="1035" y="232" class="small">Output:</text>
+  <text x="1035" y="254" class="mono">G¹, G², …, Gᴺ</text>
+  <text x="1035" y="277" class="small">empirical samples</text>
+
+  <rect x="55" y="405" width="760" height="126" rx="8" fill="#f8fafc" stroke="#94a3b8"/>
+  <line x1="55" y1="447" x2="815" y2="447" class="grid"/>
+  <line x1="55" y1="475" x2="815" y2="475" class="grid"/>
+  <line x1="55" y1="503" x2="815" y2="503" class="grid"/>
+  <line x1="125" y1="405" x2="125" y2="531" class="grid"/>
+  <line x1="225" y1="405" x2="225" y2="531" class="grid"/>
+  <line x1="325" y1="405" x2="325" y2="531" class="grid"/>
+  <line x1="555" y1="405" x2="555" y2="531" class="grid"/>
+  <line x1="655" y1="405" x2="655" y2="531" class="grid"/>
+  <text x="90" y="432" text-anchor="middle" class="heading">s</text>
+  <text x="175" y="432" text-anchor="middle" class="heading">Aˢ</text>
+  <text x="275" y="432" text-anchor="middle" class="heading">Bˢ</text>
+  <text x="440" y="432" text-anchor="middle" class="heading">ORˢ = min(Aˢ, Bˢ)</text>
+  <text x="605" y="432" text-anchor="middle" class="heading">Cˢ</text>
+  <text x="735" y="432" text-anchor="middle" class="heading">Gˢ = ORˢ + Cˢ</text>
+  <text x="90" y="469" text-anchor="middle" class="mono">1</text><text x="175" y="469" text-anchor="middle" class="mono">4</text><text x="275" y="469" text-anchor="middle" class="mono">9</text><text x="440" y="469" text-anchor="middle" class="mono">4</text><text x="605" y="469" text-anchor="middle" class="mono">3</text><text x="735" y="469" text-anchor="middle" class="mono">7</text>
+  <text x="90" y="497" text-anchor="middle" class="mono">2</text><text x="175" y="497" text-anchor="middle" class="mono">10</text><text x="275" y="497" text-anchor="middle" class="mono">5</text><text x="440" y="497" text-anchor="middle" class="mono">5</text><text x="605" y="497" text-anchor="middle" class="mono">4</text><text x="735" y="497" text-anchor="middle" class="mono">9</text>
+  <text x="90" y="525" text-anchor="middle" class="mono">3</text><text x="175" y="525" text-anchor="middle" class="mono">6</text><text x="275" y="525" text-anchor="middle" class="mono">8</text><text x="440" y="525" text-anchor="middle" class="mono">6</text><text x="605" y="525" text-anchor="middle" class="mono">2</text><text x="735" y="525" text-anchor="middle" class="mono">8</text>
+
+  <rect x="845" y="405" width="310" height="126" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="865" y="434" class="heading">Why retain attack plans?</text>
+  <text x="865" y="462" class="small">At larger AND gates, atomic source sets</text>
+  <text x="865" y="484" class="small">are unioned before their costs are summed.</text>
+  <text x="865" y="506" class="small">A prerequisite shared by two branches is</text>
+  <text x="865" y="528" class="small">therefore charged once, not twice.</text>
+</svg>
