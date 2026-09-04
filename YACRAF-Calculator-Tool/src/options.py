@@ -78,13 +78,33 @@ class Options:
         """
         Options for general settings to the program
         """
-        options = Options(model, view, 2, 2, "General settings")
+        options = Options(model, view, 5, 2, "General settings")
         
         entry_text = tk.StringVar()
         options.add_entry(0, 0, "Number of samples when sampling distributions:", settings.get_num_samples(), lambda: set_num_samples(entry_text.get()), entry_text)
         
         options.add_label(0, 1, "Warn for duplicate class instance names:")
         options.add_toggle_button(1, 1, "Print warnings", settings.warns_duplicate_names(), lambda: settings.set_warn_duplicate_names(True), lambda: settings.set_warn_duplicate_names(False))
+
+        options.add_label(2, 0, "Distribution result percentiles (applies on Calculate):")
+        initial_percentile_button = options.add_radio_button(
+            3, 0, "P0 / P50 / P100", settings.get_percentile_range() == 0,
+            lambda: settings.set_percentile_range(0)
+        )
+        options.add_linked_radio_button(
+            initial_percentile_button, "P5 / P50 / P95", settings.get_percentile_range() == 5,
+            lambda: settings.set_percentile_range(5)
+        )
+
+        options.add_label(2, 1, "Attack-event PoS calculation (applies on Calculate):")
+        initial_pos_button = options.add_radio_button(
+            3, 1, "Single success ratio", settings.get_pos_calculation_mode() == "ratio",
+            lambda: settings.set_pos_calculation_mode("ratio")
+        )
+        options.add_linked_radio_button(
+            initial_pos_button, "Conditional PoS distribution", settings.get_pos_calculation_mode() == "distribution",
+            lambda: settings.set_pos_calculation_mode("distribution")
+        )
         
     @staticmethod
     def configuration_class(model, view, configuration_class_gui, configuration_views):
@@ -190,6 +210,34 @@ class Options:
                                              1, \
                                              setup_view.get_name(), \
                                              lambda setup_view=setup_view: model.create_linked_setup_class_gui(setup_class_gui, setup_view))
+
+    @staticmethod
+    def setup_attribute(model, view, setup_attribute_gui):
+        """Offer distribution templates and plots where applicable."""
+        has_templates = setup_attribute_gui.has_manually_entered_value() and \
+                        setup_attribute_gui.supports_distribution_templates()
+        can_plot = setup_attribute_gui.can_plot_distribution()
+        columns = 4 if has_templates else 1
+        rows = 2 + int(can_plot) if has_templates else 1
+        options = Options(model, view, rows, columns, "Distribution")
+
+        if has_templates:
+            distributions = (
+                ("Uniform\nmin / max", "uniform / 0 / 1"),
+                ("Triangular\nmin / mode / max", "triangular / 0 / 0.5 / 1"),
+                ("Normal (truncated at 0)\nmean / standard deviation", "normal / 1 / 0.2"),
+                ("Lognormal\nmedian / geometric std. dev.", "lognormal / 1 / 1.5"),
+            )
+
+            for column, (label, template) in enumerate(distributions):
+                options.add_label(0, column, label)
+                options.add_button(1, column, "Use", lambda template=template: setup_attribute_gui.set_distribution_template(template))
+
+        if can_plot:
+            plot_row = 2 if has_templates else 0
+            options.add_button(plot_row, 0, "Plot distribution", setup_attribute_gui.plot_distribution)
+
+        return options
             
     @staticmethod
     def connection(model, view, connection):
@@ -310,6 +358,6 @@ def set_setup_scalars(connection, input_scalars_string):
 
 def set_num_samples(num_samples_string):
     try:
-        settings.set_num_samples(abs(int(num_samples_string)))
+        settings.set_num_samples(num_samples_string)
     except:
         settings.set_num_samples(1)

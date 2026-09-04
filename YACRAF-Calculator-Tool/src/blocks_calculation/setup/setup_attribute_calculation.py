@@ -85,6 +85,9 @@ class SetupAttribute:
             
     def get_value_type(self):
         return self.__configuration_attribute.get_value_type()
+
+    def get_setup_class(self):
+        return self.__setup_class
         
     def has_configuration_attribute(self, configuration_attribute):
         return self.__configuration_attribute == configuration_attribute

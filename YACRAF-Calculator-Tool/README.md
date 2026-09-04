@@ -4,43 +4,53 @@ This is a graphical tool for doing calculations according to [Yacraf](https://li
 
 This tool allows calculations inherent to the threat modeling to be set up and calculated using graphical block diagrams, where one can place, drag, and connect different blocks across various `Views`. The tool aims to allow for (i) the automation of the calculation process, where any changes to any block automatically propagate through the system and (ii) the simulation/analysis of various system configurations.
 
-**Disclaimer**: The Yacraf calculator is a prototype software. It was not developed as a comercial product, fulfilling all the requirements that would come with that, but as a best effort prototype for education and research. It is intended assist practical use of Yacraf, but is by no means the only way to do Yacraf-based risk analysis. The code may contain bugs so using it is at your own risk, and all results needs to be cross-checeked. Known bugs are reported under Issues. Any help with improving any dimension of the tool is most welcome - looking forward to your pull request! :)  
-Having all that said - we hope you find the tool useful. 
+> **Use the bundled metamodel as-is.** It is the calculator's implementation of the YACRAF metamodel. Normal use consists of adding instances, values, and connections in `System Views`; changing the `Metamodel Views` is neither expected nor required. Metamodel editing is documented only for maintainers and advanced experiments in [Advanced: changing or rebuilding the YACRAF metamodel](#advanced-changing-or-rebuilding-the-yacraf-metamodel) at the end of this README. The optional `Conditional PoS distribution` mode is a calculator-level theoretical extension and is identified separately from the paper-compatible calculation below.
+
+**Disclaimer**: The Yacraf calculator is prototype software. It was not developed as a commercial product fulfilling all the requirements that would come with that, but as a best-effort prototype for education and research. It is intended to assist practical use of Yacraf, but is by no means the only way to do Yacraf-based risk analysis. The code may contain bugs, so using it is at your own risk and all results need to be cross-checked. Known bugs are reported under Issues. Any help with improving any dimension of the tool is most welcome—looking forward to your pull request! :)
+
+Having all that said, we hope you find the tool useful.
 
 # Table of Contents
+
 1. [Dependencies](#dependencies)
 2. [Running the YACRAF Calculator](#running-the-yacraf-calculator)
-3. [GUI Overview](#gui-overview)
+3. [Features in this version](#features-in-this-version)
+4. [GUI Overview](#gui-overview)
+   - [Parameter notation](#parameter-notation)
    - [View Switching](#views-switching)
-   - [Working with Metamodel Views](#working-with-metamodel-views)
-     - [Creating Classes and Attributes](#creating-classes-and-attributes)
-     - [Adding Calculation Inputs](#adding-calculation-inputs)
-     - [Connections](#connections)
    - [Working with System Views](#working-with-system-views)
      - [Adding Class Instances](#adding-class-instances)
      - [Adding Connections](#adding-connections)
      - [Calculating Values](#calculating-values)
-4. [Scripts and Customization](#scripts-and-customization)
-5. [Error Handling](#error-handling)
-6. [Explanation of the YACRAF Metamodel](#explanation-of-the-yacraf-metamodel-included-in-the-program)
-7. [Step-by-Step Video Walkthroughs](#step-by-step-video-walkthroughs)
-8. [Reporting bugs with the YACRAF tool](#reporting-bugs-with-the-yacraf-tool)
-9. [Contribute to YACRAF](#contribute-to-yacraf)
-10. [FAQ](#FAQ)
+5. [Distribution-valued calculations](#distribution-valued-calculations)
+   - [Declaring input distributions](#declaring-input-distributions)
+   - [Settings](#distribution-calculation-settings)
+   - [Empirical Monte Carlo propagation](#empirical-monte-carlo-propagation)
+   - [Global attack difficulty](#global-attack-difficulty)
+   - [Probability and loss risk](#probability-and-loss-risk)
+   - [Conditional PoS theoretical extension](#conditional-pos-distribution-a-theoretical-extension)
+   - [Plotting distributions](#plotting-distributions)
+6. [Scripts and Customization](#scripts-and-customization)
+7. [Error Handling](#error-handling)
+8. [Step-by-Step Video Walkthroughs](#step-by-step-video-walkthroughs)
+9. [Reporting bugs with the YACRAF tool](#reporting-bugs-with-the-yacraf-tool)
+10. [Contribute to YACRAF](#contribute-to-yacraf)
+11. [FAQ](#faq)
+12. [Advanced: changing or rebuilding the YACRAF metamodel](#advanced-changing-or-rebuilding-the-yacraf-metamodel)
 
 
 ## Dependencies
 
-The program utilizes Tkinter for its GUI and NumPy for its calculations. If not already installed, Tkinter can on Debian-based Linux distributions (such as Ubuntu) be installed using:
+The program utilizes Tkinter for its GUI, NumPy for its calculations, and Matplotlib for distribution plots. If not already installed, Tkinter can on Debian-based Linux distributions (such as Ubuntu) be installed using:
 
 ```
 sudo apt install python3-tk
 ```
 
-NumPy can be installed using:
+The Python dependencies can be installed using:
 
 ```
-pip install numpy
+pip install -r requirements.txt
 ```
 
 Make sure the Python installation is not outdated. The known minimum requirement is Python 3.7, where 3.10 was used during the program's development. You may also need to update NumPy if you get an error related to it when booting the program.
@@ -50,26 +60,64 @@ Make sure the Python installation is not outdated. The known minimum requirement
 After navigating to the main directory, run the program using:
 
 ```
-python3 main.py <save_name>
-```
-
-Specifying a save name that does not currently exist will create a completely new save. To see which saves currently exist, run:
-
-```
 python3 main.py
 ```
 
+This opens `example_distribution`, a small distribution-valued attack graph described below. To open or create a different save, specify its name:
+
+```
+python3 main.py <save_name>
+```
+
+Specifying a save name that does not currently exist creates a completely new save. To list the existing saves without opening the GUI, run `python3 main.py --list`.
+
 The default saves of the program contain examples of the YACRAF metamodel, including accompanying system-model examples. The following default saves exist:
 
-1. `example_single`: Example based on the illustrative example found in Section 4 of the YACRAF paper, where the YACRAF metamodel is defined in the corresponding `Metamodel Views`, and the calculations are performed in the `System Views`.
-2. `example_triangle`: Same as `example_single`, except using triangle distributions whenever applicable.
-3. `Cloud`: A small example of a threat model for a cloud service provider, adapted from this [example](https://www.nccgroup.com/research-blog/threat-modelling-cloud-platform-services-by-example-google-cloud-storage/) and represented using the YACRAF metamodel. 
-4. `custom`: Same `Metamodel Views` as `exampel_triangle`, but with blank `System Views` to simplify the creation of a new threat model for a different system using the YACRAF metamodel.
+1. `example_distribution`: The default startup example. Two alternative attack events with `normal / 10 / 2` and `triangular / 5 / 10 / 15` local difficulty feed an AND event with `uniform / 1 / 3` local difficulty. An abuse case supplies `triangular / 20 / 25 / 30` effort, and the terminal event feeds a loss with `triangular / 100 / 500 / 1000` magnitude. The loss also receives the abuse case directly so its probability includes both threat-event probability and terminal PoS.
+2. `example_single`: Example based on the illustrative example found in Section 4 of the YACRAF paper, where the YACRAF metamodel is defined in the corresponding `Metamodel Views`, and the calculations are performed in the `System Views`.
+3. `example_triangle`: Same as `example_single`, except using triangle distributions whenever applicable.
+4. `Cloud`: A small example of a threat model for a cloud service provider, adapted from this [example](https://www.nccgroup.com/research-blog/threat-modelling-cloud-platform-services-by-example-google-cloud-storage/) and represented using the YACRAF metamodel.
+5. `custom`: Same `Metamodel Views` as `example_triangle`, but with blank `System Views` to simplify the creation of a new threat model for a different system using the YACRAF metamodel.
+
+## Features in this version
+
+This version retains the original scalar YACRAF workflow and adds distribution-valued analysis. The additions are summarized here and explained in detail later.
+
+| Feature | What the end user can do |
+| --- | --- |
+| Named input distributions | Use uniform, triangular, non-negative normal, or lognormal distributions for local attack difficulty, abuse-case effort, loss magnitude, loss risk, and aggregated actor risk. |
+| Empirical Monte Carlo propagation | Calculate every downstream distribution from samples of the declared inputs instead of forcing an analytically fitted output family. |
+| Attack-plan-aware cost aggregation | Evaluate OR alternatives per sample, combine AND requirements, and count a shared prerequisite only once. |
+| Configurable sample count | Choose the number of Monte Carlo samples in `Settings`. |
+| Configurable result summaries | Display either `P0 / P50 / P100` or `P5 / P50 / P95` in calculated distribution fields. |
+| Two attack-event PoS modes | Retain the paper-compatible scalar success ratio or opt into a distribution of success probabilities conditional on uncertain global difficulty. |
+| Distribution-valued losses | Give loss magnitude a distribution and propagate scalar or distribution-valued probability into loss risk. |
+| Multiple loss causes | Combine the separate $TEP_j\cdot\mathrm{PoS}_j$ contributions of independent, non-mutually-exclusive abuse cases as their probability union. |
+| Full distribution plots | Plot an empirical density histogram and cumulative distribution for any distribution-valued parameter on any object, whether manually entered or calculated. |
+| Default worked example | Start directly in `example_distribution`, a five-node example connecting an abuse case, alternative attack steps, a terminal step, and a loss event. |
+| Compatibility and diagnostics | Load legacy three-number triangular values, avoid storing thousands of calculated samples in save files, and report invalid distribution/configuration inputs with calculation-specific warnings. |
+
+The distribution features require NumPy for sampling and Matplotlib for plots. General settings are stored with the save and take effect on the next calculation.
 
 
 ## GUI Overview
 
-The graphical interface consists of two types of `Views`: `Metamodel Views` (`Configuration Views`) defining the metamodel used during the threat modeling and `System Views` (`Setup Views`) where the specific analyzed system is defined based on the aforementioned metamodel. That is, `Class` blocks (for example, an attack event) and their `Attributes` (for example, the attack event's cost) are defined within `Metamodel Views`, including their connections and relationships to other `Attributes`. For instance, specifying that the cost `Attribute` of one attack event is dependent on that of another. Meanwhile, attack event instances (such as a DDoS attack) and their connections to other system-specific instances are configured in the `System Views`.
+The graphical interface contains `System Views` (`Setup Views`) for building the analyzed scenario and `Metamodel Views` (`Configuration Views`) containing the bundled YACRAF definition. End users normally work only in `System Views`: add an abuse case, attack events, loss events, and other instances; enter their values; connect them; and calculate. The metamodel views may be inspected to understand dependencies, but editing them is an advanced maintenance activity documented at the end of this README.
+
+### Parameter notation
+
+Parenthesized abbreviations in model blocks identify the **meaning of a parameter**, not its internal value type. For example, `Local difficulty (LD)` and `Global difficulty (GD)` may both be distribution-valued, while `Probability of success (PoS)` may be either a scalar or an empirical distribution depending on the selected calculation mode. The notation follows the [YACRAF summary framework](../Course-material/lectures/Risk_calculator_framework.png). Abbreviations marked with an asterisk are added by this calculator for parameters that are named but not abbreviated in that figure.
+
+| Object | Parameter abbreviations |
+| --- | --- |
+| Abuse case | Accessibility to Attack Surface (`AtAS`), Window of Opportunity (`WoO`), Ability to Repudiate (`AtR`), Perceived Deterrence (`PD`), Perceived Ease of Attack (`PEoA`), Perceived Benefit of Success (`PBoS`), Probability of Contact (`PoC`), Probability of Action (`PoA`), Threat Event Probability (`TEP`), Effort Spent (`ES`*) |
+| Attacker | Risk Tolerance (`RT`), Concern for Collateral Damage (`CfCD`), Skill (`Sk`*), Resources (`Res`*), Sponsorship (`Sp`*), Threat Capability (`TC`) |
+| Attack event | Local Difficulty (`LD`*), Global Difficulty (`GD`*), Probability of Success (`PoS`) |
+| Loss event | Loss Magnitude (`LM`*), Loss Probability (`LP`*), Loss Risk (`LR`*) |
+| Actor | Actor Risk (`AR`*) |
+| Defense mechanism | Defense Mechanism Cost (`DMC`*), Defense Mechanism Impact (`DMI`*), Defense Mechanism Existence (`DME`*) |
+
+Text fields and other parameters with no defined semantic abbreviation are shown without a parenthesized suffix. For a custom metamodel parameter, put any desired abbreviation in its name. Maintainers can still inspect or change the underlying value type in the advanced metamodel editor.
 
 
 ### Views Switching 
@@ -91,48 +139,6 @@ For a `System View`, one can:
 The save button in the bottom left corner ((3) in the below figure) saves the current state of all `Metamodel Views` and `System Views`, but also any changes to the general settings found by pressing the settings button. Any selected block within a `View` can be deleted by pressing backspace.
 
 ![Image of a configured YACRAF metamodel within a metamodel view](img/configuration_view.svg)
-
-### Working with Metamodel Views
-
-**Note on the meta-model**: You generally should not change the meta-model, it encodes YACRAF out of the box. In almost all cases, your work should be done by adding/editing instances and values, not by altering classes/attributes. Please only consider a meta-model change with strong justification, and keep in mind that it can break examples and scripts. 
-
-So most likely you should skip over this section!
-
-#### Creating Classes and Attributes
-
-A new metamodel `Class` is created by pressing the add class button in the top left corner, as illustrated by (1) in the figure below. By pressing (2), one can add an `Attribute` to the created `Class` (result shown in (3)). Pressing an `Attribute` selects it, as shown by (4), where one can edit it by pressing E. Editing an `Attribute` allows the following to be configured:
-
-1. Its name
-2. Their displayed order in the `Class`
-3. The value type of the `Attribute`, such as a single number, probability, or a triangle distribution (the (T) at (4) indicates that the `Attribute` value is a triangle distribution)
-4. Hide it from the corresponding `System Views`, meaning it is only visible in the `Metamodel Views` (useful for calculations requiring several steps)
-
-Similarly, the `Class` itself can also be edited. In particular:
-
-1. Changing its name
-2. Creating a linked copy of this instance in another `Metamodel View` (allowing relations between blocks across multiple `Metamodel Views` - interpreting them as the same `Class` block), identified by a unique identifier in their upper right corner (see (11) in the figure below)
-
-![Image of a metamodel view where one creates classes and attributes, and subsequently connects them](img/configuration.svg)
-
-#### Adding Calculation Inputs
-
-By pressing the add input button in the top left corner (see (5) in the above figure), an `Input` block is created (see (6)). `Input` blocks take input values from one or more `Attributes` and, through a specified mathematical operation, outputs the calculated result to an adjacent `Attribute` that it has been dragged next to (see (7)). The `Input` block can be configured by selecting it and pressing E, where one can:
-
-1. Change its mathematical operation, for example, AND, OR, multiplication, etc (seen at (8) is the an `Input` block performing an AND operation between inputs)
-2. Add a scalar that multiplies the calculated input with a factor (see the number 2 at (10))
-3. Add an offset that is added after the scalar is applied (see the number 3 at (10))
-
-`Attributes` can be added as inputs by connecting them to the `Input` block by first right-clicking on the corresponding `Attribute` and then left or right-clicking the `Input` block, creating a `Connection` between the two, as illustrated by (9) in the above figure.
-
-Some mathematical operations are dependent on the order of their inputs. In such cases, the `Connections` will automatically be graphically enumerated by the order they were created.
-
-##### Connections
-
-Pressing E when the corner of a `Connection` is selected opens up its options, where one can:
-
-1. Set the `Connection` as external, meaning it will only be connected to `Attributes` of other class instances, ignoring internally connected ones, leading to, for example, an attack event only considering the corresponding `Attribute` value of other attack events and not its own (indicated by its lines becoming dashed)
-
-The corners of a `Connection` can be dragged around to customize its path.
 
 ### Working with System Views
 
@@ -159,24 +165,247 @@ Pressing the add connection button at the top ((4) in the above figure) creates 
 
 The calculate button at the top (see (8)) calculates the values of all `Attributes` that do not have a manual input entry field. Calculated are the `Attributes` of all `Classes` in all `System Views`. In the case of the above figure, the `Attribute` indicated by (9) has been calculated using the corresponding `Attribute` values of its input `Classes`. The input `Attributes` in question are highlighted when the `Attribute` is selected.
 
-#### Scripts and Customization
+## Distribution-valued calculations
+
+### Declaring input distributions
+
+A distribution-valued parameter can represent local difficulty, global difficulty, effort spent, loss magnitude, loss risk, aggregated actor risk, or another uncertain quantity in a custom model. A manual distribution starts with the distribution name followed by its parameters:
+
+```text
+uniform / minimum / maximum
+triangular / minimum / mode / maximum
+normal / mean / standard deviation
+lognormal / median / geometric standard deviation
+```
+
+Examples are `uniform / 2 / 5`, `triangular / 2 / 3 / 5`, `normal / 4 / 1`, and `lognormal / 6 / 1.5`. All four represent non-negative quantities:
+
+- `uniform` gives equal density between its minimum and maximum.
+- `triangular` uses a minimum, most likely value (mode), and maximum.
+- `normal` uses an arithmetic mean and standard deviation and is truncated at zero by rejection sampling.
+- `lognormal` uses a median and geometric standard deviation; the geometric standard deviation must be at least 1.
+
+Select a manually entered distribution-valued parameter and press `E` to choose a template in the GUI. The inserted template remains editable. Legacy three-number inputs such as `2 / 3 / 5` are interpreted as triangular distributions, and bundled triangle-based saves are migrated on load for attack difficulty, abuse-case effort, loss magnitude, loss risk, and actor risk.
+
+### Distribution calculation settings
+
+Open `Settings` to configure:
+
+1. **Number of samples**: the Monte Carlo sample count, with a minimum of one. More samples normally make quantiles and probability estimates more stable but take more time and memory.
+2. **Distribution result percentiles**: either `P0 / P50 / P100` or `P5 / P50 / P95`. This changes the three reported values for calculated distributions and the markers in distribution plots; it does not change the underlying samples. `P0` and `P100` are sample extremes and are consequently more sensitive to sample count than `P5` and `P95`.
+3. **Attack-event PoS calculation**: `Single success ratio` or `Conditional PoS distribution`. The first is the paper-compatible scalar result. The second is the optional theoretical extension described below.
+
+Settings apply when `Calculate` is next pressed and are persisted when the save is saved. Calculated sample arrays are not persisted: they are regenerated from the declared input distributions, keeping save files small. Two calculations can therefore differ slightly because they contain new random draws.
+
+### Empirical Monte Carlo propagation
+
+The named distributions describe the **inputs**. For each calculation run, the calculator draws $N$ values from every manual distribution:
+
+$$
+x_j^{(s)} \sim X_j, \qquad s=1,\ldots,N.
+$$
+
+It then evaluates the model for sample index $s$, producing $y^{(1)},\ldots,y^{(N)}$. This sample vector is the empirical output distribution. The calculator does not assume that the output is normal, triangular, or any other named family and does not fit such a family after aggregation. Displayed quantiles and plots are calculated directly from the empirical samples.
+
+Different manual sources are sampled independently. When the same local attack step is reused through several graph branches or linked views, its samples are cached for that calculation run and reused consistently. Arithmetic involving a distribution and a scalar broadcasts the scalar across all $N$ samples; arithmetic involving distributions is performed on aligned sample indices.
+
+### Global attack difficulty
+
+Every attack event—including root, intermediate, AND, OR, and terminal events—has both a Local Difficulty (`LD`) and a Global Difficulty (`GD`). `LD` is the incremental cost of performing that event itself. `GD` is the total cost of the easiest complete attack plan that reaches and performs it. Consequently, a root event has $GD=LD$, while a downstream event aggregates its predecessors' **global** difficulties and then adds its own local difficulty. It does not aggregate the predecessors' local difficulties directly.
+
+For an atomic attack event $i$, let $LD_i^{(s)}$ be its sampled Local Difficulty. A complete feasible attack plan $p$ is represented as a set of required atomic attack events, so its total difficulty in sample $s$ is
+
+$$
+GD_{a,p}^{(s)} = \sum_{i \in p} LD_i^{(s)}.
+$$
+
+If $\mathcal{P}_a$ is the set of feasible plans that reach attack event $a$, the event's Global Difficulty sample is
+
+$$
+GD_a^{(s)} = \min_{p \in \mathcal{P}_a} GD_{a,p}^{(s)}.
+$$
+
+The GUI's gate operations construct these plans as follows:
+
+1. `OR` collects the alternative input plans. The cheapest alternative may be different in different Monte Carlo samples.
+2. `AND` forms every required combination and uses set union on the atomic events. A prerequisite shared by two branches is therefore charged once rather than twice.
+3. Plans that are strict supersets of another feasible plan are discarded. This is valid because supported local difficulties are non-negative, so a strict superset cannot be easier.
+
+![Illustration of sample-aligned OR and AND Global Difficulty aggregation](img/monte_carlo_aggregation.svg)
+
+The result at every attack step is therefore the empirical distribution of the easiest complete plan reaching that step—not merely the sum or minimum of three displayed percentiles. For attack-difficulty calculations, keep metamodel input scalars at `1` and offsets at `0`. Applying an affine transform to an already aggregated plan is numerically supported, but it discards atomic plan provenance; later gates can then no longer remove duplicated shared prerequisites.
+
+### Probability and loss risk
+
+The bundled metamodel separates the probability that an attack is initiated from the probability that an initiated attack succeeds:
+
+$$
+TEP = PoC \cdot PoA.
+$$
+
+The abuse case's Probability of Action (`PoA`) therefore does **not** alter an attack event's PoS. PoS answers the conditional question “given Effort Spent (`ES`) and this Global Difficulty (`GD`), can the attempted attack succeed?” The abuse-case probabilities enter the Loss Probability calculation.
+
+For every abuse case $j$ that can cause the loss, the calculator pairs its Threat Event Probability with the PoS of its terminal attack event and first calculates one loss-cause contribution:
+
+$$
+p_j = TEP_j \cdot \mathrm{PoS}_{j,\text{terminal}}.
+$$
+
+Separate abuse cases are assumed to be independent and not mutually exclusive. Their contributions are therefore combined as the probability of their union:
+
+$$
+LP
+= \Pr\!\left(\bigcup_j L_j\right)
+= 1-\prod_j(1-p_j),
+\qquad
+LR = LM \cdot LP.
+$$
+
+With one abuse case this reduces to $LP=TEP\cdot\mathrm{PoS}_{\text{terminal}}$. With two contributions $p_1=0.10$ and $p_2=0.12$, the result is $LP=1-(1-0.10)(1-0.12)=0.208$, rather than either $0.22$ or $0.012$.
+
+![Propagation from abuse case and terminal attack event to loss probability and risk](img/loss_risk_flow.svg)
+
+System-view connections are direct, not transitive. For each contribution, connect the abuse case and its terminal attack event directly to the loss. The calculator associates them by following the attack graph from that abuse case to the terminal event. Every abuse case connected to the loss must lead to exactly one of its connected terminal attack events; ambiguous or unmatched connections produce a setup warning instead of silently multiplying unrelated inputs.
+
+If the abuse cases are mutually exclusive, dependent, or otherwise require a different overlap model, the independence formula is not valid. Handle that case manually—for example, calculate the appropriate combined probability outside this operation and use `override_attribute_values` in a script to override `LP`—and document the chosen dependence assumption.
+
+In `Single success ratio` mode, the $p_j$ values and $LP$ are scalar. A distribution-valued Loss Magnitude still makes Loss Risk distribution-valued: $LR^{(s)}=LM^{(s)}LP$. In Conditional PoS mode, the union is evaluated sample by sample:
+
+$$
+LP^{(s)}=1-\prod_j\left(1-TEP_j\,Q_j^{(s)}\right),
+\qquad
+LR^{(s)}=LM^{(s)}LP^{(s)}.
+$$
+
+### Single success ratio (paper-compatible mode)
+
+Let $ES^{(s)}$ be a sampled Effort Spent value and $GD_a^{(s)}$ the sampled Global Difficulty of attack event $a$. `Single success ratio` reports one scalar:
+
+$$
+\widehat{\mathrm{PoS}}_a
+= \frac{1}{N}\sum_{s=1}^{N}
+\mathbf{1}\!\left[ES^{(s)} > GD_a^{(s)}\right].
+$$
+
+Every aligned pair is one simulated attack situation. It contributes 1 when effort is strictly greater than difficulty and 0 otherwise. The result is the fraction of successful situations and estimates $\Pr(ES>GD_a)$. Equality counts as failure. This remains the default mode because it returns the single probability used by the original workflow.
+
+### Conditional PoS distribution: a theoretical extension
+
+> **Important theoretical status:** `Conditional PoS distribution` is an optional extension implemented by this calculator. It is not the single-value PoS calculation described in the YACRAF paper. Results produced in this mode should be labeled as conditional-PoS distributions and should record the mode and sample count used.
+
+To use it, open `Settings`, select `Conditional PoS distribution`, and press `Calculate`. Then select an attack event's `Probability of success`, press `E`, and choose `Plot distribution` to inspect the result.
+
+#### Motivation
+
+The scalar ratio integrates over all uncertainty in Global Difficulty and returns one number. That is often exactly what is needed for expected risk, but it hides whether success is nearly constant or changes substantially between low- and high-difficulty realizations. Conditional mode retains this variation.
+
+Let $F_{ES}(g)=\Pr(ES\leq g)$ be the cumulative distribution function of Effort Spent and $S_{ES}(g)=1-F_{ES}(g)$ its survival function. For every sampled Global Difficulty $GD_a^{(s)}=g_s$, conditional mode defines
+
+$$
+Q_a^{(s)} = \Pr(ES>g_s) = S_{ES}(g_s)=1-F_{ES}(g_s).
+$$
+
+Because the implementation has effort samples rather than an analytic CDF, it uses the empirical survival function:
+
+$$
+Q_a^{(s)}
+= \widehat S_{ES}\!\left(GD_a^{(s)}\right)
+= \frac{1}{N}\sum_{t=1}^{N}
+\mathbf{1}\!\left[ES^{(t)} > GD_a^{(s)}\right].
+$$
+
+The separate indices are important. For each difficulty sample $s$, the calculator compares that difficulty with **all** effort samples $t$. Sorting the effort samples makes this calculation efficient. The output $Q_a^{(1)},\ldots,Q_a^{(N)}$ is retained as an empirical probability distribution and can be summarized or plotted.
+
+![Mapping Global Difficulty samples through the Effort Spent survival function](img/conditional_pos.svg)
+
+#### Interpretation and relation to the scalar result
+
+| Mode | Returned object | Question answered |
+| --- | --- | --- |
+| `Single success ratio` | One number $\widehat{\Pr}(ES>GD_a)$ | Across all simulated effort-and-difficulty pairs, what fraction succeeds? |
+| `Conditional PoS distribution` | Samples $Q_a^{(s)}$ in $[0,1]$ | How does the chance of success vary over plausible realized Global Difficulty values? |
+
+The conditional output is **not** a posterior distribution or confidence interval for one unknown PoS, and it is not a vector of Bernoulli success/failure outcomes. Its percentiles describe variation in $\Pr(ES>g)$ caused by uncertain $g$. They do not quantify estimation confidence; increasing $N$ only makes the empirical approximation smoother and more stable.
+
+Conditional mode treats Effort Spent $ES$ and Global Difficulty $GD_a$ as independent. Under this assumption,
+
+$$
+\mathbb{E}_{GD_a}\!\left[\Pr(ES>GD_a\mid GD_a)\right]
+= \Pr(ES>GD_a),
+$$
+
+so the mean of the conditional-PoS samples should approach the scalar PoS as the sample count grows. Their medians and other percentiles need not equal the scalar probability. If effort and difficulty are dependent—for example, better-resourced attackers systematically choose harder routes—the correct quantity would require a joint model such as $\Pr(ES>g\mid GD_a=g)$. The current calculator does not model that dependence.
+
+#### What the mapping looks like for each input distribution
+
+The implementation always evaluates the empirical survival function, so it does not need these closed-form expressions. They clarify the theoretical mapping for a Global Difficulty realization $g$:
+
+**Uniform.** For $ES\sim\mathrm{Uniform}(a,b)$, $Q(g)=1$ below $a$, $Q(g)=0$ at or above $b$, and
+
+$$
+Q(g)=\frac{b-g}{b-a}, \qquad a\leq g<b.
+$$
+
+**Triangular.** For $ES\sim\mathrm{Triangular}(a,m,b)$, where $m$ is the mode,
+
+$$
+Q(g)=
+\begin{cases}
+1, & g<a,\\
+1-\dfrac{(g-a)^2}{(b-a)(m-a)}, & a\leq g\leq m,\\
+\dfrac{(b-g)^2}{(b-a)(b-m)}, & m<g<b,\\
+0, & g\geq b.
+\end{cases}
+$$
+
+If the mode equals an endpoint or all three parameters are equal, interpret this expression by its corresponding limiting or deterministic case.
+
+**Zero-truncated normal.** For the calculator's $ES\sim\mathrm{Normal}(\mu,\sigma^2)\mid ES\geq0$, with standard normal CDF $\Phi$, $Q(g)=1$ for $g<0$, and for $g\geq0$,
+
+$$
+Q(g)=\frac{1-\Phi\!\left((g-\mu)/\sigma\right)}{1-\Phi\!\left(-\mu/\sigma\right)}.
+$$
+
+When $\sigma=0$, effort is deterministic and the mapping is a step at $\mu$.
+
+**Lognormal.** For $ES\sim\mathrm{Lognormal}(\log m,\log^2 g_{\mathrm{sd}})$, where $m$ is the median and $g_{\mathrm{sd}}$ the geometric standard deviation, $Q(g)=1$ for $g\leq0$, and
+
+$$
+Q(g)=1-\Phi\!\left(\frac{\log g-\log m}{\log g_{\mathrm{sd}}}\right), \qquad g>0.
+$$
+
+When $g_{\mathrm{sd}}=1$, effort is deterministic at the median.
+
+The strict comparison $ES>g$ is used in every case. With continuous distributions equality has probability zero, but it matters for deterministic or repeated empirical values.
+
+#### Appropriate use and reporting
+
+Use `Single success ratio` when a single paper-compatible PoS is required. Use Conditional PoS when the variation of success probability across uncertain Global Difficulty is itself useful for sensitivity analysis, communication, or downstream distribution-valued risk. Before interpreting either result, ensure Effort Spent and Global Difficulty use compatible units, refer to the same attack opportunity and time horizon, and represent the intended attacker.
+
+When reporting Conditional PoS, include:
+
+- the Effort Spent distribution and all Local Difficulty distributions;
+- the Monte Carlo sample count;
+- that the independence assumption was used;
+- the selected displayed percentiles; and
+- both the mean (for comparison with scalar PoS) and the plotted empirical distribution where practical.
+
+### Plotting distributions
+
+Select any distribution-valued parameter on any `System View` object, press `E`, and choose `Plot distribution`. For a calculated parameter, press `Calculate` first so that empirical samples exist. The plot window contains an empirical density histogram and the full empirical cumulative distribution function (CDF), with the selected result percentiles marked.
+
+Plot availability is determined by the parameter's value rather than by its object class. This includes distribution-valued parameters on attacker, abuse-case, attack-event, loss-event, actor, defense-mechanism, and custom objects. It also includes a parameter whose configured type is normally scalar, such as probability, when its current calculated result is an empirical distribution. A plot shows all finite empirical samples, not only the three values displayed inside the block.
+
+## Scripts and Customization
 
 Scripts to visualize or analyze different scenarios, such as finding the most optimal order of implementing defense mechanisms or enumerating and visualizing the easiest attack paths, can be created using Python scripts that interface to the tool. Scripts are created and explained in detail in the `scripts` directory.
 We provide three scripts: ``Attack_Paths.py``: marks, in a YACRAF view, the easiest previous attack step for a chosen attack event by scanning inputs and comparing global difficulty values. ``Disable_Defenses.py``: temporarily turns off all defense mechanisms by overriding their Impact values to zero, then recalculates outcome. ``Export to CSV.py``: exports YACRAF data for Loss events, Abuse cases, and Attackers to a CSV-style table (headers + rows) after recalculating values.
 
 Note: Computationally heavy scripts could take some time to complete. The corresponding button will appear pressed (have changed color) while the script is running.
 
-### Error Handling
+## Error Handling
 
 Any errors found in the `Metamodel Views` or `System Views` upon calculating `Attribute` values are printed.
-
-## Explanation of the YACRAF Metamodel Included in the Program
-
-The attributes highlighted by (1) in the figure below have been configured to take an input between 0-10, where the sequence of &, 0.1, and 10 into a temporary (and hidden) `Attribute` is used to make a negative formulation of the `Attribute` into a positive one, or vice versa. For example, transform a 3 into 10 - 3 = 7.
-
-The calculation type Q (see (2)) implies a qualitative relation where no numerical calculation is performed. Instead, manual input is prompted. Thus, such connections merely highlight the relationship.
-
-![Image of a configuration view for the YACRAF metamodel](img/configuration_explanation.svg)
 
 ## Step-by-Step Video Walkthroughs 
 
@@ -206,13 +435,13 @@ Improvements are welcome: refactoring, scripts, docs, examples, you name it. For
 
 #### Q2: How is the YACRAF Calculator structured?
 
-**A2:** The YACRAF Calculator is structured around two views: **Metamodel Views** and **System Views**. Metamodel Views define the YACRAF threat model, where `Class` blocks and `Attributes` are created, along with their relationships. System Views apply this model to specific scenarios, allowing users to configure instances, connect blocks, and run calculations. This structure separates the model design from its application.
+**A2:** The YACRAF Calculator is structured around two view types: **Metamodel Views** and **System Views**. The shipped Metamodel Views implement the YACRAF classes, attributes, and relations. System Views apply that fixed definition to a concrete scenario by adding instances, values, and connections. Normal end-user work takes place in System Views.
 
 
 
 #### Q3: Should I modify the metamodel provided in the custom example?
 
-**A3:** We recommend sticking to the provided YACRAF metamodel for consistency and reliable results. However, you can use a different model if needed.
+**A3:** No. The provided metamodel is the calculator's implementation of YACRAF and should normally remain unchanged. Editing it can invalidate examples, calculations, and scripts. Only maintainers or researchers deliberately experimenting with a different metamodel should use the advanced instructions at the end of this README.
 
 
 
@@ -229,6 +458,8 @@ Improvements are welcome: refactoring, scripts, docs, examples, you name it. For
 - **example_single:** Based on Section 4 of the YACRAF paper.  
 
 - **example_triangle:** Similar to `example_single` but with triangle distributions.  
+
+- **example_distribution:** The default five-node distribution example, containing an abuse case, two alternative attack routes, a combined attack event, and a loss event.
 
 - **custom:** Blank System Views with the YACRAF metamodel for creating your own models.  
 
@@ -370,4 +601,49 @@ We recommend using the custom save to design your own threat models.
 
 **A24:** Once the calculator is running, a button for each script will appear in the bottom right corner of the System Views. You can click the button to execute the script and see the results within the interface.
 
+## Advanced: changing or rebuilding the YACRAF metamodel
 
+> **This section is not part of the normal modeling workflow.** The bundled Metamodel Views encode the YACRAF metamodel and are expected to remain unchanged. Create scenarios in System Views instead. A metamodel change can alter the meaning and value type of existing attributes, break saved examples, and invalidate assumptions made by scripts. Make such a change only when intentionally maintaining the tool or researching a different metamodel, and work on a copy of the save.
+
+The selectable distribution settings and Conditional PoS mode described above do not require an end user to modify the metamodel. They are implemented by the calculator and the metamodel already bundled with this branch.
+
+### Working with Metamodel Views
+
+`Metamodel Views` (`Configuration Views`) define the classes available in System Views and the dependencies between their attributes. For example, they define an attack-event class, its Local Difficulty and Global Difficulty attributes, and which connected attributes provide calculation inputs. Changes propagate to all System Views belonging to the save.
+
+![Image of a configured YACRAF metamodel within a metamodel view](img/configuration_view.svg)
+
+### Creating classes and attributes
+
+A new metamodel `Class` is created with the add-class button in the top left, illustrated by (1) below. Button (2) adds an `Attribute` to the class, producing (3). Select an attribute, as at (4), and press `E` to configure:
+
+1. its name;
+2. its displayed order in the class;
+3. its value type, such as a number, probability, legacy triangle distribution, or sampled distribution; and
+4. whether it is hidden from System Views, which is useful for intermediate calculation attributes.
+
+Select the class and press `E` to change its name or create a linked copy in another Metamodel View. Linked copies represent the same class across views and carry a shared identifier in the upper-right corner, shown at (11).
+
+![Image of a metamodel view where classes and attributes are created and connected](img/configuration.svg)
+
+### Adding calculation inputs
+
+The add-input button, shown at (5), creates an `Input` block such as (6). Drag the input next to its destination attribute, as at (7). Select it and press `E` to configure:
+
+1. the mathematical operation, including mean, AND/addition, OR/minimum, multiplication, division, effort-versus-cost comparison, or qualitative input;
+2. a scalar applied to the calculated input, shown as 2 at (10); and
+3. an offset added after scaling, shown as 3 at (10).
+
+Connect an attribute to the `Input` block by right-clicking the source attribute and then left- or right-clicking the input, as at (9). Operations such as division and effort-versus-cost comparison require a specific number and order of inputs; their connections are numbered automatically in creation order.
+
+### Metamodel attribute connections
+
+Select a connection corner and press `E` to mark the connection as external. An external connection, drawn dashed, accepts an attribute only from another class instance and ignores an internally connected attribute. This is how an attack event can consume the Global Difficulty of preceding attack-event instances without also consuming its own Global Difficulty. Connection corners can be dragged to improve the diagram layout.
+
+### How the included YACRAF metamodel is implemented
+
+The attributes highlighted by (1) below accept an input between 0 and 10. The shown sequence of AND/addition, multiplication by 0.1, and offset 10 feeds a temporary hidden attribute and converts a negatively formulated scale to a positively formulated one, or vice versa. For example, it transforms 3 into $10-3=7$.
+
+Calculation type `Q`, shown at (2), represents a qualitative relationship. It performs no numerical operation and leaves the corresponding value for manual input; its connections visually identify the relationship and highlight relevant inputs.
+
+![Image explaining calculations in the bundled YACRAF metamodel](img/configuration_explanation.svg)

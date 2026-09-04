@@ -14,6 +14,10 @@ def convert_value_to_string(value):
     final_value = []
     
     for element in value:
+        if hasattr(element, "to_display_string"):
+            final_value.append(element.to_display_string())
+            continue
+
         try:
             rounded_value = round(float(element), DECIMALS_WHEN_ROUNDING)
             
@@ -212,36 +216,55 @@ def get_text_that_fits(canvas, label, text, text_width, is_bold, length_unit):
     Returns the text and its corresponding font required for the specified text to fit within the specified grid text width
     """
     from config import OUTLINE_WIDTH
+
+    # Canvas labels also receive numeric values, for example the Monte Carlo
+    # sample count in General settings.  Normalise them before the wrapping
+    # logic uses string operations.
+    text = str(text)
     
     actual_maximum_text_width = convert_grid_coordinate_to_actual(text_width, 0, length_unit)[0] - 2 * OUTLINE_WIDTH
     font = get_font(length_unit, canvas_and_label=(canvas, label))
     
+    def text_line_widths(text_to_measure, font_to_measure):
+        weight = font_to_measure[2] if len(font_to_measure) == 3 else "normal"
+        measured_font = tkfont.Font(family=font_to_measure[0], size=font_to_measure[1], weight=weight)
+        return [measured_font.measure(line) for line in text_to_measure.split("\n")]
+
     if is_bold:
         font = (font[0], font[1], "bold")
-        actual_text_width = tkfont.Font(family=font[0], size=font[1], weight=font[2]).measure(text)
     else:
         font = (font[0], font[1])
-        actual_text_width = tkfont.Font(family=font[0], size=font[1]).measure(text)
+
+    actual_text_width = max(text_line_widths(text, font))
         
     # Should add line break and lower font size
     if actual_text_width >= actual_maximum_text_width:
-        has_line_break_text = True
-        
-        # Find the space that is closest to the middle and line break there
-        words = text.split()
-        mid_index = len(text) // 2
-        current_number_of_characters = 0
-        
-        for i, word in enumerate(words):
-            current_number_of_characters += len(word) + 1
-            
-            if current_number_of_characters >= mid_index:
-                if current_number_of_characters - mid_index < len(word) // 2:
-                    text = " ".join(words[:i+1]) + "\n" + " ".join(words[i+1:])
-                else:
-                    text = " ".join(words[:i]) + "\n" + " ".join(words[i:])
-                    
-                break
+        # Percentile summaries are slash-separated. Keep complete P-values
+        # together and choose the most balanced two-line representation.
+        slash_parts = text.split(" / ")
+        if len(slash_parts) > 1:
+            candidates = [" / ".join(slash_parts[:i]) + "\n" + " / ".join(slash_parts[i:])
+                          for i in range(1, len(slash_parts))]
+            text = min(candidates, key=lambda candidate: max(text_line_widths(candidate, font)))
+            has_line_break_text = True
+        else:
+            # Find the space that is closest to the middle and line break there.
+            words = text.split()
+            has_line_break_text = len(words) > 1
+
+            if has_line_break_text:
+                mid_index = len(text) // 2
+                current_number_of_characters = 0
+
+                for i, word in enumerate(words):
+                    current_number_of_characters += len(word) + 1
+
+                    if current_number_of_characters >= mid_index:
+                        if current_number_of_characters - mid_index < len(word) // 2:
+                            text = " ".join(words[:i+1]) + "\n" + " ".join(words[i+1:])
+                        else:
+                            text = " ".join(words[:i]) + "\n" + " ".join(words[i:])
+                        break
                 
     else:
         has_line_break_text = False
@@ -252,6 +275,15 @@ def get_text_that_fits(canvas, label, text, text_width, is_bold, length_unit):
         font = (font[0], font[1], "bold")
     else:
         font = (font[0], font[1])
+
+    # A fixed three-point reduction was not always enough for long percentile
+    # values. Continue reducing only as much as needed to keep every line in
+    # its box, while retaining the largest readable font size.
+    while font[1] > 1 and max(text_line_widths(text, font)) > actual_maximum_text_width:
+        if is_bold:
+            font = (font[0], font[1] - 1, "bold")
+        else:
+            font = (font[0], font[1] - 1)
         
     return text, font
     
