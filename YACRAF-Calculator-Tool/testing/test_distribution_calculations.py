@@ -23,16 +23,20 @@ from general_calculations import (  # noqa: E402
     CalculationTypeSampleTriangle,
     DistributionValue,
     ValueTypeDistribution,
+    ValueTypeNumber,
     ValueTypeProbability,
+    ValueTypeTriangleDistribution,
     _distribution_from_input,
     combine_values,
     configure_distribution_display,
     configure_pos_calculation,
+    is_distribution_valued_attribute,
     parse_distribution_spec,
     reset_distribution_sampling_cache,
 )
 from settings import Settings  # noqa: E402
 import helper_functions_general  # noqa: E402
+from yacraf_notation import format_parameter_name, get_parameter_abbreviation  # noqa: E402
 
 
 class InputAttribute:
@@ -186,6 +190,56 @@ class TestDistributionSpecifications(unittest.TestCase):
             )
 
         self.assertEqual(fitted_text, "10000")
+
+    def test_every_distribution_value_type_is_plottable_regardless_of_object(self):
+        self.assertTrue(is_distribution_valued_attribute(ValueTypeDistribution, None))
+        self.assertTrue(is_distribution_valued_attribute(ValueTypeTriangleDistribution, None))
+        self.assertTrue(is_distribution_valued_attribute(
+            ValueTypeProbability,
+            (DistributionValue.empirical([0.2, 0.8]),),
+        ))
+        self.assertFalse(is_distribution_valued_attribute(ValueTypeNumber, (4.0,)))
+
+    def test_model_labels_use_parameter_notation_instead_of_value_types(self):
+        expected_abbreviations = {
+            ("Abuse case", "Accessability to attack surface"): "AtAS",
+            ("Abuse case", "Window of opportunity"): "WoO",
+            ("Abuse case", "Ability to repudiate"): "AtR",
+            ("Abuse case", "Perceived deterrence"): "PD",
+            ("Abuse case", "Perceived ease of attack"): "PEoA",
+            ("Abuse case", "Perceived benefit of success"): "PBoS",
+            ("Abuse case", "Threat event probability"): "TEP",
+            ("Abuse case", "Probability of contact"): "PoC",
+            ("Abuse case", "Effort spent"): "ES",
+            ("Abuse case", "Probability of action"): "PoA",
+            ("Attacker", "Personal risk tolerance"): "RT",
+            ("Attacker", "Concern for collateral damage"): "CfCD",
+            ("Attacker", "Skill"): "Sk",
+            ("Attacker", "Resources"): "Res",
+            ("Attacker", "Sponsorship"): "Sp",
+            ("Attacker", "Threat capability"): "TC",
+            ("Attack event AND", "Local difficulty"): "LD",
+            ("Attack event OR", "Global difficulty"): "GD",
+            ("Attack event AND", "Probability of success"): "PoS",
+            ("Loss event", "Magnitude"): "LM",
+            ("Loss event", "Probability"): "LP",
+            ("Loss event", "Risk"): "LR",
+            ("Actor", "Risk"): "AR",
+            ("Defense mechanism", "Cost"): "DMC",
+            ("Defense mechanism", "Impact"): "DMI",
+            ("Defense mechanism", "Existence"): "DME",
+        }
+        for parameter, abbreviation in expected_abbreviations.items():
+            self.assertEqual(get_parameter_abbreviation(*parameter), abbreviation)
+
+        self.assertEqual(
+            format_parameter_name("Attack event AND", "Global difficulty"),
+            "Global difficulty (GD)",
+        )
+        self.assertEqual(
+            format_parameter_name("Custom class", "Unmapped distribution"),
+            "Unmapped distribution",
+        )
 
 
 class TestAttackPlanAggregation(unittest.TestCase):
