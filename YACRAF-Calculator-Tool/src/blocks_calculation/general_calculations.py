@@ -768,7 +768,17 @@ class ValueTypeTriangleDistribution(ValueType):
                 return False
                 
         return True
-        
+
+
+def is_distribution_valued_attribute(value_type, current_value):
+    """Return whether an attribute can be represented by empirical samples."""
+    if value_type in (ValueTypeDistribution, ValueTypeTriangleDistribution):
+        return True
+
+    return isinstance(current_value, (tuple, list)) and len(current_value) == 1 and \
+           isinstance(current_value[0], DistributionValue)
+
+
 class CalculationType:
     """
     Class representing the mathematical operation performed between input attributes, such as AND, OR, etc
