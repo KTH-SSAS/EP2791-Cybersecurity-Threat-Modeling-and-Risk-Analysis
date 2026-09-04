@@ -347,6 +347,109 @@ def _as_distribution_value(value, num_samples):
         raise ValueError("A sampled distribution input has an unexpected number of samples")
     return DistributionValue.empirical(values)
 
+
+def calculate_independent_probability_union(probabilities, num_samples):
+    """Return the union probability for conditionally independent events."""
+    if len(probabilities) == 0:
+        raise ValueError("At least one probability contribution is required")
+
+    if any(isinstance(value, DistributionValue) for value in probabilities):
+        probability_of_no_event = np.ones(num_samples)
+        for probability in probabilities:
+            samples = _as_distribution_value(probability, num_samples).get_samples()
+            probability_of_no_event *= 1 - samples
+        return DistributionValue.empirical(1 - probability_of_no_event)
+
+    return 1 - np.prod(1 - np.stack(probabilities), axis=0)
+
+
+def _setup_class_depends_on(setup_class, input_setup_class, visited=None):
+    """Return whether one system object depends directly or transitively on another."""
+    if setup_class is input_setup_class:
+        return True
+
+    if visited is None:
+        visited = set()
+    if setup_class in visited:
+        return False
+    visited.add(setup_class)
+
+    return any(
+        _setup_class_depends_on(predecessor, input_setup_class, visited)
+        for predecessor in setup_class.get_input_setup_classes()
+    )
+
+
+def _is_yacraf_loss_probability(configuration_attribute):
+    try:
+        configuration_class_name = configuration_attribute.get_configuration_class().get_name()
+        return configuration_class_name == "Loss event" and \
+               configuration_attribute.get_name() == "Probability"
+    except AttributeError:
+        return False
+
+
+def _loss_probability_contributions(input_setup_attributes, input_values, num_samples):
+    """Pair each abuse-case TEP with the PoS of its terminal attack event."""
+    threat_probabilities = []
+    success_probabilities = []
+
+    for setup_attribute, input_value in zip(input_setup_attributes, input_values):
+        setup_class = setup_attribute.get_setup_class()
+        class_name = setup_class.get_configuration_name()
+        attribute_name = setup_attribute.get_name()
+
+        if class_name == "Abuse case" and attribute_name == "Threat event probability":
+            threat_probabilities.append((setup_class, input_value))
+        elif class_name.startswith("Attack event ") and attribute_name == "Probability of success":
+            success_probabilities.append((setup_class, input_value))
+        else:
+            raise ValueError(
+                "Loss probability accepts Threat event probability from abuse cases "
+                "and Probability of success from terminal attack events"
+            )
+
+    if len(threat_probabilities) == 0 or len(success_probabilities) == 0:
+        raise ValueError(
+            "Loss probability requires an abuse case and a terminal attack event"
+        )
+
+    contributions = []
+    used_terminal_events = set()
+    for abuse_case, threat_probability in threat_probabilities:
+        matching_terminal_events = [
+            (terminal_event, success_probability)
+            for terminal_event, success_probability in success_probabilities
+            if _setup_class_depends_on(terminal_event, abuse_case)
+        ]
+
+        # A single incoming abuse case and terminal event is unambiguous even
+        # in older saves that do not connect the abuse case into the attack graph.
+        if len(matching_terminal_events) == 0 and \
+           len(threat_probabilities) == len(success_probabilities) == 1:
+            matching_terminal_events = success_probabilities
+
+        if len(matching_terminal_events) != 1:
+            raise ValueError(
+                "Each abuse case connected to a loss must lead to exactly one "
+                "terminal attack event connected to that loss"
+            )
+
+        terminal_event, success_probability = matching_terminal_events[0]
+        used_terminal_events.add(terminal_event)
+        contributions.append(CalculationTypeMultiplication.calculate_output_value(
+            [threat_probability, success_probability], num_samples
+        ))
+
+    if used_terminal_events != {item[0] for item in success_probabilities}:
+        raise ValueError(
+            "Every terminal attack event connected to a loss must be associated "
+            "with one of its connected abuse cases"
+        )
+
+    return contributions
+
+
 def combine_values(value_type, calculation_type, input_setup_attributes, setup_input_scalars_per_attribute, configuration_attribute, num_samples):
     """
     Returns a string of the calculated value by combining the value of all input setup attributes according to the calculation type
@@ -396,7 +499,22 @@ def combine_values(value_type, calculation_type, input_setup_attributes, setup_i
         input_values.append(input_value)
         
     if len(input_values) > 0:
-        calculated_value = calculation_type.calculate_output_value(input_values, num_samples)
+        try:
+            if calculation_type == CalculationTypeMultiplication and \
+               _is_yacraf_loss_probability(configuration_attribute):
+                contributions = _loss_probability_contributions(
+                    input_setup_attributes, input_values, num_samples
+                )
+                calculated_value = calculate_independent_probability_union(
+                    contributions, num_samples
+                )
+            else:
+                calculated_value = calculation_type.calculate_output_value(
+                    input_values, num_samples
+                )
+        except ValueError as error:
+            print(f"Warning: {error}")
+            return ("SETUP ERROR",)
 
         if isinstance(calculated_value, DistributionValue):
             calculated_value = calculated_value.apply_affine(configuration_attribute.get_input_scalar(), configuration_attribute.get_input_offset())
