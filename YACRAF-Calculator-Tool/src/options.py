@@ -214,7 +214,8 @@ class Options:
     @staticmethod
     def setup_attribute(model, view, setup_attribute_gui):
         """Offer distribution templates and plots where applicable."""
-        has_templates = setup_attribute_gui.has_manually_entered_value()
+        has_templates = setup_attribute_gui.has_manually_entered_value() and \
+                        setup_attribute_gui.supports_distribution_templates()
         can_plot = setup_attribute_gui.can_plot_distribution()
         columns = 4 if has_templates else 1
         rows = 2 + int(can_plot) if has_templates else 1
