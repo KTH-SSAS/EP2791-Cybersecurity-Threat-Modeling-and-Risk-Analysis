@@ -1,6 +1,7 @@
 from general_gui import GUIModelingBlock
 from configuration_attribute_calculation import ConfigurationAttribute
 from helper_functions_general import delete_all
+from yacraf_notation import format_parameter_name
 from options import Options
 from config import *
 
@@ -211,16 +212,12 @@ class GUIConfigurationAttribute(GUIModelingBlock):
         """
         Returns the text that should be shown on the GUI attribute
         """
-        text = ""
         is_bold = self.get_calculation_type() != None
-        
-        symbol_value_type = self.__configuration_attribute.get_value_type().symbol()
-        
-        if symbol_value_type != None:
-            text = f"{self.__configuration_attribute.get_name()} ({symbol_value_type})"
-        else:
-            text = f"{self.__configuration_attribute.get_name()}"
-            
+        text = format_parameter_name(
+            self.__configuration_class_gui.get_name(),
+            self.__configuration_attribute.get_name(),
+        )
+
         return text, is_bold
         
     def update_text(self, update_linked=True):
