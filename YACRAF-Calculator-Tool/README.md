@@ -92,6 +92,7 @@ This version retains the original scalar YACRAF workflow and adds distribution-v
 | Configurable result summaries | Display either `P0 / P50 / P100` or `P5 / P50 / P95` in calculated distribution fields. |
 | Two attack-event PoS modes | Retain the paper-compatible scalar success ratio or opt into a distribution of success probabilities conditional on uncertain global difficulty. |
 | Distribution-valued losses | Give loss magnitude a distribution and propagate scalar or distribution-valued probability into loss risk. |
+| Multiple loss causes | Combine the separate $TEP_j\cdot\mathrm{PoS}_j$ contributions of independent, non-mutually-exclusive abuse cases as their probability union. |
 | Full distribution plots | Plot an empirical density histogram and cumulative distribution for any distribution-valued parameter on any object, whether manually entered or calculated. |
 | Default worked example | Start directly in `example_distribution`, a five-node example connecting an abuse case, alternative attack steps, a terminal step, and a loss event. |
 | Compatibility and diagnostics | Load legacy three-number triangular values, avoid storing thousands of calculated samples in save files, and report invalid distribution/configuration inputs with calculation-specific warnings. |
@@ -210,6 +211,8 @@ Different manual sources are sampled independently. When the same local attack s
 
 ### Global attack difficulty
 
+Every attack event—including root, intermediate, AND, OR, and terminal events—has both a Local Difficulty (`LD`) and a Global Difficulty (`GD`). `LD` is the incremental cost of performing that event itself. `GD` is the total cost of the easiest complete attack plan that reaches and performs it. Consequently, a root event has $GD=LD$, while a downstream event aggregates its predecessors' **global** difficulties and then adds its own local difficulty. It does not aggregate the predecessors' local difficulties directly.
+
 For an atomic attack event $i$, let $LD_i^{(s)}$ be its sampled Local Difficulty. A complete feasible attack plan $p$ is represented as a set of required atomic attack events, so its total difficulty in sample $s$ is
 
 $$
@@ -240,34 +243,46 @@ $$
 TEP = PoC \cdot PoA.
 $$
 
-The abuse case's Probability of Action (`PoA`) therefore does **not** alter an attack event's PoS. PoS answers the conditional question “given Effort Spent (`ES`) and this Global Difficulty (`GD`), can the attempted attack succeed?” The abuse-case probabilities enter when the terminal attack event is connected to a loss:
+The abuse case's Probability of Action (`PoA`) therefore does **not** alter an attack event's PoS. PoS answers the conditional question “given Effort Spent (`ES`) and this Global Difficulty (`GD`), can the attempted attack succeed?” The abuse-case probabilities enter the Loss Probability calculation.
+
+For every abuse case $j$ that can cause the loss, the calculator pairs its Threat Event Probability with the PoS of its terminal attack event and first calculates one loss-cause contribution:
 
 $$
-LP = TEP \cdot \operatorname{PoS}_{\text{terminal}},
+p_j = TEP_j \cdot \mathrm{PoS}_{j,\text{terminal}}.
+$$
+
+Separate abuse cases are assumed to be independent and not mutually exclusive. Their contributions are therefore combined as the probability of their union:
+
+$$
+LP
+= \Pr\!\left(\bigcup_j L_j\right)
+= 1-\prod_j(1-p_j),
 \qquad
 LR = LM \cdot LP.
 $$
 
+With one abuse case this reduces to $LP=TEP\cdot\mathrm{PoS}_{\text{terminal}}$. With two contributions $p_1=0.10$ and $p_2=0.12$, the result is $LP=1-(1-0.10)(1-0.12)=0.208$, rather than either $0.22$ or $0.012$.
+
 ![Propagation from abuse case and terminal attack event to loss probability and risk](img/loss_risk_flow.svg)
 
-System-view connections are direct, not transitive. A loss event needs one incoming connection from the relevant abuse case, supplying Threat Event Probability (`TEP`), and one from the single terminal attack event, supplying PoS. Connecting the abuse case only to an attack event does not implicitly forward TEP to the loss. If PoS does not change but Loss Probability (`LP`) also remains unchanged after changing PoC or PoA, check this direct abuse-case-to-loss connection.
+System-view connections are direct, not transitive. For each contribution, connect the abuse case and its terminal attack event directly to the loss. The calculator associates them by following the attack graph from that abuse case to the terminal event. Every abuse case connected to the loss must lead to exactly one of its connected terminal attack events; ambiguous or unmatched connections produce a setup warning instead of silently multiplying unrelated inputs.
 
-In `Single success ratio` mode, $LP$ is scalar. A distribution-valued Loss Magnitude still makes Loss Risk distribution-valued: $LR^{(s)}=LM^{(s)}LP$. In Conditional PoS mode, probability and risk remain distribution-valued:
+If the abuse cases are mutually exclusive, dependent, or otherwise require a different overlap model, the independence formula is not valid. Handle that case manually—for example, calculate the appropriate combined probability outside this operation and use `override_attribute_values` in a script to override `LP`—and document the chosen dependence assumption.
+
+In `Single success ratio` mode, the $p_j$ values and $LP$ are scalar. A distribution-valued Loss Magnitude still makes Loss Risk distribution-valued: $LR^{(s)}=LM^{(s)}LP$. In Conditional PoS mode, the union is evaluated sample by sample:
 
 $$
-LP^{(s)}=TEP\,Q^{(s)},
+LP^{(s)}=1-\prod_j\left(1-TEP_j\,Q_j^{(s)}\right),
 \qquad
 LR^{(s)}=LM^{(s)}LP^{(s)}.
 $$
-
-The standard bundled scenario expects one terminal attack event per loss. The generic multiplication operation will multiply several PoS inputs if several terminal events are connected to one loss, which encodes an “all connected terminal events are required” assumption and should be used only deliberately.
 
 ### Single success ratio (paper-compatible mode)
 
 Let $ES^{(s)}$ be a sampled Effort Spent value and $GD_a^{(s)}$ the sampled Global Difficulty of attack event $a$. `Single success ratio` reports one scalar:
 
 $$
-\widehat{\operatorname{PoS}}_a
+\widehat{\mathrm{PoS}}_a
 = \frac{1}{N}\sum_{s=1}^{N}
 \mathbf{1}\!\left[ES^{(s)} > GD_a^{(s)}\right].
 $$
@@ -325,13 +340,13 @@ so the mean of the conditional-PoS samples should approach the scalar PoS as the
 
 The implementation always evaluates the empirical survival function, so it does not need these closed-form expressions. They clarify the theoretical mapping for a Global Difficulty realization $g$:
 
-- For $ES\sim\operatorname{Uniform}(a,b)$, $Q(g)=1$ below $a$, $Q(g)=0$ at or above $b$, and
+- For $ES\sim\mathrm{Uniform}(a,b)$, $Q(g)=1$ below $a$, $Q(g)=0$ at or above $b$, and
 
   $$
   Q(g)=\frac{b-g}{b-a}, \qquad a\leq g<b.
   $$
 
-- For $ES\sim\operatorname{Triangular}(a,m,b)$, where $m$ is the mode,
+- For $ES\sim\mathrm{Triangular}(a,m,b)$, where $m$ is the mode,
 
   $$
   Q(g)=
@@ -345,7 +360,7 @@ The implementation always evaluates the empirical survival function, so it does 
 
   If the mode equals an endpoint or all three parameters are equal, interpret this expression by its corresponding limiting or deterministic case.
 
-- For the calculator's zero-truncated normal $ES\sim\operatorname{Normal}(\mu,\sigma^2)\mid ES\geq0$, with standard normal CDF $\Phi$, $Q(g)=1$ for $g<0$, and for $g\geq0$,
+- For the calculator's zero-truncated normal $ES\sim\mathrm{Normal}(\mu,\sigma^2)\mid ES\geq0$, with standard normal CDF $\Phi$, $Q(g)=1$ for $g<0$, and for $g\geq0$,
 
   $$
   Q(g)=\frac{1-\Phi\!\left((g-\mu)/\sigma\right)}{1-\Phi\!\left(-\mu/\sigma\right)}.
@@ -353,7 +368,7 @@ The implementation always evaluates the empirical survival function, so it does 
 
   When $\sigma=0$, effort is deterministic and the mapping is a step at $\mu$.
 
-- For $ES\sim\operatorname{Lognormal}(\log m,\log^2 g_{\mathrm{sd}})$, where $m$ is the median and $g_{\mathrm{sd}}$ the geometric standard deviation, $Q(g)=1$ for $g\leq0$, and
+- For $ES\sim\mathrm{Lognormal}(\log m,\log^2 g_{\mathrm{sd}})$, where $m$ is the median and $g_{\mathrm{sd}}$ the geometric standard deviation, $Q(g)=1$ for $g\leq0$, and
 
   $$
   Q(g)=1-\Phi\!\left(\frac{\log g-\log m}{\log g_{\mathrm{sd}}}\right), \qquad g>0.
