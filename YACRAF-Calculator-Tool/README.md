@@ -16,6 +16,7 @@ Having all that said, we hope you find the tool useful.
 2. [Running the YACRAF Calculator](#running-the-yacraf-calculator)
 3. [Features in this version](#features-in-this-version)
 4. [GUI Overview](#gui-overview)
+   - [Parameter notation](#parameter-notation)
    - [View Switching](#views-switching)
    - [Working with System Views](#working-with-system-views)
      - [Adding Class Instances](#adding-class-instances)
@@ -25,7 +26,7 @@ Having all that said, we hope you find the tool useful.
    - [Declaring input distributions](#declaring-input-distributions)
    - [Settings](#distribution-calculation-settings)
    - [Empirical Monte Carlo propagation](#empirical-monte-carlo-propagation)
-   - [Global attack cost](#global-attack-cost)
+   - [Global attack difficulty](#global-attack-difficulty)
    - [Probability and loss risk](#probability-and-loss-risk)
    - [Conditional PoS theoretical extension](#conditional-pos-distribution-a-theoretical-extension)
    - [Plotting distributions](#plotting-distributions)
@@ -84,14 +85,14 @@ This version retains the original scalar YACRAF workflow and adds distribution-v
 
 | Feature | What the end user can do |
 | --- | --- |
-| Named input distributions | Use uniform, triangular, non-negative normal, or lognormal distributions for local attack cost, abuse-case effort, loss magnitude, loss risk, and aggregated actor risk. |
+| Named input distributions | Use uniform, triangular, non-negative normal, or lognormal distributions for local attack difficulty, abuse-case effort, loss magnitude, loss risk, and aggregated actor risk. |
 | Empirical Monte Carlo propagation | Calculate every downstream distribution from samples of the declared inputs instead of forcing an analytically fitted output family. |
 | Attack-plan-aware cost aggregation | Evaluate OR alternatives per sample, combine AND requirements, and count a shared prerequisite only once. |
 | Configurable sample count | Choose the number of Monte Carlo samples in `Settings`. |
-| Configurable result summaries | Display either `P0 / P50 / P100` or `P5 / P50 / P95` in calculated distribution fields. Long percentile text is fitted or wrapped inside its field. |
-| Two attack-event PoS modes | Retain the paper-compatible scalar success ratio or opt into a distribution of success probabilities conditional on uncertain global cost. |
+| Configurable result summaries | Display either `P0 / P50 / P100` or `P5 / P50 / P95` in calculated distribution fields. |
+| Two attack-event PoS modes | Retain the paper-compatible scalar success ratio or opt into a distribution of success probabilities conditional on uncertain global difficulty. |
 | Distribution-valued losses | Give loss magnitude a distribution and propagate scalar or distribution-valued probability into loss risk. |
-| Full distribution plots | Plot an empirical density histogram and cumulative distribution for supported manual and calculated attributes, including abuse-case effort and attack-event PoS. |
+| Full distribution plots | Plot an empirical density histogram and cumulative distribution for any distribution-valued parameter on any object, whether manually entered or calculated. |
 | Default worked example | Start directly in `example_distribution`, a five-node example connecting an abuse case, alternative attack steps, a terminal step, and a loss event. |
 | Compatibility and diagnostics | Load legacy three-number triangular values, avoid storing thousands of calculated samples in save files, and report invalid distribution/configuration inputs with calculation-specific warnings. |
 
@@ -101,6 +102,21 @@ The distribution features require NumPy for sampling and Matplotlib for plots. G
 ## GUI Overview
 
 The graphical interface contains `System Views` (`Setup Views`) for building the analyzed scenario and `Metamodel Views` (`Configuration Views`) containing the bundled YACRAF definition. End users normally work only in `System Views`: add an abuse case, attack events, loss events, and other instances; enter their values; connect them; and calculate. The metamodel views may be inspected to understand dependencies, but editing them is an advanced maintenance activity documented at the end of this README.
+
+### Parameter notation
+
+Parenthesized abbreviations in model blocks identify the **meaning of a parameter**, not its internal value type. For example, `Local difficulty (LD)` and `Global difficulty (GD)` may both be distribution-valued, while `Probability of success (PoS)` may be either a scalar or an empirical distribution depending on the selected calculation mode. The notation follows the [YACRAF summary framework](../Course-material/lectures/Risk_calculator_framework.png). Abbreviations marked with an asterisk are added by this calculator for parameters that are named but not abbreviated in that figure.
+
+| Object | Parameter abbreviations |
+| --- | --- |
+| Abuse case | Accessibility to Attack Surface (`AtAS`), Window of Opportunity (`WoO`), Ability to Repudiate (`AtR`), Perceived Deterrence (`PD`), Perceived Ease of Attack (`PEoA`), Perceived Benefit of Success (`PBoS`), Probability of Contact (`PoC`), Probability of Action (`PoA`), Threat Event Probability (`TEP`), Effort Spent (`ES`*) |
+| Attacker | Risk Tolerance (`RT`), Concern for Collateral Damage (`CfCD`), Skill (`Sk`*), Resources (`Res`*), Sponsorship (`Sp`*), Threat Capability (`TC`) |
+| Attack event | Local Difficulty (`LD`*), Global Difficulty (`GD`*), Probability of Success (`PoS`) |
+| Loss event | Loss Magnitude (`LM`*), Loss Probability (`LP`*), Loss Risk (`LR`*) |
+| Actor | Actor Risk (`AR`*) |
+| Defense mechanism | Defense Mechanism Cost (`DMC`*), Defense Mechanism Impact (`DMI`*), Defense Mechanism Existence (`DME`*) |
+
+Text fields and other parameters with no defined semantic abbreviation are shown without a parenthesized suffix. For a custom metamodel parameter, put any desired abbreviation in its name. Maintainers can still inspect or change the underlying value type in the advanced metamodel editor.
 
 
 ### Views Switching 
@@ -152,7 +168,7 @@ The calculate button at the top (see (8)) calculates the values of all `Attribut
 
 ### Declaring input distributions
 
-The sampled distribution value type `(D)` can represent local attacker cost, global attacker cost, attacker effort, loss magnitude, loss risk, and aggregated actor risk. A manual value starts with the distribution name followed by its parameters:
+A distribution-valued parameter can represent local difficulty, global difficulty, effort spent, loss magnitude, loss risk, aggregated actor risk, or another uncertain quantity in a custom model. A manual distribution starts with the distribution name followed by its parameters:
 
 ```text
 uniform / minimum / maximum
@@ -168,14 +184,14 @@ Examples are `uniform / 2 / 5`, `triangular / 2 / 3 / 5`, `normal / 4 / 1`, and 
 - `normal` uses an arithmetic mean and standard deviation and is truncated at zero by rejection sampling.
 - `lognormal` uses a median and geometric standard deviation; the geometric standard deviation must be at least 1.
 
-Select a manually entered `(D)` attribute and press `E` to choose a template in the GUI. The inserted template remains editable. Legacy three-number inputs such as `2 / 3 / 5` are interpreted as triangular distributions, and bundled triangle-based saves are migrated on load for attack costs, abuse-case effort, loss magnitude, loss risk, and actor risk.
+Select a manually entered distribution-valued parameter and press `E` to choose a template in the GUI. The inserted template remains editable. Legacy three-number inputs such as `2 / 3 / 5` are interpreted as triangular distributions, and bundled triangle-based saves are migrated on load for attack difficulty, abuse-case effort, loss magnitude, loss risk, and actor risk.
 
 ### Distribution calculation settings
 
 Open `Settings` to configure:
 
 1. **Number of samples**: the Monte Carlo sample count, with a minimum of one. More samples normally make quantiles and probability estimates more stable but take more time and memory.
-2. **Distribution result percentiles**: either `P0 / P50 / P100` or `P5 / P50 / P95`. This changes the three values shown inside calculated `(D)` fields and the markers in distribution plots; it does not change the underlying samples. `P0` and `P100` are sample extremes and are consequently more sensitive to sample count than `P5` and `P95`.
+2. **Distribution result percentiles**: either `P0 / P50 / P100` or `P5 / P50 / P95`. This changes the three reported values for calculated distributions and the markers in distribution plots; it does not change the underlying samples. `P0` and `P100` are sample extremes and are consequently more sensitive to sample count than `P5` and `P95`.
 3. **Attack-event PoS calculation**: `Single success ratio` or `Conditional PoS distribution`. The first is the paper-compatible scalar result. The second is the optional theoretical extension described below.
 
 Settings apply when `Calculate` is next pressed and are persisted when the save is saved. Calculated sample arrays are not persisted: they are regenerated from the declared input distributions, keeping save files small. Two calculations can therefore differ slightly because they contain new random draws.
@@ -192,71 +208,71 @@ It then evaluates the model for sample index $s$, producing $y^{(1)},\ldots,y^{(
 
 Different manual sources are sampled independently. When the same local attack step is reused through several graph branches or linked views, its samples are cached for that calculation run and reused consistently. Arithmetic involving a distribution and a scalar broadcasts the scalar across all $N$ samples; arithmetic involving distributions is performed on aligned sample indices.
 
-### Global attack cost
+### Global attack difficulty
 
-For an atomic attack event $i$, let $L_i^{(s)}$ be its sampled local cost. A complete feasible attack plan $p$ is represented as a set of required atomic attack events, so its cost in sample $s$ is
-
-$$
-C_p^{(s)} = \sum_{i \in p} L_i^{(s)}.
-$$
-
-If $\mathcal{P}_a$ is the set of feasible plans that reach attack event $a$, the event's global cost sample is
+For an atomic attack event $i$, let $LD_i^{(s)}$ be its sampled Local Difficulty. A complete feasible attack plan $p$ is represented as a set of required atomic attack events, so its total difficulty in sample $s$ is
 
 $$
-G_a^{(s)} = \min_{p \in \mathcal{P}_a} C_p^{(s)}.
+GD_{a,p}^{(s)} = \sum_{i \in p} LD_i^{(s)}.
+$$
+
+If $\mathcal{P}_a$ is the set of feasible plans that reach attack event $a$, the event's Global Difficulty sample is
+
+$$
+GD_a^{(s)} = \min_{p \in \mathcal{P}_a} GD_{a,p}^{(s)}.
 $$
 
 The GUI's gate operations construct these plans as follows:
 
 1. `OR` collects the alternative input plans. The cheapest alternative may be different in different Monte Carlo samples.
 2. `AND` forms every required combination and uses set union on the atomic events. A prerequisite shared by two branches is therefore charged once rather than twice.
-3. Plans that are strict supersets of another feasible plan are discarded. This is valid because supported local costs are non-negative, so a strict superset cannot be cheaper.
+3. Plans that are strict supersets of another feasible plan are discarded. This is valid because supported local difficulties are non-negative, so a strict superset cannot be easier.
 
-![Illustration of sample-aligned OR and AND global-cost aggregation](img/monte_carlo_aggregation.svg)
+![Illustration of sample-aligned OR and AND Global Difficulty aggregation](img/monte_carlo_aggregation.svg)
 
-The result at every attack step is therefore the empirical distribution of the cheapest complete plan reaching that step—not merely the sum or minimum of three displayed percentiles. For attack-cost calculations, keep metamodel input scalars at `1` and offsets at `0`. Applying an affine transform to an already aggregated plan is numerically supported, but it discards atomic plan provenance; later gates can then no longer remove duplicated shared prerequisites.
+The result at every attack step is therefore the empirical distribution of the easiest complete plan reaching that step—not merely the sum or minimum of three displayed percentiles. For attack-difficulty calculations, keep metamodel input scalars at `1` and offsets at `0`. Applying an affine transform to an already aggregated plan is numerically supported, but it discards atomic plan provenance; later gates can then no longer remove duplicated shared prerequisites.
 
 ### Probability and loss risk
 
 The bundled metamodel separates the probability that an attack is initiated from the probability that an initiated attack succeeds:
 
 $$
-P_{\text{threat}} = P_{\text{contact}} \cdot P_{\text{action}}.
+TEP = PoC \cdot PoA.
 $$
 
-The abuse case's `Probability of action` therefore does **not** alter an attack event's PoS. PoS answers the conditional question “given the attacker's effort and this attack cost, can the attempted attack succeed?” The abuse-case probabilities enter when the terminal attack event is connected to a loss:
+The abuse case's Probability of Action (`PoA`) therefore does **not** alter an attack event's PoS. PoS answers the conditional question “given Effort Spent (`ES`) and this Global Difficulty (`GD`), can the attempted attack succeed?” The abuse-case probabilities enter when the terminal attack event is connected to a loss:
 
 $$
-P_{\text{loss}} = P_{\text{threat}} \cdot \operatorname{PoS}_{\text{terminal}},
+LP = TEP \cdot \operatorname{PoS}_{\text{terminal}},
 \qquad
-R_{\text{loss}} = M_{\text{loss}} \cdot P_{\text{loss}}.
+LR = LM \cdot LP.
 $$
 
 ![Propagation from abuse case and terminal attack event to loss probability and risk](img/loss_risk_flow.svg)
 
-System-view connections are direct, not transitive. A loss event needs one incoming connection from the relevant abuse case, supplying `Threat event probability`, and one from the single terminal attack event, supplying PoS. Connecting the abuse case only to an attack event does not implicitly forward the threat-event probability to the loss. If PoS does not change but the loss probability also remains unchanged after changing `Probability of contact` or `Probability of action`, check this direct abuse-case-to-loss connection.
+System-view connections are direct, not transitive. A loss event needs one incoming connection from the relevant abuse case, supplying Threat Event Probability (`TEP`), and one from the single terminal attack event, supplying PoS. Connecting the abuse case only to an attack event does not implicitly forward TEP to the loss. If PoS does not change but Loss Probability (`LP`) also remains unchanged after changing PoC or PoA, check this direct abuse-case-to-loss connection.
 
-In `Single success ratio` mode, $P_{\text{loss}}$ is scalar. A distribution-valued magnitude still makes risk distribution-valued: $R_{\text{loss}}^{(s)}=M_{\text{loss}}^{(s)}P_{\text{loss}}$. In Conditional PoS mode, probability and risk remain distribution-valued:
+In `Single success ratio` mode, $LP$ is scalar. A distribution-valued Loss Magnitude still makes Loss Risk distribution-valued: $LR^{(s)}=LM^{(s)}LP$. In Conditional PoS mode, probability and risk remain distribution-valued:
 
 $$
-P_{\text{loss}}^{(s)}=P_{\text{threat}}Q^{(s)},
+LP^{(s)}=TEP\,Q^{(s)},
 \qquad
-R_{\text{loss}}^{(s)}=M_{\text{loss}}^{(s)}P_{\text{loss}}^{(s)}.
+LR^{(s)}=LM^{(s)}LP^{(s)}.
 $$
 
 The standard bundled scenario expects one terminal attack event per loss. The generic multiplication operation will multiply several PoS inputs if several terminal events are connected to one loss, which encodes an “all connected terminal events are required” assumption and should be used only deliberately.
 
 ### Single success ratio (paper-compatible mode)
 
-Let $E^{(s)}$ be a sampled abuse-case effort value and $G_a^{(s)}$ the sampled global cost of attack event $a$. `Single success ratio` reports one scalar:
+Let $ES^{(s)}$ be a sampled Effort Spent value and $GD_a^{(s)}$ the sampled Global Difficulty of attack event $a$. `Single success ratio` reports one scalar:
 
 $$
 \widehat{\operatorname{PoS}}_a
 = \frac{1}{N}\sum_{s=1}^{N}
-\mathbf{1}\!\left[E^{(s)} > G_a^{(s)}\right].
+\mathbf{1}\!\left[ES^{(s)} > GD_a^{(s)}\right].
 $$
 
-Every aligned pair is one simulated attack situation. It contributes 1 when effort is strictly greater than cost and 0 otherwise. The result is the fraction of successful situations and estimates $\Pr(E>G_a)$. Equality counts as failure. This remains the default mode because it returns the single probability used by the original workflow.
+Every aligned pair is one simulated attack situation. It contributes 1 when effort is strictly greater than difficulty and 0 otherwise. The result is the fraction of successful situations and estimates $\Pr(ES>GD_a)$. Equality counts as failure. This remains the default mode because it returns the single probability used by the original workflow.
 
 ### Conditional PoS distribution: a theoretical extension
 
@@ -266,56 +282,56 @@ To use it, open `Settings`, select `Conditional PoS distribution`, and press `Ca
 
 #### Motivation
 
-The scalar ratio integrates over all uncertainty in global cost and returns one number. That is often exactly what is needed for expected risk, but it hides whether success is nearly constant or changes substantially between low-cost and high-cost realizations. Conditional mode retains this variation.
+The scalar ratio integrates over all uncertainty in Global Difficulty and returns one number. That is often exactly what is needed for expected risk, but it hides whether success is nearly constant or changes substantially between low- and high-difficulty realizations. Conditional mode retains this variation.
 
-Let $F_E(g)=\Pr(E\leq g)$ be the cumulative distribution function of attacker effort and $S_E(g)=1-F_E(g)$ its survival function. For every sampled global cost $G_a^{(s)}=g_s$, conditional mode defines
+Let $F_{ES}(g)=\Pr(ES\leq g)$ be the cumulative distribution function of Effort Spent and $S_{ES}(g)=1-F_{ES}(g)$ its survival function. For every sampled Global Difficulty $GD_a^{(s)}=g_s$, conditional mode defines
 
 $$
-Q_a^{(s)} = \Pr(E>g_s) = S_E(g_s)=1-F_E(g_s).
+Q_a^{(s)} = \Pr(ES>g_s) = S_{ES}(g_s)=1-F_{ES}(g_s).
 $$
 
 Because the implementation has effort samples rather than an analytic CDF, it uses the empirical survival function:
 
 $$
 Q_a^{(s)}
-= \widehat S_E\!\left(G_a^{(s)}\right)
+= \widehat S_{ES}\!\left(GD_a^{(s)}\right)
 = \frac{1}{N}\sum_{t=1}^{N}
-\mathbf{1}\!\left[E^{(t)} > G_a^{(s)}\right].
+\mathbf{1}\!\left[ES^{(t)} > GD_a^{(s)}\right].
 $$
 
-The separate indices are important. For each cost sample $s$, the calculator compares that cost with **all** effort samples $t$. Sorting the effort samples makes this calculation efficient. The output $Q_a^{(1)},\ldots,Q_a^{(N)}$ is retained as an empirical probability distribution and can be summarized or plotted.
+The separate indices are important. For each difficulty sample $s$, the calculator compares that difficulty with **all** effort samples $t$. Sorting the effort samples makes this calculation efficient. The output $Q_a^{(1)},\ldots,Q_a^{(N)}$ is retained as an empirical probability distribution and can be summarized or plotted.
 
-![Mapping global-cost samples through an attacker-effort survival function](img/conditional_pos.svg)
+![Mapping Global Difficulty samples through the Effort Spent survival function](img/conditional_pos.svg)
 
 #### Interpretation and relation to the scalar result
 
 | Mode | Returned object | Question answered |
 | --- | --- | --- |
-| `Single success ratio` | One number $\widehat{\Pr}(E>G_a)$ | Across all simulated effort-and-cost pairs, what fraction succeeds? |
-| `Conditional PoS distribution` | Samples $Q_a^{(s)}$ in $[0,1]$ | How does the chance of success vary over plausible realized global costs? |
+| `Single success ratio` | One number $\widehat{\Pr}(ES>GD_a)$ | Across all simulated effort-and-difficulty pairs, what fraction succeeds? |
+| `Conditional PoS distribution` | Samples $Q_a^{(s)}$ in $[0,1]$ | How does the chance of success vary over plausible realized Global Difficulty values? |
 
-The conditional output is **not** a posterior distribution or confidence interval for one unknown PoS, and it is not a vector of Bernoulli success/failure outcomes. Its percentiles describe variation in $\Pr(E>g)$ caused by uncertain $g$. They do not quantify estimation confidence; increasing $N$ only makes the empirical approximation smoother and more stable.
+The conditional output is **not** a posterior distribution or confidence interval for one unknown PoS, and it is not a vector of Bernoulli success/failure outcomes. Its percentiles describe variation in $\Pr(ES>g)$ caused by uncertain $g$. They do not quantify estimation confidence; increasing $N$ only makes the empirical approximation smoother and more stable.
 
-Conditional mode treats effort $E$ and global cost $G_a$ as independent. Under this assumption,
+Conditional mode treats Effort Spent $ES$ and Global Difficulty $GD_a$ as independent. Under this assumption,
 
 $$
-\mathbb{E}_{G_a}\!\left[\Pr(E>G_a\mid G_a)\right]
-= \Pr(E>G_a),
+\mathbb{E}_{GD_a}\!\left[\Pr(ES>GD_a\mid GD_a)\right]
+= \Pr(ES>GD_a),
 $$
 
-so the mean of the conditional-PoS samples should approach the scalar PoS as the sample count grows. Their medians and other percentiles need not equal the scalar probability. If effort and cost are dependent—for example, better-resourced attackers systematically choose harder routes—the correct quantity would require a joint model such as $\Pr(E>g\mid G_a=g)$. The current calculator does not model that dependence.
+so the mean of the conditional-PoS samples should approach the scalar PoS as the sample count grows. Their medians and other percentiles need not equal the scalar probability. If effort and difficulty are dependent—for example, better-resourced attackers systematically choose harder routes—the correct quantity would require a joint model such as $\Pr(ES>g\mid GD_a=g)$. The current calculator does not model that dependence.
 
 #### What the mapping looks like for each input distribution
 
-The implementation always evaluates the empirical survival function, so it does not need these closed-form expressions. They clarify the theoretical mapping for a cost realization $g$:
+The implementation always evaluates the empirical survival function, so it does not need these closed-form expressions. They clarify the theoretical mapping for a Global Difficulty realization $g$:
 
-- For $E\sim\operatorname{Uniform}(a,b)$, $Q(g)=1$ below $a$, $Q(g)=0$ at or above $b$, and
+- For $ES\sim\operatorname{Uniform}(a,b)$, $Q(g)=1$ below $a$, $Q(g)=0$ at or above $b$, and
 
   $$
   Q(g)=\frac{b-g}{b-a}, \qquad a\leq g<b.
   $$
 
-- For $E\sim\operatorname{Triangular}(a,m,b)$, where $m$ is the mode,
+- For $ES\sim\operatorname{Triangular}(a,m,b)$, where $m$ is the mode,
 
   $$
   Q(g)=
@@ -329,7 +345,7 @@ The implementation always evaluates the empirical survival function, so it does 
 
   If the mode equals an endpoint or all three parameters are equal, interpret this expression by its corresponding limiting or deterministic case.
 
-- For the calculator's zero-truncated normal $E\sim\operatorname{Normal}(\mu,\sigma^2)\mid E\geq0$, with standard normal CDF $\Phi$, $Q(g)=1$ for $g<0$, and for $g\geq0$,
+- For the calculator's zero-truncated normal $ES\sim\operatorname{Normal}(\mu,\sigma^2)\mid ES\geq0$, with standard normal CDF $\Phi$, $Q(g)=1$ for $g<0$, and for $g\geq0$,
 
   $$
   Q(g)=\frac{1-\Phi\!\left((g-\mu)/\sigma\right)}{1-\Phi\!\left(-\mu/\sigma\right)}.
@@ -337,7 +353,7 @@ The implementation always evaluates the empirical survival function, so it does 
 
   When $\sigma=0$, effort is deterministic and the mapping is a step at $\mu$.
 
-- For $E\sim\operatorname{Lognormal}(\log m,\log^2 g_{\mathrm{sd}})$, where $m$ is the median and $g_{\mathrm{sd}}$ the geometric standard deviation, $Q(g)=1$ for $g\leq0$, and
+- For $ES\sim\operatorname{Lognormal}(\log m,\log^2 g_{\mathrm{sd}})$, where $m$ is the median and $g_{\mathrm{sd}}$ the geometric standard deviation, $Q(g)=1$ for $g\leq0$, and
 
   $$
   Q(g)=1-\Phi\!\left(\frac{\log g-\log m}{\log g_{\mathrm{sd}}}\right), \qquad g>0.
@@ -345,15 +361,15 @@ The implementation always evaluates the empirical survival function, so it does 
 
   When $g_{\mathrm{sd}}=1$, effort is deterministic at the median.
 
-The strict comparison $E>g$ is used in every case. With continuous distributions equality has probability zero, but it matters for deterministic or repeated empirical values.
+The strict comparison $ES>g$ is used in every case. With continuous distributions equality has probability zero, but it matters for deterministic or repeated empirical values.
 
 #### Appropriate use and reporting
 
-Use `Single success ratio` when a single paper-compatible PoS is required. Use Conditional PoS when the variation of success probability across uncertain attack costs is itself useful for sensitivity analysis, communication, or downstream distribution-valued risk. Before interpreting either result, ensure effort and cost use compatible units, refer to the same attack opportunity and time horizon, and represent the intended attacker.
+Use `Single success ratio` when a single paper-compatible PoS is required. Use Conditional PoS when the variation of success probability across uncertain Global Difficulty is itself useful for sensitivity analysis, communication, or downstream distribution-valued risk. Before interpreting either result, ensure Effort Spent and Global Difficulty use compatible units, refer to the same attack opportunity and time horizon, and represent the intended attacker.
 
 When reporting Conditional PoS, include:
 
-- the effort distribution and all local-cost distributions;
+- the Effort Spent distribution and all Local Difficulty distributions;
 - the Monte Carlo sample count;
 - that the independence assumption was used;
 - the selected displayed percentiles; and
@@ -361,9 +377,9 @@ When reporting Conditional PoS, include:
 
 ### Plotting distributions
 
-Select a supported distribution-valued attribute, press `E`, and choose `Plot distribution`. For calculated fields, press `Calculate` first. The plot window contains an empirical density histogram and the full empirical cumulative distribution function (CDF), with the selected result percentiles marked.
+Select any distribution-valued parameter on any `System View` object, press `E`, and choose `Plot distribution`. For a calculated parameter, press `Calculate` first so that empirical samples exist. The plot window contains an empirical density histogram and the full empirical cumulative distribution function (CDF), with the selected result percentiles marked.
 
-Plots are available for manual local attack costs, abuse-case effort spent, loss magnitudes, calculated global attack costs, Conditional PoS outputs, loss probability when distribution-valued, loss risk, and other supported distribution-valued attack/loss attributes. A plot shows all finite empirical samples, not only the three values displayed inside the block.
+Plot availability is determined by the parameter's value rather than by its object class. This includes distribution-valued parameters on attacker, abuse-case, attack-event, loss-event, actor, defense-mechanism, and custom objects. It also includes a parameter whose configured type is normally scalar, such as probability, when its current calculated result is an empirical distribution. A plot shows all finite empirical samples, not only the three values displayed inside the block.
 
 ## Scripts and Customization
 
@@ -578,7 +594,7 @@ The selectable distribution settings and Conditional PoS mode described above do
 
 ### Working with Metamodel Views
 
-`Metamodel Views` (`Configuration Views`) define the classes available in System Views and the dependencies between their attributes. For example, they define an attack-event class, its local and global cost attributes, and which connected attributes provide calculation inputs. Changes propagate to all System Views belonging to the save.
+`Metamodel Views` (`Configuration Views`) define the classes available in System Views and the dependencies between their attributes. For example, they define an attack-event class, its Local Difficulty and Global Difficulty attributes, and which connected attributes provide calculation inputs. Changes propagate to all System Views belonging to the save.
 
 ![Image of a configured YACRAF metamodel within a metamodel view](img/configuration_view.svg)
 
@@ -588,7 +604,7 @@ A new metamodel `Class` is created with the add-class button in the top left, il
 
 1. its name;
 2. its displayed order in the class;
-3. its value type, such as a number, probability, legacy triangle distribution, or sampled distribution (identified by `(D)`); and
+3. its value type, such as a number, probability, legacy triangle distribution, or sampled distribution; and
 4. whether it is hidden from System Views, which is useful for intermediate calculation attributes.
 
 Select the class and press `E` to change its name or create a linked copy in another Metamodel View. Linked copies represent the same class across views and carry a shared identifier in the upper-right corner, shown at (11).
@@ -607,7 +623,7 @@ Connect an attribute to the `Input` block by right-clicking the source attribute
 
 ### Metamodel attribute connections
 
-Select a connection corner and press `E` to mark the connection as external. An external connection, drawn dashed, accepts an attribute only from another class instance and ignores an internally connected attribute. This is how an attack event can consume the global cost of preceding attack-event instances without also consuming its own global cost. Connection corners can be dragged to improve the diagram layout.
+Select a connection corner and press `E` to mark the connection as external. An external connection, drawn dashed, accepts an attribute only from another class instance and ignores an internally connected attribute. This is how an attack event can consume the Global Difficulty of preceding attack-event instances without also consuming its own Global Difficulty. Connection corners can be dragged to improve the diagram layout.
 
 ### How the included YACRAF metamodel is implemented
 
