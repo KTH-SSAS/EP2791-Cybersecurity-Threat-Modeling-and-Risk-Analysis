@@ -340,41 +340,41 @@ so the mean of the conditional-PoS samples should approach the scalar PoS as the
 
 The implementation always evaluates the empirical survival function, so it does not need these closed-form expressions. They clarify the theoretical mapping for a Global Difficulty realization $g$:
 
-- For $ES\sim\mathrm{Uniform}(a,b)$, $Q(g)=1$ below $a$, $Q(g)=0$ at or above $b$, and
+**Uniform.** For $ES\sim\mathrm{Uniform}(a,b)$, $Q(g)=1$ below $a$, $Q(g)=0$ at or above $b$, and
 
-  $$
-  Q(g)=\frac{b-g}{b-a}, \qquad a\leq g<b.
-  $$
+$$
+Q(g)=\frac{b-g}{b-a}, \qquad a\leq g<b.
+$$
 
-- For $ES\sim\mathrm{Triangular}(a,m,b)$, where $m$ is the mode,
+**Triangular.** For $ES\sim\mathrm{Triangular}(a,m,b)$, where $m$ is the mode,
 
-  $$
-  Q(g)=
-  \begin{cases}
-  1, & g<a,\\
-  1-\dfrac{(g-a)^2}{(b-a)(m-a)}, & a\leq g\leq m,\\
-  \dfrac{(b-g)^2}{(b-a)(b-m)}, & m<g<b,\\
-  0, & g\geq b.
-  \end{cases}
-  $$
+$$
+Q(g)=
+\begin{cases}
+1, & g<a,\\
+1-\dfrac{(g-a)^2}{(b-a)(m-a)}, & a\leq g\leq m,\\
+\dfrac{(b-g)^2}{(b-a)(b-m)}, & m<g<b,\\
+0, & g\geq b.
+\end{cases}
+$$
 
-  If the mode equals an endpoint or all three parameters are equal, interpret this expression by its corresponding limiting or deterministic case.
+If the mode equals an endpoint or all three parameters are equal, interpret this expression by its corresponding limiting or deterministic case.
 
-- For the calculator's zero-truncated normal $ES\sim\mathrm{Normal}(\mu,\sigma^2)\mid ES\geq0$, with standard normal CDF $\Phi$, $Q(g)=1$ for $g<0$, and for $g\geq0$,
+**Zero-truncated normal.** For the calculator's $ES\sim\mathrm{Normal}(\mu,\sigma^2)\mid ES\geq0$, with standard normal CDF $\Phi$, $Q(g)=1$ for $g<0$, and for $g\geq0$,
 
-  $$
-  Q(g)=\frac{1-\Phi\!\left((g-\mu)/\sigma\right)}{1-\Phi\!\left(-\mu/\sigma\right)}.
-  $$
+$$
+Q(g)=\frac{1-\Phi\!\left((g-\mu)/\sigma\right)}{1-\Phi\!\left(-\mu/\sigma\right)}.
+$$
 
-  When $\sigma=0$, effort is deterministic and the mapping is a step at $\mu$.
+When $\sigma=0$, effort is deterministic and the mapping is a step at $\mu$.
 
-- For $ES\sim\mathrm{Lognormal}(\log m,\log^2 g_{\mathrm{sd}})$, where $m$ is the median and $g_{\mathrm{sd}}$ the geometric standard deviation, $Q(g)=1$ for $g\leq0$, and
+**Lognormal.** For $ES\sim\mathrm{Lognormal}(\log m,\log^2 g_{\mathrm{sd}})$, where $m$ is the median and $g_{\mathrm{sd}}$ the geometric standard deviation, $Q(g)=1$ for $g\leq0$, and
 
-  $$
-  Q(g)=1-\Phi\!\left(\frac{\log g-\log m}{\log g_{\mathrm{sd}}}\right), \qquad g>0.
-  $$
+$$
+Q(g)=1-\Phi\!\left(\frac{\log g-\log m}{\log g_{\mathrm{sd}}}\right), \qquad g>0.
+$$
 
-  When $g_{\mathrm{sd}}=1$, effort is deterministic at the median.
+When $g_{\mathrm{sd}}=1$, effort is deterministic at the median.
 
 The strict comparison $ES>g$ is used in every case. With continuous distributions equality has probability zero, but it matters for deterministic or repeated empirical values.
 
