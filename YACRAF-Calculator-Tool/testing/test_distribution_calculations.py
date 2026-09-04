@@ -27,6 +27,7 @@ from general_calculations import (  # noqa: E402
     ValueTypeProbability,
     ValueTypeTriangleDistribution,
     _distribution_from_input,
+    calculate_independent_probability_union,
     combine_values,
     configure_distribution_display,
     configure_pos_calculation,
@@ -59,6 +60,47 @@ class OutputAttribute:
     @staticmethod
     def get_input_offset():
         return 0
+
+
+class SetupClassStub:
+    def __init__(self, configuration_name, predecessors=()):
+        self.configuration_name = configuration_name
+        self.predecessors = {predecessor: None for predecessor in predecessors}
+
+    def get_configuration_name(self):
+        return self.configuration_name
+
+    def get_input_setup_classes(self):
+        return self.predecessors
+
+
+class ConnectedInputAttribute(InputAttribute):
+    def __init__(self, value_type, value, name, setup_class):
+        super().__init__(value_type, value)
+        self.name = name
+        self.setup_class = setup_class
+
+    def get_name(self):
+        return self.name
+
+    def get_setup_class(self):
+        return self.setup_class
+
+
+class ConfigurationClassStub:
+    @staticmethod
+    def get_name():
+        return "Loss event"
+
+
+class LossProbabilityOutputAttribute(OutputAttribute):
+    @staticmethod
+    def get_name():
+        return "Probability"
+
+    @staticmethod
+    def get_configuration_class():
+        return ConfigurationClassStub()
 
 
 class TestDistributionSpecifications(unittest.TestCase):
@@ -322,6 +364,120 @@ class TestAttackPlanAggregation(unittest.TestCase):
 
         self.assertIsInstance(probability, DistributionValue)
         np.testing.assert_allclose(probability.get_samples(), [0.75, 0.5, 0.25, 0])
+
+    def test_independent_probability_union(self):
+        probability = calculate_independent_probability_union(
+            [np.asarray([0.1]), np.asarray([0.12])], 1
+        )
+        np.testing.assert_allclose(probability, [0.208])
+
+    def test_loss_probability_unions_each_abuse_case_contribution(self):
+        abuse_a = SetupClassStub("Abuse case")
+        abuse_b = SetupClassStub("Abuse case")
+        terminal_a = SetupClassStub("Attack event AND", (abuse_a,))
+        terminal_b = SetupClassStub("Attack event OR", (abuse_b,))
+        attributes = [
+            ConnectedInputAttribute(
+                ValueTypeProbability, 0.2,
+                "Threat event probability", abuse_a,
+            ),
+            ConnectedInputAttribute(
+                ValueTypeProbability, 0.3,
+                "Threat event probability", abuse_b,
+            ),
+            ConnectedInputAttribute(
+                ValueTypeProbability, 0.5,
+                "Probability of success", terminal_a,
+            ),
+            ConnectedInputAttribute(
+                ValueTypeProbability, 0.4,
+                "Probability of success", terminal_b,
+            ),
+        ]
+
+        probability = combine_values(
+            ValueTypeProbability,
+            CalculationTypeMultiplication,
+            attributes,
+            [None] * len(attributes),
+            LossProbabilityOutputAttribute(),
+            1,
+        )
+
+        # p_a = 0.2 * 0.5 = 0.10; p_b = 0.3 * 0.4 = 0.12.
+        # P(A union B) = 1 - (1 - 0.10)(1 - 0.12) = 0.208.
+        np.testing.assert_allclose(probability, [0.208])
+
+    def test_loss_probability_union_preserves_empirical_samples(self):
+        abuse_a = SetupClassStub("Abuse case")
+        abuse_b = SetupClassStub("Abuse case")
+        terminal_a = SetupClassStub("Attack event AND", (abuse_a,))
+        terminal_b = SetupClassStub("Attack event OR", (abuse_b,))
+        attributes = [
+            ConnectedInputAttribute(
+                ValueTypeProbability, 0.2,
+                "Threat event probability", abuse_a,
+            ),
+            ConnectedInputAttribute(
+                ValueTypeProbability, 0.4,
+                "Threat event probability", abuse_b,
+            ),
+            ConnectedInputAttribute(
+                ValueTypeProbability,
+                DistributionValue.empirical([0.1, 0.5, 0.9]),
+                "Probability of success", terminal_a,
+            ),
+            ConnectedInputAttribute(
+                ValueTypeProbability, 0.5,
+                "Probability of success", terminal_b,
+            ),
+        ]
+
+        probability = combine_values(
+            ValueTypeProbability,
+            CalculationTypeMultiplication,
+            attributes,
+            [None] * len(attributes),
+            LossProbabilityOutputAttribute(),
+            3,
+        )[0]
+
+        self.assertIsInstance(probability, DistributionValue)
+        np.testing.assert_allclose(
+            probability.get_samples(), [0.216, 0.28, 0.344]
+        )
+
+    def test_loss_probability_rejects_ambiguous_abuse_terminal_pairing(self):
+        abuse = SetupClassStub("Abuse case")
+        terminal_a = SetupClassStub("Attack event AND", (abuse,))
+        terminal_b = SetupClassStub("Attack event OR", (abuse,))
+        attributes = [
+            ConnectedInputAttribute(
+                ValueTypeProbability, 0.2,
+                "Threat event probability", abuse,
+            ),
+            ConnectedInputAttribute(
+                ValueTypeProbability, 0.5,
+                "Probability of success", terminal_a,
+            ),
+            ConnectedInputAttribute(
+                ValueTypeProbability, 0.4,
+                "Probability of success", terminal_b,
+            ),
+        ]
+
+        with patch("builtins.print") as warning:
+            probability = combine_values(
+                ValueTypeProbability,
+                CalculationTypeMultiplication,
+                attributes,
+                [None] * len(attributes),
+                LossProbabilityOutputAttribute(),
+                1,
+            )
+
+        self.assertEqual(probability, ("SETUP ERROR",))
+        self.assertIn("exactly one terminal attack event", warning.call_args.args[0])
 
     def test_loss_risk_keeps_the_full_sample_distribution(self):
         magnitude = DistributionValue.empirical([100, 200, 300])
