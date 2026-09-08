@@ -271,6 +271,12 @@ def parse_distribution_spec(input_value, *, triangle_only=False):
         median, geometric_standard_deviation = parameters
         if median <= 0 or geometric_standard_deviation < 1:
             raise ValueError("Lognormal requires median > 0 and geometric standard deviation >= 1")
+    elif distribution_name == "exponential":
+        if len(parameters) != 1:
+            raise ValueError("Exponential requires mean")
+        mean = parameters[0]
+        if mean <= 0:
+            raise ValueError("Exponential requires mean > 0")
     else:
         raise ValueError(f"Unsupported distribution {distribution_name}")
 
@@ -311,6 +317,10 @@ def _sample_distribution_spec(distribution_spec, num_samples):
         if geometric_standard_deviation == 1:
             return np.full(num_samples, median)
         return _distribution_rng.lognormal(np.log(median), np.log(geometric_standard_deviation), num_samples)
+
+    if distribution_name == "exponential":
+        mean = parameters[0]
+        return _distribution_rng.exponential(mean, num_samples)
 
     raise ValueError(f"Unsupported distribution {distribution_name}")
 
@@ -751,7 +761,7 @@ class ValueTypeDistribution(ValueType):
 
     @staticmethod
     def explaination():
-        return "Distribution (uniform, triangular, normal, or lognormal)"
+        return "Distribution (uniform, triangular, normal, lognormal, or exponential)"
 
     @staticmethod
     def default_text():
