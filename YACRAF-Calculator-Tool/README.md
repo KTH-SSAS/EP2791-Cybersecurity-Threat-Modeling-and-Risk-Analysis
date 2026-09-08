@@ -354,7 +354,7 @@ The implementation always evaluates the empirical survival function, so it does 
 **Uniform.** For $ES\sim\mathrm{Uniform}(a,b)$, $Q(g)=1$ below $a$, $Q(g)=0$ at or above $b$, and
 
 $$
-Q(g)=\frac{b-g}{b-a}, \qquad a\leq g<b.
+Q(g)=\frac{b-g}{b-a}, \qquad a\leq g\lt b.
 $$
 
 **Triangular.** For $ES\sim\mathrm{Triangular}(a,m,b)$, where $m$ is the mode, the piecewise survival function is shown as a table so every expression renders reliably on GitHub:
