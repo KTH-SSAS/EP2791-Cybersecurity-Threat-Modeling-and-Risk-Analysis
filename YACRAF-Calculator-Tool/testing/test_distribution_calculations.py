@@ -117,12 +117,19 @@ class TestDistributionSpecifications(unittest.TestCase):
         triangular = self.sampled(("triangular", 2.0, 3.0, 5.0))
         normal = self.sampled(("normal", 2.0, 3.0))
         lognormal = self.sampled(("lognormal", 4.0, 1.5))
+        exponential = self.sampled(("exponential", 3.0))
 
         self.assertTrue(np.all((uniform >= 2) & (uniform <= 5)))
         self.assertTrue(np.all((triangular >= 2) & (triangular <= 5)))
         self.assertTrue(np.all(normal >= 0))
         self.assertTrue(np.all(lognormal > 0))
+        self.assertTrue(np.all(exponential >= 0))
         self.assertAlmostEqual(float(np.median(lognormal)), 4.0, delta=0.1)
+        self.assertAlmostEqual(float(np.mean(exponential)), 3.0, delta=0.1)
+        self.assertEqual(
+            parse_distribution_spec(("exponential", 3.0)),
+            ("exponential", 3.0),
+        )
 
     def test_legacy_triangle_is_accepted(self):
         self.assertEqual(parse_distribution_spec((1.0, 2.0, 3.0)),
@@ -132,7 +139,9 @@ class TestDistributionSpecifications(unittest.TestCase):
         for specification in (("uniform", -1.0, 2.0),
                               ("triangular", 1.0, 3.0, 2.0),
                               ("normal", 1.0, -1.0),
-                              ("lognormal", 0.0, 1.5)):
+                              ("lognormal", 0.0, 1.5),
+                              ("exponential", 0.0),
+                              ("exponential", 1.0, 2.0)):
             with self.subTest(specification=specification):
                 with self.assertRaises(ValueError):
                     parse_distribution_spec(specification)
@@ -348,6 +357,21 @@ class TestAttackPlanAggregation(unittest.TestCase):
 
         self.assertIsInstance(probability, DistributionValue)
         np.testing.assert_allclose(probability.get_samples(), [0.75, 0.5, 0.25, 0])
+
+    def test_triangular_conditional_pos_example(self):
+        # These empirical effort samples have the exact survival counts of a
+        # symmetric Triangular(2, 5, 8) example at g = 3, 5, and 7.
+        effort = DistributionValue.empirical([3] + [4] * 8 + [6] * 8 + [8])
+        global_cost = DistributionValue.empirical([3] * 6 + [5] * 6 + [7] * 6)
+        configure_pos_calculation("distribution")
+
+        probability = CalculationTypeSampleTriangle.calculate_output_value(
+            [effort, global_cost], 18
+        ).get_samples()
+
+        np.testing.assert_allclose(probability[:6], 17 / 18)
+        np.testing.assert_allclose(probability[6:12], 1 / 2)
+        np.testing.assert_allclose(probability[12:], 1 / 18)
 
     def test_probability_value_type_keeps_the_pos_distribution(self):
         configure_pos_calculation("distribution")
