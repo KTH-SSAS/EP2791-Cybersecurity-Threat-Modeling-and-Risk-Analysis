@@ -217,24 +217,27 @@ class Options:
         has_templates = setup_attribute_gui.has_manually_entered_value() and \
                         setup_attribute_gui.supports_distribution_templates()
         can_plot = setup_attribute_gui.can_plot_distribution()
-        columns = 4 if has_templates else 1
-        rows = 2 + int(can_plot) if has_templates else 1
+        distributions = (
+            ("Uniform\nmin / max", "uniform / 0 / 1"),
+            ("Triangular\nmin / mode / max", "triangular / 0 / 0.5 / 1"),
+            ("Normal (truncated at 0)\nmean / standard deviation", "normal / 1 / 0.2"),
+            ("Lognormal\nmedian / geometric std. dev.", "lognormal / 1 / 1.5"),
+            ("Exponential\nmean", "exponential / 1"),
+        )
+        columns = min(3, len(distributions)) if has_templates else 1
+        template_rows = 2 * ((len(distributions) + columns - 1) // columns) if has_templates else 0
+        rows = template_rows + int(can_plot) if has_templates else 1
         options = Options(model, view, rows, columns, "Distribution")
 
         if has_templates:
-            distributions = (
-                ("Uniform\nmin / max", "uniform / 0 / 1"),
-                ("Triangular\nmin / mode / max", "triangular / 0 / 0.5 / 1"),
-                ("Normal (truncated at 0)\nmean / standard deviation", "normal / 1 / 0.2"),
-                ("Lognormal\nmedian / geometric std. dev.", "lognormal / 1 / 1.5"),
-            )
-
-            for column, (label, template) in enumerate(distributions):
-                options.add_label(0, column, label)
-                options.add_button(1, column, "Use", lambda template=template: setup_attribute_gui.set_distribution_template(template))
+            for index, (label, template) in enumerate(distributions):
+                row = 2 * (index // columns)
+                column = index % columns
+                options.add_label(row, column, label)
+                options.add_button(row + 1, column, "Use", lambda template=template: setup_attribute_gui.set_distribution_template(template))
 
         if can_plot:
-            plot_row = 2 if has_templates else 0
+            plot_row = template_rows if has_templates else 0
             options.add_button(plot_row, 0, "Plot distribution", setup_attribute_gui.plot_distribution)
 
         return options
