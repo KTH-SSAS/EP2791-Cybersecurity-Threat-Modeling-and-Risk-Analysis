@@ -228,6 +228,7 @@ def parse_distribution_spec(input_value, *, triangle_only=False):
     if len(input_value) == 1 and isinstance(input_value[0], DistributionValue):
         return input_value[0]
 
+    shift = 0.0
     if triangle_only:
         if len(input_value) != 3 or not all(_is_number(value) for value in input_value):
             raise ValueError("A triangular distribution requires minimum / mode / maximum")
@@ -240,7 +241,25 @@ def parse_distribution_spec(input_value, *, triangle_only=False):
     else:
         if len(input_value) == 0 or not isinstance(input_value[0], str):
             raise ValueError("A distribution must start with its name")
-        distribution_name = input_value[0].strip().lower()
+        distribution_token = input_value[0].strip().lower()
+        if "+" in distribution_token:
+            shift_parts = distribution_token.split("+")
+            if len(shift_parts) != 2:
+                raise ValueError("A shifted distribution must use offset + distribution name")
+
+            shift_text, distribution_name = (part.strip() for part in shift_parts)
+            try:
+                shift = float(shift_text)
+            except ValueError as error:
+                raise ValueError("A distribution shift must be a number") from error
+
+            if not np.isfinite(shift) or shift < 0:
+                raise ValueError("A distribution shift must be a finite non-negative number")
+            if not distribution_name:
+                raise ValueError("A shifted distribution must include a distribution name")
+        else:
+            distribution_name = distribution_token
+
         parameters = tuple(input_value[1:])
 
         if not all(_is_number(value) for value in parameters):
@@ -280,11 +299,19 @@ def parse_distribution_spec(input_value, *, triangle_only=False):
     else:
         raise ValueError(f"Unsupported distribution {distribution_name}")
 
+    if shift:
+        return ("shifted", shift, distribution_name) + parameters
     return (distribution_name,) + parameters
 
 
 def _sample_distribution_spec(distribution_spec, num_samples):
     distribution_name, *parameters = distribution_spec
+
+    if distribution_name == "shifted":
+        shift, base_distribution_name, *base_parameters = parameters
+        return shift + _sample_distribution_spec(
+            (base_distribution_name,) + tuple(base_parameters), num_samples
+        )
 
     if distribution_name == "uniform":
         minimum, maximum = parameters
@@ -761,7 +788,7 @@ class ValueTypeDistribution(ValueType):
 
     @staticmethod
     def explaination():
-        return "Distribution (uniform, triangular, normal, lognormal, or exponential)"
+        return "Distribution (uniform, triangular, normal, lognormal, or exponential; optional non-negative shift)"
 
     @staticmethod
     def default_text():
