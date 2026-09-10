@@ -82,9 +82,7 @@ class SetupView(View):
             end_block = connection_with_blocks.get_end_block()
             
             setup_view_copy.create_connection_with_blocks(start_coordinate=(start_block.get_x(), start_block.get_y()), \
-                                                          end_coordinate=(end_block.get_x(), end_block.get_y()), \
-                                                          input_scalars=connection_with_blocks.get_input_scalars(), \
-                                                          input_scalars_indicator_coordinate=connection_with_blocks.get_input_scalars_coordinate())
+                                                          end_coordinate=(end_block.get_x(), end_block.get_y()))
             
     def create_setup_class_gui(self, *, configuration_class_gui=None, setup_class_gui_to_copy=None, position=None):
         """
@@ -143,16 +141,14 @@ class SetupView(View):
                     
         return matching_setup_classes_gui
         
-    def create_connection_with_blocks(self, *, start_coordinate=None, end_coordinate=None, input_scalars=None, input_scalars_indicator_coordinate=None):
+    def create_connection_with_blocks(self, *, start_coordinate=None, end_coordinate=None):
         """
         Creates a new directional connection with already attached triangle blocks on either side
         """
         connection_with_blocks = GUIConnectionWithBlocks(self.get_model(), \
                                                          self, \
                                                          start_coordinate=start_coordinate, \
-                                                         end_coordinate=end_coordinate, \
-                                                         input_scalars=input_scalars, \
-                                                         input_scalars_indicator_coordinate=input_scalars_indicator_coordinate)
+                                                         end_coordinate=end_coordinate)
         self.__connections_with_blocks.append(connection_with_blocks)
         
         return connection_with_blocks
@@ -295,10 +291,8 @@ class SetupView(View):
                     start_coordinate = (saved_states_start_block["x"], saved_states_start_block["y"])
                     end_coordinate = (saved_states_end_block["x"], saved_states_end_block["y"])
                     
-                    connection_with_blocks = self.create_connection_with_blocks(start_coordinate=start_coordinate, \
-                                                                                end_coordinate=end_coordinate, \
-                                                                                input_scalars=saved_states_connection_with_blocks["input_scalars"], \
-                                                                                input_scalars_indicator_coordinate=saved_states_connection_with_blocks["input_scalars_indicator_coordinate"])
+                    self.create_connection_with_blocks(start_coordinate=start_coordinate, \
+                                                       end_coordinate=end_coordinate)
                     
         except FileNotFoundError as e:
             print(f"Could not find setup view {file_path}: {e}")
