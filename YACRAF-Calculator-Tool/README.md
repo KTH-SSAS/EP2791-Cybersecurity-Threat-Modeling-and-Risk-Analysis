@@ -179,13 +179,23 @@ lognormal / median / geometric standard deviation
 exponential / mean
 ```
 
-Examples are `uniform / 2 / 5`, `triangular / 2 / 3 / 5`, `normal / 4 / 1`, `lognormal / 6 / 1.5`, and `exponential / 3`. All five represent non-negative quantities:
+An optional non-negative location shift can precede any named distribution:
+
+```text
+offset + distribution / parameters
+```
+
+For example, `1 + lognormal / 5 / 2` draws $X$ from a lognormal distribution with median 5 and geometric standard deviation 2, then calculates $Y=1+X$ for every draw. Its lower bound is therefore 1 and its median is 6. The shift is applied to the empirical samples before they enter global-difficulty, PoS, loss, or risk calculations. It is a deterministic fixed addition, not another sampled input and not a change to the named distribution's parameters.
+
+Other examples are `uniform / 2 / 5`, `triangular / 2 / 3 / 5`, `normal / 4 / 1`, `lognormal / 6 / 1.5`, and `exponential / 3`. All five represent non-negative quantities:
 
 - `uniform` gives equal density between its minimum and maximum.
 - `triangular` uses a minimum, most likely value (mode), and maximum.
 - `normal` uses an arithmetic mean and standard deviation and is truncated at zero by rejection sampling.
 - `lognormal` uses a median and geometric standard deviation; the geometric standard deviation must be at least 1.
 - `exponential` uses one strictly positive mean, also known as its scale. Its rate is the reciprocal of that mean.
+
+The offset must be finite and non-negative. For a shifted uniform or triangular distribution, the resulting lower bound is the offset plus the distribution's stated minimum. Normal inputs remain truncated at zero before the offset is added.
 
 Select a manually entered distribution-valued parameter and press `E` to choose a template in the GUI. The inserted template remains editable. Legacy three-number inputs such as `2 / 3 / 5` are interpreted as triangular distributions, and bundled triangle-based saves are migrated on load for attack difficulty, abuse-case effort, loss magnitude, loss risk, and actor risk.
 
