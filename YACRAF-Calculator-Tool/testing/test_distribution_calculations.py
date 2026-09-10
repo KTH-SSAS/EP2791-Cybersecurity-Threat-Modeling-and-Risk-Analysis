@@ -52,6 +52,12 @@ class InputAttribute:
         return self.value
 
 
+class ManualInputAttribute(InputAttribute):
+    def __init__(self, value_type, value):
+        self.value_type = value_type
+        self.value = value
+
+
 class OutputAttribute:
     @staticmethod
     def get_input_scalar():
@@ -134,6 +140,39 @@ class TestDistributionSpecifications(unittest.TestCase):
     def test_legacy_triangle_is_accepted(self):
         self.assertEqual(parse_distribution_spec((1.0, 2.0, 3.0)),
                          ("triangular", 1.0, 2.0, 3.0))
+
+    def test_legacy_triangle_field_accepts_named_triangular_syntax(self):
+        specification = helper_functions_general.convert_string_to_value(
+            "triangular / 1 / 2 / 3"
+        )
+
+        self.assertEqual(
+            parse_distribution_spec(specification, triangle_only=True),
+            ("triangular", 1.0, 2.0, 3.0),
+        )
+        self.assertTrue(ValueTypeTriangleDistribution.is_correct_input_value(
+            specification
+        ))
+
+    def test_defense_triangle_distribution_propagates_into_global_difficulty(self):
+        global_difficulty = combine_values(
+            ValueTypeDistribution,
+            CalculationTypeAND,
+            [ManualInputAttribute(
+                 ValueTypeDistribution, ("uniform", 2.0, 2.0)
+             ),
+             ManualInputAttribute(
+                 ValueTypeTriangleDistribution,
+                 ("triangular", 1.0, 2.0, 3.0),
+             )],
+            [None, None],
+            OutputAttribute(),
+            1000,
+        )[0]
+
+        self.assertIsInstance(global_difficulty, DistributionValue)
+        self.assertTrue(np.all(global_difficulty.get_samples() >= 3))
+        self.assertTrue(np.all(global_difficulty.get_samples() <= 5))
 
     def test_non_negative_shift_is_added_to_distribution_samples(self):
         specification = helper_functions_general.convert_string_to_value("1 + lognormal / 5 / 2")
