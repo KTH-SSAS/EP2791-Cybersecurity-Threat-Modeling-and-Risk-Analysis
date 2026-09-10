@@ -197,7 +197,7 @@ Other examples are `uniform / 2 / 5`, `triangular / 2 / 3 / 5`, `normal / 4 / 1`
 
 The offset must be finite and non-negative. For a shifted uniform or triangular distribution, the resulting lower bound is the offset plus the distribution's stated minimum. Normal inputs remain truncated at zero before the offset is added.
 
-Select a manually entered distribution-valued parameter and press `E` to choose a template in the GUI. The inserted template remains editable. Legacy three-number inputs such as `2 / 3 / 5` are interpreted as triangular distributions, and bundled triangle-based saves are migrated on load for attack difficulty, abuse-case effort, loss magnitude, loss risk, and actor risk.
+Select a manually entered distribution-valued parameter and press `E` to choose a template in the GUI. The inserted template remains editable. Legacy three-number inputs such as `2 / 3 / 5` are interpreted as triangular distributions, and bundled triangle-based saves are migrated on load for attack difficulty, abuse-case effort, loss magnitude, loss risk, actor risk, and defense-mechanism cost and impact. A defense impact distribution is sampled like any other input distribution and is included in the connected attack event's empirical Global Difficulty (`GD`) calculation.
 
 ### Distribution calculation settings
 
