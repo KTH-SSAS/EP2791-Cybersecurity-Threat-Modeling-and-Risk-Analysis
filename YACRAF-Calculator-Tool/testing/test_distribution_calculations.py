@@ -10,6 +10,7 @@ import numpy as np
 TOOL_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(TOOL_DIRECTORY, "src"))
 sys.path.insert(0, os.path.join(TOOL_DIRECTORY, "src", "blocks_calculation"))
+sys.path.insert(0, os.path.join(TOOL_DIRECTORY, "src", "blocks_calculation", "setup"))
 sys.path.insert(0, os.path.join(TOOL_DIRECTORY, "config"))
 
 # general_calculations imports GUI configuration constants, but the statistical
@@ -36,6 +37,7 @@ from general_calculations import (  # noqa: E402
     reset_distribution_sampling_cache,
 )
 from settings import Settings  # noqa: E402
+from setup_class_calculation import SetupClass  # noqa: E402
 import helper_functions_general  # noqa: E402
 from yacraf_notation import format_parameter_name, get_parameter_abbreviation  # noqa: E402
 
@@ -98,6 +100,10 @@ class ConfigurationClassStub:
     def get_name():
         return "Loss event"
 
+    @staticmethod
+    def get_configuration_attributes():
+        return []
+
 
 class LossProbabilityOutputAttribute(OutputAttribute):
     @staticmethod
@@ -136,6 +142,20 @@ class TestDistributionSpecifications(unittest.TestCase):
             parse_distribution_spec(("exponential", 3.0)),
             ("exponential", 3.0),
         )
+
+    def test_fixed_value_is_a_degenerate_distribution(self):
+        self.assertEqual(parse_distribution_spec((2.0,)), ("constant", 2.0))
+        self.assertTrue(ValueTypeDistribution.is_correct_input_value((2.0,)))
+        self.assertTrue(ValueTypeTriangleDistribution.is_correct_input_value((2.0,)))
+        np.testing.assert_array_equal(self.sampled((2.0,)), np.full(20000, 2.0))
+
+    def test_system_connection_scalars_are_ignored(self):
+        source = SetupClass("source", ConfigurationClassStub())
+        target = SetupClass("target", ConfigurationClassStub())
+
+        target.set_input_setup_class(source, (7.0,))
+
+        self.assertIsNone(target.get_input_setup_classes()[source])
 
     def test_legacy_triangle_is_accepted(self):
         self.assertEqual(parse_distribution_spec((1.0, 2.0, 3.0)),
@@ -202,7 +222,10 @@ class TestDistributionSpecifications(unittest.TestCase):
                               ("-1 + lognormal", 5.0, 2.0),
                               ("minimum + lognormal", 5.0, 2.0),
                               ("1 + 2 + lognormal", 5.0, 2.0),
-                              ("1 + ", 5.0, 2.0)):
+                              ("1 + ", 5.0, 2.0),
+                              (-1.0,),
+                              (float("inf"),),
+                              (float("nan"),)):
             with self.subTest(specification=specification):
                 with self.assertRaises(ValueError):
                     parse_distribution_spec(specification)
