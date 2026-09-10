@@ -157,6 +157,19 @@ class TestDistributionSpecifications(unittest.TestCase):
 
         self.assertIsNone(target.get_input_setup_classes()[source])
 
+    def test_connection_endpoint_has_no_removed_scalar_indicator_hook(self):
+        source_path = os.path.join(
+            TOOL_DIRECTORY,
+            "src",
+            "blocks_gui",
+            "connection",
+            "connection_blocks_gui.py",
+        )
+        with open(source_path, encoding="utf-8") as source_file:
+            source = source_file.read()
+
+        self.assertNotIn("correct_scalars_indicator_location", source)
+
     def test_legacy_triangle_is_accepted(self):
         self.assertEqual(parse_distribution_spec((1.0, 2.0, 3.0)),
                          ("triangular", 1.0, 2.0, 3.0))
