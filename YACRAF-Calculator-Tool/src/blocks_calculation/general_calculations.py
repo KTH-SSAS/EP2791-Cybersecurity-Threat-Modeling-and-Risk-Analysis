@@ -229,9 +229,7 @@ def parse_distribution_spec(input_value, *, triangle_only=False):
         return input_value[0]
 
     shift = 0.0
-    if triangle_only:
-        if len(input_value) != 3 or not all(_is_number(value) for value in input_value):
-            raise ValueError("A triangular distribution requires minimum / mode / maximum")
+    if triangle_only and len(input_value) == 3 and all(_is_number(value) for value in input_value):
         distribution_name = "triangular"
         parameters = tuple(float(value) for value in input_value)
     elif len(input_value) == 3 and all(_is_number(value) for value in input_value):
@@ -265,6 +263,9 @@ def parse_distribution_spec(input_value, *, triangle_only=False):
         if not all(_is_number(value) for value in parameters):
             raise ValueError("Distribution parameters must be numbers")
         parameters = tuple(float(value) for value in parameters)
+
+    if triangle_only and distribution_name != "triangular":
+        raise ValueError("A legacy triangular field only supports a triangular distribution")
 
     if distribution_name == "uniform":
         if len(parameters) != 2:
@@ -913,16 +914,12 @@ class ValueTypeTriangleDistribution(ValueType):
         
     @staticmethod
     def is_correct_input_value(input_value):
-        if len(input_value) != 3:
-            print(f"Warning: The input {input_value} did not contain exactly three values for the attribute value type {ValueTypeProbability.symbol()}")
+        try:
+            parse_distribution_spec(input_value, triangle_only=True)
+            return True
+        except ValueError as error:
+            print(f"Warning: {error}")
             return False
-            
-        for value in input_value:
-            if not isinstance(value, float):
-                print(f"Warning: The value {value} in the input {input_value} could not be converted to a float for the attribute value type {ValueTypeProbability.symbol()}")
-                return False
-                
-        return True
 
 
 def is_distribution_valued_attribute(value_type, current_value):
