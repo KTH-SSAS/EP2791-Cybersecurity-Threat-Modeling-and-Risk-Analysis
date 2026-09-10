@@ -223,6 +223,7 @@ class Options:
             ("Normal (truncated at 0)\nmean / standard deviation", "normal / 1 / 0.2"),
             ("Lognormal\nmedian / geometric std. dev.", "lognormal / 1 / 1.5"),
             ("Exponential\nmean", "exponential / 1"),
+            ("Shifted example\nfixed value + distribution", "1 + lognormal / 5 / 2"),
         )
         columns = min(3, len(distributions)) if has_templates else 1
         template_rows = 2 * ((len(distributions) + columns - 1) // columns) if has_templates else 0
