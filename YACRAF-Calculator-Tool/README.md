@@ -157,9 +157,9 @@ An instance of a `Class` from a `Metamodel View` can be added to the current `Sy
 
 #### Adding Connections
 
-Pressing the add connection button at the top ((4) in the above figure) creates a directional `Connection` (see (5)) that can be attached to `Classes` (see (6)) by dragging its corresponding ends. The `Attributes` of the `Class` that the `Connection` points to may take input from the other `Class` if such `Attribute` relations have been configured in the `Metamodel Views`. Attaching a `Connection` to a `Class` will automatically disable `Attribute` entry fields if the corresponding value is dependent on at least one connected `Class`. By pressing E after selecting a corner on the directional `Connection`, one can:
+Pressing the add connection button at the top ((4) in the above figure) creates a directional `Connection` (see (5)) that can be attached to `Classes` (see (6)) by dragging its corresponding ends. The `Attributes` of the `Class` that the `Connection` points to may take input from the other `Class` if such `Attribute` relations have been configured in the `Metamodel Views`. Attaching a `Connection` to a `Class` will automatically disable `Attribute` entry fields if the corresponding value is dependent on at least one connected `Class`.
 
-1. Add a scalar that is applied to input values obtained through the `Connection`, where the appearing indicator (see (7)) can be dragged along the path of the `Connection`
+System-view connections pass values unchanged and do not have editable scalar multipliers. Fixed transformations required by Yacraf are part of the bundled metamodel calculations.
 
 #### Calculating Values
 
@@ -169,15 +169,18 @@ The calculate button at the top (see (8)) calculates the values of all `Attribut
 
 ### Declaring input distributions
 
-A distribution-valued parameter can represent local difficulty, global difficulty, effort spent, loss magnitude, loss risk, aggregated actor risk, or another uncertain quantity in a custom model. A manual distribution starts with the distribution name followed by its parameters:
+A distribution-valued parameter can represent local difficulty, global difficulty, effort spent, loss magnitude, loss risk, aggregated actor risk, or another uncertain quantity in a custom model. It may be entered as either a single fixed non-negative value or a distribution name followed by its parameters:
 
 ```text
+fixed value, for example: 2
 uniform / minimum / maximum
 triangular / minimum / mode / maximum
 normal / mean / standard deviation
 lognormal / median / geometric standard deviation
 exponential / mean
 ```
+
+This fixed-value form is accepted by every distribution-valued field on every object type. For example, entering `2` is the clearer deterministic equivalent of `uniform / 2 / 2`.
 
 An optional non-negative location shift can precede any named distribution:
 
@@ -217,7 +220,7 @@ $$
 x_j^{(s)} \sim X_j, \qquad s=1,\ldots,N.
 $$
 
-It then evaluates the model for sample index $s$, producing $y^{(1)},\ldots,y^{(N)}$. This sample vector is the empirical output distribution. The calculator does not assume that the output is normal, triangular, or any other named family and does not fit such a family after aggregation. Displayed quantiles and plots are calculated directly from the empirical samples.
+It then evaluates the model for sample index $s$, producing $y^{(1)},\ldots,y^{(N)}$. A fixed input such as `2` is expanded to `2` in every sample, so it remains compatible with aggregation, percentiles, and distribution plots. This sample vector is the empirical output distribution. The calculator does not assume that the output is normal, triangular, or any other named family and does not fit such a family after aggregation. Displayed quantiles and plots are calculated directly from the empirical samples.
 
 Different manual sources are sampled independently. When the same local attack step is reused through several graph branches or linked views, its samples are cached for that calculation run and reused consistently. Arithmetic involving a distribution and a scalar broadcasts the scalar across all $N$ samples; arithmetic involving distributions is performed on aligned sample indices.
 
@@ -245,7 +248,7 @@ The GUI's gate operations construct these plans as follows:
 
 ![Illustration of sample-aligned OR and AND Global Difficulty aggregation](img/monte_carlo_aggregation.svg)
 
-The result at every attack step is therefore the empirical distribution of the easiest complete plan reaching that step—not merely the sum or minimum of three displayed percentiles. For attack-difficulty calculations, keep metamodel input scalars at `1` and offsets at `0`. Applying an affine transform to an already aggregated plan is numerically supported, but it discards atomic plan provenance; later gates can then no longer remove duplicated shared prerequisites.
+The result at every attack step is therefore the empirical distribution of the easiest complete plan reaching that step—not merely the sum or minimum of three displayed percentiles. For attack-difficulty calculations, the bundled metamodel uses identity transforms between connected Global Difficulty attributes. Custom metamodel authors should keep those attribute-input scalars at `1` and offsets at `0`: applying an affine transform to an already aggregated plan is numerically supported, but it discards atomic plan provenance, so later gates can no longer remove duplicated shared prerequisites.
 
 ### Probability and loss risk
 
