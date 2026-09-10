@@ -229,7 +229,10 @@ def parse_distribution_spec(input_value, *, triangle_only=False):
         return input_value[0]
 
     shift = 0.0
-    if triangle_only and len(input_value) == 3 and all(_is_number(value) for value in input_value):
+    if len(input_value) == 1 and _is_number(input_value[0]):
+        distribution_name = "constant"
+        parameters = (float(input_value[0]),)
+    elif triangle_only and len(input_value) == 3 and all(_is_number(value) for value in input_value):
         distribution_name = "triangular"
         parameters = tuple(float(value) for value in input_value)
     elif len(input_value) == 3 and all(_is_number(value) for value in input_value):
@@ -264,10 +267,15 @@ def parse_distribution_spec(input_value, *, triangle_only=False):
             raise ValueError("Distribution parameters must be numbers")
         parameters = tuple(float(value) for value in parameters)
 
-    if triangle_only and distribution_name != "triangular":
-        raise ValueError("A legacy triangular field only supports a triangular distribution")
+    if triangle_only and distribution_name not in ("constant", "triangular"):
+        raise ValueError("A legacy triangular field only supports a fixed value or triangular distribution")
 
-    if distribution_name == "uniform":
+    if distribution_name == "constant":
+        if len(parameters) != 1:
+            raise ValueError("A fixed distribution value requires one number")
+        if not np.isfinite(parameters[0]) or parameters[0] < 0:
+            raise ValueError("A fixed distribution value must be a finite non-negative number")
+    elif distribution_name == "uniform":
         if len(parameters) != 2:
             raise ValueError("Uniform requires minimum / maximum")
         minimum, maximum = parameters
@@ -313,6 +321,9 @@ def _sample_distribution_spec(distribution_spec, num_samples):
         return shift + _sample_distribution_spec(
             (base_distribution_name,) + tuple(base_parameters), num_samples
         )
+
+    if distribution_name == "constant":
+        return np.full(num_samples, parameters[0])
 
     if distribution_name == "uniform":
         minimum, maximum = parameters
@@ -789,7 +800,7 @@ class ValueTypeDistribution(ValueType):
 
     @staticmethod
     def explaination():
-        return "Distribution (uniform, triangular, normal, lognormal, or exponential; optional non-negative shift)"
+        return "Fixed non-negative value, or uniform, triangular, normal, lognormal, or exponential distribution; optional non-negative shift"
 
     @staticmethod
     def default_text():
@@ -854,7 +865,7 @@ class ValueTypeTriangleDistribution(ValueType):
         
     @staticmethod
     def explaination():
-        return "Triangle distribution (a / b / c)"
+        return "Fixed non-negative value, or triangle distribution (a / b / c)"
         
     @staticmethod
     def default_text():
