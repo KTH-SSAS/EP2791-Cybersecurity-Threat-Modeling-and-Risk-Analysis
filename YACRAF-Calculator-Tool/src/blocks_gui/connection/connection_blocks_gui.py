@@ -201,8 +201,6 @@ class GUIConnectionTriangle(GUIBlock):
                 
                 break
                 
-        self.__connection.correct_scalars_indicator_location()
-        
     def rotate_triangle(self, new_direction):
         """
         Rotates the triangle to point in the specified direction
