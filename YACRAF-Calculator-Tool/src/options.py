@@ -218,6 +218,7 @@ class Options:
                         setup_attribute_gui.supports_distribution_templates()
         can_plot = setup_attribute_gui.can_plot_distribution()
         distributions = (
+            ("Fixed\nvalue", "1"),
             ("Uniform\nmin / max", "uniform / 0 / 1"),
             ("Triangular\nmin / mode / max", "triangular / 0 / 0.5 / 1"),
             ("Normal (truncated at 0)\nmean / standard deviation", "normal / 1 / 0.2"),
@@ -250,20 +251,6 @@ class Options:
         """
         options = Options(model, view, 1, 1, "Connection")
         options.add_toggle_button(0, 0, "External connection", connection.is_external(), lambda: connection.set_external(True), lambda: connection.set_external(False))
-        
-    @staticmethod
-    def connection_with_blocks(model, view, connection):
-        """
-        Options for directional connection in setup views
-        """
-        options = Options(model, view, 2, 1, "Connection")
-        default_text = connection.get_input_scalars_string()
-        
-        if default_text == None:
-            default_text = "1"
-            
-        entry_text = tk.StringVar()
-        options.add_entry(0, 0, "Scalar (number or a / b / c):", default_text, lambda: set_setup_scalars(connection, entry_text.get()), entry_text)
         
     def get_grid_coordinate(self, row, column):
         """
@@ -354,12 +341,6 @@ def set_configuration_offset(configuration_input, input_offset_string):
         
     configuration_input.set_input_offset(input_offset)
     
-def set_setup_scalars(connection, input_scalars_string):
-    try:
-        connection.set_input_scalars(convert_string_to_value(input_scalars_string))
-    except:
-        connection.reset_input_scalars()
-
 def set_num_samples(num_samples_string):
     try:
         settings.set_num_samples(num_samples_string)

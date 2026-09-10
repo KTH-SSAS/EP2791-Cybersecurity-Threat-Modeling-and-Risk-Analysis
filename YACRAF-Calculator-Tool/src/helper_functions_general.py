@@ -292,10 +292,10 @@ def delete_all(to_delete_list, manual_delete=False):
     Calls the delete method of all elements in to_delete_list
     """
     from configuration_attribute_gui import GUIConfigurationAttribute
-    from connection_blocks_gui import GUIConnectionCorner, GUIConnectionScalarsIndicator
+    from connection_blocks_gui import GUIConnectionCorner
     
     for i in range(len(to_delete_list)-1, -1, -1):
-        if manual_delete and isinstance(to_delete_list[i], (GUIConfigurationAttribute, GUIConnectionCorner, GUIConnectionScalarsIndicator)):
+        if manual_delete and isinstance(to_delete_list[i], (GUIConfigurationAttribute, GUIConnectionCorner)):
             to_delete_list[i].delete(True)
         else:
             to_delete_list[i].delete()
