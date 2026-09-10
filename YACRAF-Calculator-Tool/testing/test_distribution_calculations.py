@@ -135,13 +135,35 @@ class TestDistributionSpecifications(unittest.TestCase):
         self.assertEqual(parse_distribution_spec((1.0, 2.0, 3.0)),
                          ("triangular", 1.0, 2.0, 3.0))
 
+    def test_non_negative_shift_is_added_to_distribution_samples(self):
+        specification = helper_functions_general.convert_string_to_value("1 + lognormal / 5 / 2")
+
+        self.assertEqual(
+            parse_distribution_spec(specification),
+            ("shifted", 1.0, "lognormal", 5.0, 2.0),
+        )
+
+        samples = self.sampled(specification)
+        self.assertTrue(np.all(samples >= 1))
+        self.assertAlmostEqual(float(np.median(samples)), 6.0, delta=0.15)
+
+    def test_distribution_shift_is_whitespace_tolerant(self):
+        self.assertEqual(
+            parse_distribution_spec(helper_functions_general.convert_string_to_value("2.5+exponential / 3")),
+            ("shifted", 2.5, "exponential", 3.0),
+        )
+
     def test_invalid_cost_distributions_are_rejected(self):
         for specification in (("uniform", -1.0, 2.0),
                               ("triangular", 1.0, 3.0, 2.0),
                               ("normal", 1.0, -1.0),
                               ("lognormal", 0.0, 1.5),
                               ("exponential", 0.0),
-                              ("exponential", 1.0, 2.0)):
+                              ("exponential", 1.0, 2.0),
+                              ("-1 + lognormal", 5.0, 2.0),
+                              ("minimum + lognormal", 5.0, 2.0),
+                              ("1 + 2 + lognormal", 5.0, 2.0),
+                              ("1 + ", 5.0, 2.0)):
             with self.subTest(specification=specification):
                 with self.assertRaises(ValueError):
                     parse_distribution_spec(specification)
