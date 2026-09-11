@@ -144,7 +144,7 @@ The save button in the bottom left corner ((3) in the below figure) saves the cu
 
 The figure below shows an example model (following the Yacraf metamodel) in the `System View` (upper right corner, marked blue). The green buttons in the upper left add class instances, `Add connection` and `Calculate` are at the top centre, and view navigation is in the upper right. `Save` and `Settings` are in the lower left, while the lower-right buttons run or clear custom scripts. Scripts are explained in detail later.
 
-![Image of a system view](img/setup_view.svg)
+![Image of a system view](img/yacraf-system_view.png)
 
 #### Adding Class Instances
 
