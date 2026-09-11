@@ -142,28 +142,28 @@ The save button in the bottom left corner ((3) in the below figure) saves the cu
 
 ### Working with System Views
 
-Shown in the figure below is an example of a `System View` reflecting the system that the metamodel from the corresponding `Metamodel Views` has been applied to. The buttons at (1) in the figure are used to create `Connections` between `Classes` and calculate the final values, respectively. (2) shows buttons for running custom scripts that can calculate/simulate different scenarios throughout the `System Views`. Scripts are explained in detail later.
+The figure below shows the bundled distribution example in a current `System View`. The green buttons in the upper left add class instances, `Add connection` and `Calculate` are at the top centre, and view navigation is in the upper right. `Save` and `Settings` are in the lower left, while the lower-right buttons run or clear custom scripts. Scripts are explained in detail later.
 
 ![Image of a system view](img/setup_view.svg)
 
 #### Adding Class Instances
 
-An instance of a `Class` from a `Metamodel View` can be added to the current `System View` by pressing the corresponding button in the top left corner, as shown by (1) in the `System View` in the below figure. The `Class` instances can be configured by pressing E when selected, where one can:
+An instance of a `Class` from a `Metamodel View` can be added to the current `System View` by pressing the corresponding green button in the upper left. The `Class` instances can be configured by pressing E when selected, where one can:
 
 1. Change the name of the corresponding `Class` instance
-2. Create a linked copy of the instance to another `System View` (any calculated value takes all linked versions into account), identified by a marker in their upper right corner (see (3) in the figure below)
+2. Create a linked copy of the instance in another `System View` (any calculated value takes all linked versions into account). Linked copies are identified by a light-green marker in the instance's upper-right corner.
 
 ![Image of a system view where classes from the metamodel views are added and connected based on the analyzed system](img/setup.svg)
 
 #### Adding Connections
 
-Pressing the add connection button at the top ((4) in the above figure) creates a directional `Connection` (see (5)) that can be attached to `Classes` (see (6)) by dragging its corresponding ends. The `Attributes` of the `Class` that the `Connection` points to may take input from the other `Class` if such `Attribute` relations have been configured in the `Metamodel Views`. Attaching a `Connection` to a `Class` will automatically disable `Attribute` entry fields if the corresponding value is dependent on at least one connected `Class`.
+Pressing `Add connection` creates a directional `Connection` with a triangle at each end. Drag the triangles to attach the connection to its source and destination class instances. The `Attributes` of the destination `Class` may then take input from the source `Class` if those `Attribute` relations have been configured in the `Metamodel Views`. Attaching a `Connection` to a `Class` automatically disables an `Attribute` entry field when its value depends on at least one connected `Class`.
 
 System-view connections pass values unchanged and do not have editable scalar multipliers. Fixed transformations required by Yacraf are part of the bundled metamodel calculations.
 
 #### Calculating Values
 
-The calculate button at the top (see (8)) calculates the values of all `Attributes` that do not have a manual input entry field. Calculated are the `Attributes` of all `Classes` in all `System Views`. In the case of the above figure, the `Attribute` indicated by (9) has been calculated using the corresponding `Attribute` values of its input `Classes`. The input `Attributes` in question are highlighted when the `Attribute` is selected.
+Pressing `Calculate` calculates every `Attribute` that does not have a manual input entry field, across all `Classes` in all `System Views`. In the example above, Global Difficulty (GD), Probability of Success (PoS), Loss Risk (LR), and Loss Probability (LP) are calculated downstream values. Distribution-valued results are shown using the percentile range selected in `Settings`. Selecting a calculated `Attribute` highlights the contributing input `Attributes` in orange.
 
 ## Distribution-valued calculations
 
