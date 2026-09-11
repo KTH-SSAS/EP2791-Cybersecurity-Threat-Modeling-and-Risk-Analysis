@@ -142,18 +142,17 @@ The save button in the bottom left corner ((3) in the below figure) saves the cu
 
 ### Working with System Views
 
-The figure below shows the bundled distribution example in a current `System View`. The green buttons in the upper left add class instances, `Add connection` and `Calculate` are at the top centre, and view navigation is in the upper right. `Save` and `Settings` are in the lower left, while the lower-right buttons run or clear custom scripts. Scripts are explained in detail later.
+The figure below shows an example model (following the Yacraf metamodel) in the `System View` (upper right corner, marked blue). The green buttons in the upper left add class instances, `Add connection` and `Calculate` are at the top centre, and view navigation is in the upper right. `Save` and `Settings` are in the lower left, while the lower-right buttons run or clear custom scripts. Scripts are explained in detail later.
 
 ![Image of a system view](img/setup_view.svg)
 
 #### Adding Class Instances
 
-An instance of a `Class` from a `Metamodel View` can be added to the current `System View` by pressing the corresponding green button in the upper left. The `Class` instances can be configured by pressing E when selected, where one can:
+An instance of a `Class` from a `Metamodel View` can be added to the current `System View` by pressing the corresponding green button in the upper left. The `Class` instances can be configured by pressing `E` when selected, where one can:
 
 1. Change the name of the corresponding `Class` instance
 2. Create a linked copy of the instance in another `System View` (any calculated value takes all linked versions into account). Linked copies are identified by a light-green marker in the instance's upper-right corner.
 
-![Image of a system view where classes from the metamodel views are added and connected based on the analyzed system](img/setup.svg)
 
 #### Adding Connections
 
