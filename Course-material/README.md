@@ -1,4 +1,4 @@
-# Main Course Material
+# Main course material
 
 The main study material for this course is the [Yet another cybersecurity risk assessment framework (Yacraf)](https://link.springer.com/article/10.1007/s10207-023-00713-y). Moreover, in the [Yacraf calculations and statistical extensions](lectures/Yacraf-calculations.md) some refinements and extensions of the original work is presented (in particular the calculation of conditional Probability of Success for attacks/abuse cases). As a complement, this directory gathers:
 
