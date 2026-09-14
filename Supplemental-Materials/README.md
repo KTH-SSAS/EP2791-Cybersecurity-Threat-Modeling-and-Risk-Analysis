@@ -121,3 +121,20 @@ Use this subsection to quickly deepen Phase 4: find and rate vulnerabilities, na
 - FAIR overview ppt -> [Link](https://cdn2.hubspot.net/hubfs/1616664/The%20FAIR%20Model_FINAL_Web%20Only.pdf)
 
 - Notes on Yacraf relation to FAIR → [Link](https://github.com/KTH-SSAS/EP2791-Cybersecurity-Threat-Modeling-and-Risk-Analysis/blob/master/Supplemental-Materials/Notes_on_Yacraf_relation_to_FAIR.md)
+
+## Multi-Agentic System Threat Modelling
+
+The [OWASP Multi-Agentic System Threat Modeling Guide v1.0](https://genai.owasp.org/resource/multi-agentic-system-threat-modeling-guide-v1-0/) is supplementary reading for the Threat Modelling course. It applies OWASP’s Agentic AI threat taxonomy to systems in which multiple autonomous agents coordinate to achieve shared or distributed goals.
+
+### Relevance
+
+Multi-agent systems introduce dynamic communication, delegated authority, tool access, and inter-agent dependencies. These characteristics create new attack surfaces and allow the compromise or failure of one agent to affect the wider system.
+
+### Important Threat Modeling outcomes 
+
+- Identify agents, assets, data flows, tools, and external services.
+- Map agent interactions, permissions, dependencies, and trust boundaries.
+- Examine threats related to coordination, shared context, and delegated authority.
+- Analyse how attacks or failures could propagate between agents.
+- Select controls for validation, access restriction, isolation, monitoring, and human oversight.
+
