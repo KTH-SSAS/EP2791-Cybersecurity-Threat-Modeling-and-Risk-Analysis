@@ -1,10 +1,18 @@
 # Yacraf calculator
 
+## Background
 This is a graphical tool for doing calculations according to [Yacraf](https://link.springer.com/article/10.1007/s10207-023-00713-y) used in the KTH courses EP2790, EP2791, and EP279V.
 
 This tool allows calculations inherent to the threat modeling to be set up and calculated using graphical block diagrams, where one can place, drag, and connect different blocks across various `Views`. The tool aims to allow for (i) the automation of the calculation process, where any changes to any block automatically propagate through the system and (ii) the simulation/analysis of various system configurations.
 
-This README explains how to install and operate the calculator. Parameter definitions, equations, statistical assumptions, and worked calculation examples are maintained in the course material's [Yacraf calculations and statistical extensions](../Course-material/lectures/Yacraf-calculations.md).
+This README explains how to install and operate the calculator. In addition, we provide a set of short tutorial videos that walk you through the tool, from setup and basic navigation to running example workflows with Yacraf. **Note! The videos are recorded in an earlier tool version, so while details may be legacy the overall design remains the same.**
+- Video 1 - [First launch & pre-installed models](https://play.kth.se/media/YACRAF-tool-1/0_of3nc0sc)
+- Video 2 - [Workspace creation](https://play.kth.se/media/YACRAF-tool-2/0_mtn010dp)
+- Video 3 - [Creating attacker profiles & abuse cases](https://play.kth.se/media/YACRAF-tool-3/0_mkt2fuhc)
+- Video 4 - [Creating attack trees](https://play.kth.se/media/YACRAF-tool-4/0_yc4z3d9j)
+- Video 5 - [Metamodel editing](https://play.kth.se/media/YACRAF-tool-5/0_wa27pt27)
+
+Parameter definitions, equations, statistical assumptions are maintained in the course material's [Yacraf calculations and statistical extensions](../Course-material/lectures/Yacraf-calculations.md).
 
 > **Use the bundled metamodel as-is.** It is the calculator's implementation of the Yacraf metamodel. Normal use consists of adding instances, values, and connections in `System Views`; changing the `Metamodel Views` is neither expected nor required. Metamodel editing is documented only for maintainers and advanced experiments in [Advanced: changing or rebuilding the Yacraf metamodel](#advanced-changing-or-rebuilding-the-yacraf-metamodel) at the end of this README. The calculation reference clearly distinguishes paper-compatible behavior from calculator-specific statistical assumptions and the optional `Conditional PoS distribution` extension.
 
@@ -226,17 +234,6 @@ Note: Computationally heavy scripts could take some time to complete. The corres
 ## Error Handling
 
 Any errors found in the `Metamodel Views` or `System Views` upon calculating `Attribute` values are printed.
-
-## Step-by-Step Video Walkthroughs 
-
-We provide a set of short tutorial videos that walk you through the tool, from setup and basic navigation to running example workflows with Yacraf. Watch them in order for a quick onboarding. Links to each video are listed below
-
-- Video 1 - [First launch & pre-installed models](https://play.kth.se/media/YACRAF-tool-1/0_of3nc0sc)
-- Video 2 - [Workspace creation](https://play.kth.se/media/YACRAF-tool-2/0_mtn010dp)
-- Video 3 - [Creating attacker profiles & abuse cases](https://play.kth.se/media/YACRAF-tool-3/0_mkt2fuhc)
-- Video 4 - [Creating attack trees](https://play.kth.se/media/YACRAF-tool-4/0_yc4z3d9j)
-- Video 5 - [Metamodel editing](https://play.kth.se/media/YACRAF-tool-5/0_wa27pt27)
-
 
 ## Reporting bugs with the Yacraf tool
 If you hit a bug while using the Yacraf calculator or examples, please open a **GitHub Issue** (preferred) or email us. **Before you file the issue**, please update to the **latest commit/release** and try again, and check **existing issues** to avoid duplicates.
