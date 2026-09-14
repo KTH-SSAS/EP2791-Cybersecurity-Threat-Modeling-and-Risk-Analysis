@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="610" viewBox="0 0 1200 610" role="img" aria-labelledby="title desc">
+  <title id="title">Triangular conditional probability-of-success example</title>
+  <desc id="desc">The survival function of a triangular Effort Spent distribution maps Global Difficulty samples 3, 5, and 7 to conditional probabilities 17 over 18, one half, and 1 over 18.</desc>
+  <defs>
+    <style>
+      .title { font: 700 25px system-ui, sans-serif; fill: #0f172a; }
+      .heading { font: 700 18px system-ui, sans-serif; fill: #0f172a; }
+      .body { font: 16px system-ui, sans-serif; fill: #334155; }
+      .small { font: 14px system-ui, sans-serif; fill: #475569; }
+      .mono { font: 15px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #0f172a; }
+      .axis { stroke: #334155; stroke-width: 2; }
+      .guide { stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 5 5; }
+      .curve { fill: none; stroke: #7c3aed; stroke-width: 4; }
+      .point { fill: #dc2626; stroke: #ffffff; stroke-width: 2; }
+      .grid { stroke: #94a3b8; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="610" fill="#ffffff"/>
+  <text x="40" y="42" class="title">Triangular effort produces a nonlinear Conditional PoS mapping</text>
+  <rect x="40" y="66" width="1120" height="54" rx="8" fill="#f5f3ff" stroke="#c4b5fd"/>
+  <text x="600" y="99" text-anchor="middle" class="heading">Qˢ = Pr(ES &gt; GDˢ), with ES ~ Triangular(2, 5, 8)</text>
+
+  <text x="70" y="157" class="heading">Effort survival function</text>
+  <line x1="130" y1="495" x2="570" y2="495" class="axis"/>
+  <line x1="130" y1="495" x2="130" y2="185" class="axis"/>
+  <text x="350" y="550" text-anchor="middle" class="body">Global Difficulty g</text>
+  <text x="52" y="340" text-anchor="middle" transform="rotate(-90 52 340)" class="body">Pr(ES &gt; g)</text>
+  <text x="116" y="500" text-anchor="end" class="small">0</text>
+  <text x="116" y="345" text-anchor="end" class="small">0.5</text>
+  <text x="116" y="195" text-anchor="end" class="small">1</text>
+  <line x1="130" y1="343" x2="570" y2="343" class="guide"/>
+  <line x1="130" y1="190" x2="570" y2="190" class="guide"/>
+
+  <g class="small" text-anchor="middle">
+    <text x="130" y="518">0</text>
+    <text x="218" y="518">2</text>
+    <text x="262" y="518">3</text>
+    <text x="350" y="518">5</text>
+    <text x="438" y="518">7</text>
+    <text x="482" y="518">8</text>
+    <text x="570" y="518">10</text>
+  </g>
+  <path d="M130 190 L218 190 Q284 190 350 342.5 Q416 495 482 495 L570 495" class="curve"/>
+  <line x1="262" y1="495" x2="262" y2="207" class="guide"/>
+  <line x1="350" y1="495" x2="350" y2="342.5" class="guide"/>
+  <line x1="438" y1="495" x2="438" y2="478" class="guide"/>
+  <circle cx="262" cy="207" r="7" class="point"/>
+  <circle cx="350" cy="342.5" r="7" class="point"/>
+  <circle cx="438" cy="478" r="7" class="point"/>
+
+  <rect x="625" y="157" width="505" height="252" rx="10" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="650" y="190" class="heading">Map Global Difficulty values to Conditional PoS</text>
+  <line x1="650" y1="215" x2="1105" y2="215" class="grid"/>
+  <line x1="650" y1="257" x2="1105" y2="257" class="grid"/>
+  <line x1="650" y1="299" x2="1105" y2="299" class="grid"/>
+  <line x1="650" y1="341" x2="1105" y2="341" class="grid"/>
+  <line x1="750" y1="215" x2="750" y2="383" class="grid"/>
+  <line x1="875" y1="215" x2="875" y2="383" class="grid"/>
+  <text x="700" y="243" text-anchor="middle" class="heading">sample s</text>
+  <text x="812" y="243" text-anchor="middle" class="heading">GDˢ</text>
+  <text x="990" y="243" text-anchor="middle" class="heading">Qˢ = Pr(ES &gt; GDˢ)</text>
+  <text x="700" y="285" text-anchor="middle" class="mono">1</text>
+  <text x="812" y="285" text-anchor="middle" class="mono">3</text>
+  <text x="990" y="285" text-anchor="middle" class="mono">17/18 = 0.944</text>
+  <text x="700" y="327" text-anchor="middle" class="mono">2</text>
+  <text x="812" y="327" text-anchor="middle" class="mono">5</text>
+  <text x="990" y="327" text-anchor="middle" class="mono">1/2 = 0.500</text>
+  <text x="700" y="369" text-anchor="middle" class="mono">3</text>
+  <text x="812" y="369" text-anchor="middle" class="mono">7</text>
+  <text x="990" y="369" text-anchor="middle" class="mono">1/18 = 0.056</text>
+
+  <rect x="625" y="435" width="505" height="118" rx="10" fill="#fff7ed" stroke="#fdba74"/>
+  <text x="650" y="468" class="heading">Interpretation</text>
+  <text x="650" y="495" class="body">The same triangular effort model gives very different success</text>
+  <text x="650" y="519" class="body">probabilities at low, central, and high difficulty. The mapping is</text>
+  <text x="650" y="543" class="body">curved because triangular density is not constant.</text>
+  <text x="70" y="585" class="small">The mean of {0.944, 0.500, 0.056} is 0.500, while the spread exposes sensitivity to realized difficulty.</text>
+</svg>

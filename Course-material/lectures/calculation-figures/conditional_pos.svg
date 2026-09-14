@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="610" viewBox="0 0 1200 610" role="img" aria-labelledby="title desc">
+  <title id="title">Conditional probability-of-success distribution</title>
+  <desc id="desc">The survival function of a uniform Effort Spent distribution maps each Global Difficulty sample to a conditional probability of success. Three example difficulty samples become three probability samples.</desc>
+  <defs>
+    <style>
+      .title { font: 700 25px system-ui, sans-serif; fill: #0f172a; }
+      .heading { font: 700 18px system-ui, sans-serif; fill: #0f172a; }
+      .body { font: 16px system-ui, sans-serif; fill: #334155; }
+      .small { font: 14px system-ui, sans-serif; fill: #475569; }
+      .mono { font: 15px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #0f172a; }
+      .axis { stroke: #334155; stroke-width: 2; }
+      .guide { stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 5 5; }
+      .curve { fill: none; stroke: #2563eb; stroke-width: 4; }
+      .point { fill: #dc2626; stroke: #ffffff; stroke-width: 2; }
+      .grid { stroke: #94a3b8; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="610" fill="#ffffff"/>
+  <text x="40" y="42" class="title">Conditional PoS maps each Global Difficulty sample through the effort survival function</text>
+  <rect x="40" y="66" width="1120" height="54" rx="8" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="600" y="99" text-anchor="middle" class="heading">Qˢ = Pr(ES &gt; GDˢ) = 1 − F<tspan baseline-shift="sub" font-size="13">ES</tspan>(GDˢ)</text>
+
+  <text x="70" y="157" class="heading">Example: Effort Spent ES ~ Uniform(2, 8)</text>
+  <line x1="130" y1="495" x2="570" y2="495" class="axis"/>
+  <line x1="130" y1="495" x2="130" y2="185" class="axis"/>
+  <text x="350" y="550" text-anchor="middle" class="body">Global Difficulty g</text>
+  <text x="52" y="340" text-anchor="middle" transform="rotate(-90 52 340)" class="body">Pr(ES &gt; g)</text>
+  <text x="116" y="500" text-anchor="end" class="small">0</text>
+  <text x="116" y="345" text-anchor="end" class="small">0.5</text>
+  <text x="116" y="195" text-anchor="end" class="small">1</text>
+  <line x1="130" y1="340" x2="570" y2="340" class="guide"/>
+  <line x1="130" y1="190" x2="570" y2="190" class="guide"/>
+
+  <g class="small" text-anchor="middle">
+    <text x="130" y="518">0</text><text x="218" y="518">2</text><text x="262" y="518">3</text><text x="350" y="518">5</text><text x="438" y="518">7</text><text x="482" y="518">8</text><text x="570" y="518">10</text>
+  </g>
+  <path d="M130 190 L218 190 L482 495 L570 495" class="curve"/>
+  <line x1="262" y1="495" x2="262" y2="241" class="guide"/>
+  <line x1="350" y1="495" x2="350" y2="343" class="guide"/>
+  <line x1="438" y1="495" x2="438" y2="444" class="guide"/>
+  <circle cx="262" cy="241" r="7" class="point"/>
+  <circle cx="350" cy="343" r="7" class="point"/>
+  <circle cx="438" cy="444" r="7" class="point"/>
+
+  <rect x="625" y="157" width="505" height="252" rx="10" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="650" y="190" class="heading">Map Global Difficulty values to conditional PoS</text>
+  <line x1="650" y1="215" x2="1105" y2="215" class="grid"/>
+  <line x1="650" y1="257" x2="1105" y2="257" class="grid"/>
+  <line x1="650" y1="299" x2="1105" y2="299" class="grid"/>
+  <line x1="650" y1="341" x2="1105" y2="341" class="grid"/>
+  <line x1="750" y1="215" x2="750" y2="383" class="grid"/>
+  <line x1="875" y1="215" x2="875" y2="383" class="grid"/>
+  <text x="700" y="243" text-anchor="middle" class="heading">sample s</text>
+  <text x="812" y="243" text-anchor="middle" class="heading">GDˢ</text>
+  <text x="990" y="243" text-anchor="middle" class="heading">Qˢ = Pr(ES &gt; GDˢ)</text>
+  <text x="700" y="285" text-anchor="middle" class="mono">1</text><text x="812" y="285" text-anchor="middle" class="mono">3</text><text x="990" y="285" text-anchor="middle" class="mono">5/6 = 0.833</text>
+  <text x="700" y="327" text-anchor="middle" class="mono">2</text><text x="812" y="327" text-anchor="middle" class="mono">5</text><text x="990" y="327" text-anchor="middle" class="mono">3/6 = 0.500</text>
+  <text x="700" y="369" text-anchor="middle" class="mono">3</text><text x="812" y="369" text-anchor="middle" class="mono">7</text><text x="990" y="369" text-anchor="middle" class="mono">1/6 = 0.167</text>
+
+  <rect x="625" y="435" width="505" height="118" rx="10" fill="#fff7ed" stroke="#fdba74"/>
+  <text x="650" y="468" class="heading">Interpretation</text>
+  <text x="650" y="495" class="body">{0.833, 0.500, 0.167} is a distribution over conditional</text>
+  <text x="650" y="519" class="body">success probabilities caused by uncertain difficulty. Its percentiles</text>
+  <text x="650" y="543" class="body">are not a confidence interval for one unknown PoS.</text>
+  <text x="70" y="585" class="small">For 2 ≤ g ≤ 8: Pr(ES &gt; g) = (8 − g) / (8 − 2); below 2 it is 1, and above 8 it is 0.</text>
+</svg>
