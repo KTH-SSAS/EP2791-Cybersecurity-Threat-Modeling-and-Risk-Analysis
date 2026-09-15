@@ -316,7 +316,7 @@ If effort and difficulty are dependent—for example, if better-resourced attack
 
 #### Survival-function mappings for the supported distributions
 
-The implementation always evaluates the empirical survival function, so it does not need the following closed-form expressions. They clarify the theoretical mapping for a Global Difficulty realization $g$.
+**The implementation always evaluates the empirical survival function, so it does not need the following closed-form expressions. They clarify the theoretical mapping for a Global Difficulty realization $g$.**
 
 **Fixed effort.** For deterministic effort $ES=e$, strict comparison produces a step: $Q(g)=1$ when $g<e$ and $Q(g)=0$ when $g\geq e$.
 
