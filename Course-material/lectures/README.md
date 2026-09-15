@@ -1,11 +1,11 @@
 ## Lectures
-In this folder you’ll find links to the **course lecture videos**. Watch them in order (Phase 0 → Phase 5). Each lecture introduces a phase of the Yacraf that you’ll use for the assignement. All lectures were not recorded at the same point in time and extended and complimentary material has been added over time. A red star in the slide deck is indicating where material has been added. The folder also includes the PDF course slides and PNG diagrams of the risk calculator framework and threat modeling language for better readability
+In this folder you’ll find links to the **course lecture videos**. Watch them in order (Phase 0 → Phase 5). Each lecture introduces a phase of Yacraf that you’ll use for the assignment. The lectures were recorded at different times, and extended and complementary material has been added over time. A red star in the slide deck indicates where material has been added. The folder also includes the PDF course slides and PNG diagrams of the risk calculator framework and threat modeling language for a quick overview.
 
 - **Intro Lecture from 2025-10-27 → [Lecture video ▶](https://play.kth.se/media/EP2790+EP279V-Intro+Lecture/0_qyrtjym5?st=50)**
 
 - **Lecture 0 — Preliminaries for Cyber Threat Modeling & Risk Analysis → [Lecture video ▶](https://play.kth.se/playlist/dedicated/0_eeoaqjho/0_kih95sxw)** 
 
-    In this lecture, we’ll ground YACRAF in conceptual modeling: UML class diagrams define the language (meta-model) and object diagrams capture real-world instances. You’ll see how this mindset underpins every phase that follows. 
+    In this lecture, we’ll ground Yacraf in conceptual modeling: UML class diagrams define the language (metamodel) and object diagrams capture real-world instances. You’ll see how this mindset underpins every phase that follows.
 
 - **Lecture 1 — Phase 0 and 1 Scope & Delimitations and Business Analysis → [Lecture video ▶](https://play.kth.se/playlist/dedicated/0_eeoaqjho/0_4yxyqknt)**  
 
@@ -27,6 +27,8 @@ In this folder you’ll find links to the **course lecture videos**. Watch them 
 
     In this lecture, we’ll identify threat actors and abuse cases and estimate contact/action probabilities. You’ll turn attacker intent and capability into concrete threat events you can later quantify.
 
+    Related calculation reference: [Threat Event Probability](Yacraf-calculations.md#threat-event-probability-loss-probability-and-loss-risk).
+
 
 
 - **Lecture 3a — Phase 3: Additional Comments → [Lecture video ▶](https://play.kth.se/playlist/dedicated/0_eeoaqjho/0_e7siw0ke)**
@@ -37,6 +39,8 @@ In this folder you’ll find links to the **course lecture videos**. Watch them 
 - **Lecture 4 — Phase 4 Attack and Resilience Analysis → [Lecture video ▶](https://play.kth.se/playlist/dedicated/0_eeoaqjho/0_0tz0nn66)**
 
     In this lecture, we’ll link weaknesses to attack paths (trees/graphs) and examine existing/proposed controls. You’ll prioritize vulnerabilities and understand where the system is fragile or resilient.
+
+    Related calculation references: [Global Attack Difficulty](Yacraf-calculations.md#global-attack-difficulty) and [Probability of Success](Yacraf-calculations.md#probability-of-success-modes).
 
 
 
@@ -56,3 +60,4 @@ In this folder you’ll find links to the **course lecture videos**. Watch them 
     
     In this lecture, we’ll aggregate it all: combine likelihood and impact into overall risk, compare protection scenarios, and deliver clear, prioritized recommendations for reducing risk.
 
+    Related calculation reference: [Loss Probability and Loss Risk](Yacraf-calculations.md#threat-event-probability-loss-probability-and-loss-risk).
