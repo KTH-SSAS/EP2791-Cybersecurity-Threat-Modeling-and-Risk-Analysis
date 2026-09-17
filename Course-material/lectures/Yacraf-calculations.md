@@ -16,6 +16,7 @@ The calculator supports both the paper-compatible single-value workflow and addi
 8. [Probability of Success modes](#probability-of-success-modes)
 9. [Results, percentiles, and repeated runs](#results-percentiles-and-repeated-runs)
 10. [How the bundled metamodel implements the calculations](#how-the-bundled-metamodel-implements-the-calculations)
+11. [Supplementary: closed-form survival mappings](#supplementary-closed-form-survival-mappings)
 
 ## Status of the calculations
 
@@ -260,28 +261,28 @@ Every aligned pair is one simulated attack situation. It contributes $1$ when ef
 
 > **Important:** `Conditional PoS distribution` is an optional extension implemented by the calculator. It is not the single-value PoS calculation described in the Yacraf paper. A result produced in this mode must be labeled as a Conditional PoS distribution, with the calculation mode and sample count reported.
 
-#### Motivation
+#### Empirical survival function: what the calculator actually computes
 
-The scalar ratio integrates over all uncertainty in Global Difficulty and returns one number. That is often exactly what is needed for expected risk, but it hides whether success is nearly constant or changes substantially between low- and high-difficulty realizations. Conditional mode retains this variation.
+In Conditional PoS mode, the calculator draws $N$ Effort Spent ($ES$) samples and obtains $N$ Global Difficulty ($GD_a$) realizations by propagating the attack graph's sampled inputs. For **each** realized difficulty $g$, it asks: *What fraction of all sampled effort values is strictly greater than $g$?* This fraction is the empirical survival function at $g$. The calculator does not evaluate a closed-form cumulative distribution function (CDF), fit a probability family to the output, or compare only the effort sample at the same index.
 
-For example, suppose $ES\sim\mathrm{Uniform}(0,10)$ and each of the following two Global Difficulty values is equally likely. Both scenarios have mean Conditional PoS $0.50$, and therefore the same scalar PoS in the large-sample limit:
+For a small hand-counted example, suppose one run produces these four **realized samples**, not distribution parameters:
 
-| Scenario | Possible $GD$ values | Conditional PoS values $Q(g)=\Pr(ES>g)$ | What the scalar hides |
-| --- | --- | --- | --- |
-| Nearly constant difficulty | $4.9,\ 5.1$ | $0.51,\ 0.49$ | Success stays close to 50% for either realization. |
-| Strongly varying difficulty | $1,\ 9$ | $0.90,\ 0.10$ | Success changes from very likely to very unlikely. |
+| Sampled Effort Spent $ES$ | Sampled Global Difficulty $GD_a$ |
+| --- | --- |
+| $[2,4,6,8]$ | $[3,5,7,9]$ |
 
-Thus a scalar value of $0.50$ cannot distinguish the narrow distribution $\{0.49,0.51\}$ from the wide distribution $\{0.10,0.90\}$. The Conditional PoS output makes that difference visible while preserving the same mean.
+Hold the effort samples fixed and check each difficulty against all four of them:
 
-#### Definition and empirical calculation
+| Difficulty realization $g$ | Effort samples with $ES>g$ | Empirical survival $\widehat S_{ES}(g)$ |
+| --- | --- | --- |
+| $3$ | $4,6,8$ | $3/4=0.75$ |
+| $5$ | $6,8$ | $2/4=0.50$ |
+| $7$ | $8$ | $1/4=0.25$ |
+| $9$ | None | $0/4=0$ |
 
-Let $F_{ES}(g)=\Pr(ES\leq g)$ be the cumulative distribution function of Effort Spent and $S_{ES}(g)=1-F_{ES}(g)$ its survival function. For every sampled Global Difficulty $GD_a^{(s)}=g_s$, conditional mode defines
+The attack event's Conditional PoS output is therefore the empirical sample vector $[0.75,0.50,0.25,0]$. These are four **success probabilities conditional on four plausible difficulty realizations**, not four binary success/failure outcomes. The tool can show their percentiles or plot the full empirical distribution. With only four effort samples, the estimates move in steps of $1/4$; the user-selected larger sample count normally makes the estimate more stable. If an effort sample equals $g$, it is excluded because success requires $ES>g$.
 
-$$
-Q_a^{(s)} = \Pr(ES>g_s) = S_{ES}(g_s)=1-F_{ES}(g_s).
-$$
-
-Because the implementation has effort samples rather than an analytic cumulative distribution function, it uses the empirical survival function:
+In notation, $s$ selects a difficulty realization and $t$ ranges over **all** effort samples:
 
 $$
 Q_a^{(s)}
@@ -290,9 +291,20 @@ Q_a^{(s)}
 \mathbf{1}\!\left[ES^{(t)} > GD_a^{(s)}\right].
 $$
 
-The separate indices are important. For each difficulty sample $s$, the calculator compares that difficulty with **all** effort samples $t$. Sorting the effort samples makes this calculation efficient. The output $Q_a^{(1)},\ldots,Q_a^{(N)}$ is retained as an empirical probability distribution and can be summarized or plotted.
+Sorting the effort samples makes these counts efficient. The output $Q_a^{(1)},\ldots,Q_a^{(N)}$ is retained as an empirical probability distribution. If $F_{ES}(g)=\Pr(ES\leq g)$ is the theoretical CDF of Effort Spent, its theoretical survival function is $S_{ES}(g)=1-F_{ES}(g)=\Pr(ES>g)$. The empirical fractions approximate that function from the sampled values; they need not equal its [closed-form expression](#supplementary-closed-form-survival-mappings) in a finite run.
 
-![Mapping Global Difficulty samples through the Effort Spent survival function](calculation-figures/conditional_pos.svg)
+#### Why retain the conditional distribution?
+
+The scalar ratio integrates over all uncertainty in Global Difficulty and returns one number. That is often exactly what is needed for expected risk, but it hides whether success is nearly constant or changes substantially between low- and high-difficulty realizations. Conditional mode retains this variation.
+
+As an **idealized theoretical illustration**, suppose $ES\sim\mathrm{Uniform}(0,10)$ and each of the following two Global Difficulty values is equally likely. Both scenarios have mean Conditional PoS $0.50$, and therefore the same scalar PoS in the large-sample limit. A finite calculator run obtains **empirical estimates** from its actual effort samples rather than using the analytical values in this table; small runs need not be close to them:
+
+| Scenario | Possible $GD$ values | Analytical Conditional PoS values $Q(g)=\Pr(ES>g)$ | What the scalar hides |
+| --- | --- | --- | --- |
+| Nearly constant difficulty | $4.9,\ 5.1$ | $0.51,\ 0.49$ | Success stays close to 50% for either realization. |
+| Strongly varying difficulty | $1,\ 9$ | $0.90,\ 0.10$ | Success changes from very likely to very unlikely. |
+
+Thus a scalar value of $0.50$ cannot distinguish the narrow distribution $\{0.49,0.51\}$ from the wide distribution $\{0.10,0.90\}$. The Conditional PoS output makes that difference visible while preserving approximately the same mean as the sample count grows.
 
 #### Interpretation and relationship to the scalar result
 
@@ -313,76 +325,6 @@ $$
 so the mean of the Conditional PoS samples should approach the scalar PoS as the sample count grows. Their medians and other percentiles need not equal the scalar probability.
 
 If effort and difficulty are dependent—for example, if better-resourced attackers systematically choose harder routes—the correct quantity requires a joint model such as $\Pr(ES>g\mid GD_a=g)$. The current calculator does not model that dependence.
-
-#### Survival-function mappings for the supported distributions
-
-**The implementation always evaluates the empirical survival function, so it does not need the following closed-form expressions. They clarify the theoretical mapping for a Global Difficulty realization $g$.**
-
-**Fixed effort.** For deterministic effort $ES=e$, strict comparison produces a step: $Q(g)=1$ when $g<e$ and $Q(g)=0$ when $g\geq e$.
-
-**Shifted distributions.** If $ES=c+X$ for a non-negative fixed shift $c$, then
-
-| Global Difficulty $g$ | Conditional PoS $Q(g)$ |
-| --- | --- |
-| $g<c$ | $1$ |
-| $g\geq c$ | $S_X(g-c)$ |
-
-Thus the survival function for any supported named distribution can be shifted by evaluating its unshifted survival function at $g-c$.
-
-**Uniform.** For $ES\sim\mathrm{Uniform}(a,b)$, $Q(g)=1$ below $a$, $Q(g)=0$ at or above $b$, and
-
-$$
-Q(g)=\frac{b-g}{b-a}, \qquad a\leq g < b.
-$$
-
-When $a=b$, treat the uniform input as deterministic effort at $a$ rather than evaluating the fraction with a zero denominator.
-
-**Triangular.** For $ES\sim\mathrm{Triangular}(a,m,b)$, where $m$ is the mode:
-
-| Global Difficulty $g$ | Conditional PoS $Q(g)$ |
-| --- | --- |
-| $g<a$ | $1$ |
-| $a\leq g\leq m$ | $1-\frac{(g-a)^2}{(b-a)(m-a)}$ |
-| $m<g<b$ | $\frac{(b-g)^2}{(b-a)(b-m)}$ |
-| $g\geq b$ | $0$ |
-
-If the mode equals an endpoint or all three parameters are equal, interpret the expression by its corresponding limiting or deterministic case.
-
-For a concrete example, let $ES\sim\mathrm{Triangular}(2,5,8)$ and suppose three sampled Global Difficulty values are $3$, $5$, and $7$:
-
-| Sampled $g$ | Calculation | Conditional PoS $Q(g)$ |
-| --- | --- | --- |
-| $3$ | $1-(3-2)^2/((8-2)(5-2))$ | $17/18\approx0.944$ |
-| $5$ | $1-(5-2)^2/((8-2)(5-2))$ | $1/2=0.500$ |
-| $7$ | $(8-7)^2/((8-2)(8-5))$ | $1/18\approx0.056$ |
-
-The resulting empirical Conditional PoS distribution is therefore approximately $\{0.944,0.500,0.056\}$. The following figure shows that nonlinear mapping.
-
-![Mapping Global Difficulty samples through a triangular Effort Spent survival function](calculation-figures/conditional_pos_triangular.svg)
-
-**Zero-truncated normal.** For the calculator's $ES\sim\mathrm{Normal}(\mu,\sigma^2)\mid ES\geq0$, with standard normal cumulative distribution function $\Phi$, $Q(g)=1$ for $g<0$, and for $g\geq0$,
-
-$$
-Q(g)=\frac{1-\Phi\!\left((g-\mu)/\sigma\right)}{1-\Phi\!\left(-\mu/\sigma\right)}.
-$$
-
-When $\sigma=0$, effort is deterministic and the mapping is a step at $\mu$.
-
-**Lognormal.** For $ES\sim\mathrm{Lognormal}(\log m,\log^2 g_{\mathrm{sd}})$, where $m$ is the median and $g_{\mathrm{sd}}$ is the geometric standard deviation, $Q(g)=1$ for $g\leq0$, and
-
-$$
-Q(g)=1-\Phi\!\left(\frac{\log g-\log m}{\log g_{\mathrm{sd}}}\right), \qquad g>0.
-$$
-
-When $g_{\mathrm{sd}}=1$, effort is deterministic at the median.
-
-**Exponential.** For $ES\sim\mathrm{Exponential}(\theta)$, where the mean (scale) $\theta>0$, $Q(g)=1$ for $g<0$, and
-
-$$
-Q(g)=e^{-g/\theta}, \qquad g\geq0.
-$$
-
-The strict comparison $ES>g$ is used in every case. Equality has probability zero for continuous distributions, but the distinction matters for deterministic or repeated empirical values.
 
 #### Appropriate use and reporting
 
@@ -448,3 +390,77 @@ Calculation type `Q`, highlighted by (2), illustrates the qualitative operation 
 ![Calculations and qualitative relationships in the bundled Yacraf metamodel](calculation-figures/configuration_explanation.svg)
 
 For GUI instructions and the advanced metamodel editor, return to the [Yacraf calculator user guide](../../YACRAF-Calculator-Tool/README.md). Source-level implementation notes are available in the [calculation code overview](../../YACRAF-Calculator-Tool/src/blocks_calculation/README.md).
+
+## Supplementary: closed-form survival mappings
+
+The preceding [empirical worked example](#empirical-survival-function-what-the-calculator-actually-computes) describes the **actual Conditional PoS implementation**. The following formulas are analytical survival functions for idealized Effort Spent distributions. They can help explain the theoretical shape of the mapping or check a large-sample approximation, but the calculator does **not** evaluate these formulas when it calculates Conditional PoS. Finite empirical results may differ from the analytical values.
+
+**Fixed effort.** For deterministic effort $ES=e$, strict comparison produces a step: $Q(g)=1$ when $g<e$ and $Q(g)=0$ when $g\geq e$.
+
+**Shifted distributions.** If $ES=c+X$ for a non-negative fixed shift $c$, then
+
+| Global Difficulty $g$ | Analytical survival $Q(g)$ |
+| --- | --- |
+| $g<c$ | $1$ |
+| $g\geq c$ | $S_X(g-c)$ |
+
+Thus the analytical survival function for any supported named distribution can be shifted by evaluating its unshifted survival function at $g-c$.
+
+**Uniform.** For $ES\sim\mathrm{Uniform}(a,b)$, $Q(g)=1$ below $a$, $Q(g)=0$ at or above $b$, and
+
+$$
+Q(g)=\frac{b-g}{b-a}, \qquad a\leq g < b.
+$$
+
+When $a=b$, treat the uniform input as deterministic effort at $a$ rather than evaluating the fraction with a zero denominator.
+
+The smooth line in the following figure is the **analytical** mapping for uniform effort, not the stepwise empirical survival curve of a finite sample. The calculator approximates it from the sampled effort values.
+
+![Analytical uniform-effort survival mapping](calculation-figures/conditional_pos.svg)
+
+**Triangular.** For $ES\sim\mathrm{Triangular}(a,m,b)$, where $m$ is the mode:
+
+| Global Difficulty $g$ | Analytical survival $Q(g)$ |
+| --- | --- |
+| $g<a$ | $1$ |
+| $a\leq g\leq m$ | $1-\frac{(g-a)^2}{(b-a)(m-a)}$ |
+| $m<g<b$ | $\frac{(b-g)^2}{(b-a)(b-m)}$ |
+| $g\geq b$ | $0$ |
+
+If the mode equals an endpoint or all three parameters are equal, interpret the expression by its corresponding limiting or deterministic case.
+
+For an **analytical** example, let $ES\sim\mathrm{Triangular}(2,5,8)$ and consider difficulty values $g=3$, $5$, and $7$:
+
+| Difficulty $g$ | Closed-form calculation | Analytical $Q(g)$ |
+| --- | --- | --- |
+| $3$ | $1-(3-2)^2/((8-2)(5-2))$ | $17/18\approx0.944$ |
+| $5$ | $1-(5-2)^2/((8-2)(5-2))$ | $1/2=0.500$ |
+| $7$ | $(8-7)^2/((8-2)(8-5))$ | $1/18\approx0.056$ |
+
+The theoretical mapping gives $\{0.944,0.500,0.056\}$ at those three difficulty values. These are **not** claimed to be the outputs of a finite calculator run; its empirical fractions depend on the effort samples actually drawn. The following figure shows the theoretical nonlinear shape.
+
+![Analytical triangular-effort survival mapping](calculation-figures/conditional_pos_triangular.svg)
+
+**Zero-truncated normal.** For the calculator's $ES\sim\mathrm{Normal}(\mu,\sigma^2)\mid ES\geq0$, with standard normal cumulative distribution function $\Phi$, $Q(g)=1$ for $g<0$, and for $g\geq0$,
+
+$$
+Q(g)=\frac{1-\Phi\!\left((g-\mu)/\sigma\right)}{1-\Phi\!\left(-\mu/\sigma\right)}.
+$$
+
+When $\sigma=0$, effort is deterministic and the mapping is a step at $\mu$.
+
+**Lognormal.** For $ES\sim\mathrm{Lognormal}(\log m,\log^2 g_{\mathrm{sd}})$, where $m$ is the median and $g_{\mathrm{sd}}$ is the geometric standard deviation, $Q(g)=1$ for $g\leq0$, and
+
+$$
+Q(g)=1-\Phi\!\left(\frac{\log g-\log m}{\log g_{\mathrm{sd}}}\right), \qquad g>0.
+$$
+
+When $g_{\mathrm{sd}}=1$, effort is deterministic at the median.
+
+**Exponential.** For $ES\sim\mathrm{Exponential}(\theta)$, where the mean (scale) $\theta>0$, $Q(g)=1$ for $g<0$, and
+
+$$
+Q(g)=e^{-g/\theta}, \qquad g\geq0.
+$$
+
+The strict comparison $ES>g$ is used in every case. Equality has probability zero for continuous distributions, but the distinction matters for deterministic or repeated empirical values.
