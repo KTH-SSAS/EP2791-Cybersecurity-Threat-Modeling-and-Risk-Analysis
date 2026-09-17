@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="610" viewBox="0 0 1200 610" role="img" aria-labelledby="title desc">
   <title id="title">Triangular conditional probability-of-success example</title>
-  <desc id="desc">The survival function of a triangular Effort Spent distribution maps Global Difficulty samples 3, 5, and 7 to conditional probabilities 17 over 18, one half, and 1 over 18.</desc>
+  <desc id="desc">Analytical illustration only: the theoretical survival function of a triangular Effort Spent distribution maps example Global Difficulty values 3, 5, and 7 to probabilities 17 over 18, one half, and 1 over 18. The calculator instead counts sampled effort values.</desc>
   <defs>
     <style>
       .title { font: 700 25px system-ui, sans-serif; fill: #0f172a; }
@@ -19,7 +19,7 @@
   <rect width="1200" height="610" fill="#ffffff"/>
   <text x="40" y="42" class="title">Triangular effort produces a nonlinear Conditional PoS mapping</text>
   <rect x="40" y="66" width="1120" height="54" rx="8" fill="#f5f3ff" stroke="#c4b5fd"/>
-  <text x="600" y="99" text-anchor="middle" class="heading">Qˢ = Pr(ES &gt; GDˢ), with ES ~ Triangular(2, 5, 8)</text>
+  <text x="600" y="99" text-anchor="middle" class="heading">Analytical illustration — calculator counts sampled effort values instead</text>
 
   <text x="70" y="157" class="heading">Effort survival function</text>
   <line x1="130" y1="495" x2="570" y2="495" class="axis"/>
