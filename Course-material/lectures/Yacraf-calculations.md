@@ -66,13 +66,15 @@ All difficulty and effort quantities compared in the calculations must use compa
 
 ## Bundled Yacraf input calculations
 
-The bundled metamodel uses values from $0$ to $10$ for the contributing attacker and abuse-case assessments. Threat Capability is the arithmetic mean of attacker Skill, Resources, and Sponsorship:
+The bundled metamodel uses values from $0$ to $10$ for the contributing attacker and abuse-case assessments. The dotted or qualitative relationships in the framework are prompts for analyst judgment. In other words forming the calculations here are challenging. However, the tool implementation deploys simplified and mean-centred arithmetic formulas for these calculations. The values of the parameters calculated this way can also be overwritten by the end user to capture the analyst's own judgement. 
+
+Threat Capability is the arithmetic mean of attacker Skill, Resources, and Sponsorship:
 
 $$
 TC=\frac{Sk+Res+Sp}{3}.
 $$
 
-Probability of Contact is the mean of Accessibility to Attack Surface and Window of Opportunity, scaled from $0$–$10$ to $0$–$1$:
+Probability of Contact is the mean of Accessibility to Attack Surface and Window of Opportunity, scaled from $0$ – $10$ to $0$ – $1$:
 
 $$
 PoC=0.1\cdot\frac{AtAS+WoO}{2}.
@@ -93,7 +95,7 @@ $$
 TEP=PoC\cdot PoA.
 $$
 
-The dotted or qualitative relationships in the framework are prompts for analyst judgment, not additional numerical formulas. In particular, the bundled metamodel calculates $TC$ but leaves Effort Spent and Local Difficulty as manual assessments informed by the connected qualitative factors. Likewise, the model can use $TC$ to highlight relevant considerations without automatically converting it into $LD$, $AtAS$, or $ES$.
+In particular, the bundled metamodel calculates $TC$ but leaves Effort Spent and Local Difficulty as manual assessments informed by the connected qualitative factors. Likewise, the model can use $TC$ to highlight relevant considerations without automatically converting it into $LD$, $AtAS$, or $ES$.
 
 ## Distribution-valued inputs
 
@@ -113,7 +115,7 @@ $$
 
 For example, `1 + lognormal / 5 / 2` uses a lognormal distribution with median $5$ and geometric standard deviation $2$, then adds $1$ to every sampled value. The shifted distribution therefore has lower bound $1$ and median $6$. The offset is deterministic, not another uncertain input.
 
-These names describe the input distributions only. The calculator does not force a named distribution family on an aggregated result.
+These names describe the input distributions only. The calculator does not force a named distribution family on an aggregated result, and instead operates on numerical distributions based on sampling.
 
 In the bundled metamodel, named distributions are accepted for attack-event Local and Global Difficulty and their hidden intermediate values, abuse-case Effort Spent, Loss Magnitude and Loss Risk, Actor Risk, and Defense Mechanism Cost and Impact. Probability of Contact, Probability of Action, and Threat Event Probability remain scalar probability inputs or results. Probability of Success and Loss Probability can nevertheless become empirical distributions when Conditional PoS mode produces distribution-valued downstream results. A custom metamodel may assign the sampled-distribution value type to additional fields.
 
@@ -129,7 +131,7 @@ It then evaluates the complete model for sample index $s$, producing $y^{(1)},\l
 
 A fixed input such as $2$ is expanded to $2$ in every sample. Arithmetic involving a distribution and a scalar broadcasts the scalar across all $N$ samples, while arithmetic involving distributions is performed on aligned sample indices.
 
-Different manually entered sources are sampled independently. When the same local attack event is reused through several graph branches or linked views, its samples are cached for that calculation run and reused consistently. This prevents the same uncertain source from receiving unrelated realizations merely because it occurs in more than one branch.
+Different manually entered sources are sampled independently. When the same local attack event is reused through several graph branches or linked views, its samples are cached for that calculation run and reused consistently.
 
 The Monte Carlo sample count controls numerical resolution rather than model uncertainty. More samples normally make quantiles and probability estimates more stable, but they do not remove uncertainty represented by the input distributions.
 
@@ -137,7 +139,7 @@ The Monte Carlo sample count controls numerical resolution rather than model unc
 
 Every attack event—including root, intermediate, AND, OR, and terminal events—has both a Local Difficulty ($LD$) and a Global Difficulty ($GD$). Local Difficulty is the incremental cost of performing the event itself. Global Difficulty is the total cost of the easiest complete attack plan that reaches and performs it, including the impact of connected defenses.
 
-Consequently, a root attack event without a connected defense has $GD=LD$. A downstream attack event aggregates its predecessors' **global** difficulties and then adds its own Local Difficulty and connected Defense Mechanism Impact. It does not aggregate the predecessors' Local Difficulties directly.
+Consequently, a root attack event without a connected defense has $GD=LD$. A downstream attack event aggregates its predecessors' **global** difficulties and then adds its own Local Difficulty and connected Defense Mechanism Impact. 
 
 Let $c_r^{(s)}$ be the sampled difficulty contribution of one atomic source $r$. An atomic source can be an attack event's Local Difficulty or a connected Defense Mechanism Impact. A complete feasible attack plan $p$ is represented as a set of required atomic sources. Its total difficulty in sample $s$ is
 
@@ -155,15 +157,12 @@ The gate operations construct the feasible plans as follows:
 
 1. `OR` collects the alternative input plans. The easiest alternative may be different in different Monte Carlo samples.
 2. `AND` forms every required combination and uses set union on the atomic sources. A Local Difficulty or Defense Mechanism Impact shared by two branches is therefore charged once rather than twice.
-3. Plans that are strict supersets of another feasible plan are discarded. This is valid because the supported difficulty contributions are non-negative, so a strict superset cannot be easier.
 
 ![Illustration of sample-aligned OR and AND Global Difficulty aggregation](calculation-figures/monte_carlo_aggregation.svg)
 
 The result at every attack event is therefore the empirical distribution of the easiest complete plan reaching that event—not a sum or minimum calculated from only the three displayed percentiles.
 
-Defense Mechanism Cost ($DMC$) is a separate input for comparing or prioritizing defenses. It is not added to Global Difficulty and does not automatically propagate into Loss Probability, Loss Risk, or Actor Risk. Defense Mechanism Impact ($DMI$), by contrast, is added directly to the attack plan when the defense is connected. The framework's Defense Mechanism Existence ($DME$) is not implemented as a separate calculator attribute; disabling a defense is modeled by overriding its Impact to zero, as done by the bundled `Disable Defenses` script.
-
-The bundled metamodel uses identity transformations between connected Global Difficulty attributes. A custom metamodel should keep those attribute-input scalars at $1$ and offsets at $0$ for attack-difficulty aggregation. Applying an affine transformation to an already aggregated plan is numerically supported, but it discards atomic-plan provenance; a later gate can then no longer detect and remove duplicated shared prerequisites.
+Defense Mechanism Cost ($DMC$) is a separate input for comparing or prioritizing defenses. It is not added to Global Difficulty and does not automatically propagate into Loss Probability, Loss Risk, or Actor Risk. Defense Mechanism Impact ($DMI$), by contrast, is added directly to the attack plan when the defense is connected. The framework's Defense Mechanism Existence ($DME$) thus deploys the $DMI$.
 
 ## Threat Event Probability, Loss Probability, and Loss Risk
 
@@ -215,8 +214,6 @@ The result is neither the simple sum $0.22$ nor the product $0.012$.
 
 System-view connections are direct, not transitive. For each contribution, connect the abuse case and its terminal attack event directly to the loss. The calculator associates them by following the attack graph from that abuse case to the terminal event. Every connected abuse case must lead to exactly one of the loss's connected terminal attack events, and every connected terminal event must be associated with at least one abuse case. Several abuse cases may legitimately lead to the same terminal event. Ambiguous or unmatched connections produce a setup warning instead of silently multiplying unrelated inputs.
 
-For compatibility with older saves, exactly one connected abuse case and one connected terminal event are paired even when the saved attack graph does not expose their dependency. New models should not rely on this fallback: represent the path explicitly so that the association remains unambiguous when the model grows.
-
 If the abuse cases are mutually exclusive, dependent, or otherwise require a different overlap model, the independent-union formula is not valid. Calculate the appropriate combined probability separately, override $LP$ manually—for example through a script—and document the chosen dependence assumption.
 
 In `Single success ratio` mode, the $p_j$ values and $LP$ are scalar. A distribution-valued Loss Magnitude still produces a distribution-valued Loss Risk:
@@ -241,7 +238,7 @@ $$
 
 When any $LR_k$ is distribution-valued, this sum is evaluated on aligned sample indices. The analyst remains responsible for defining loss events so that adding their risks is meaningful; overlapping descriptions of the same consequence can otherwise double-count risk.
 
-The gray Total Risk box in the framework figure is conceptual. The bundled calculator aggregates Loss Risk into Actor Risk but does not automatically combine several actors into one additional Total Risk attribute.
+(The gray Total Risk box in the framework figure is conceptual. The bundled calculator aggregates Loss Risk into Actor Risk but does not automatically combine several actors into one additional Total Risk attribute.)
 
 ## Probability of Success modes
 
@@ -257,9 +254,9 @@ $$
 
 Every aligned pair is one simulated attack situation. It contributes $1$ when effort is strictly greater than difficulty and $0$ otherwise. The result is the fraction of successful situations and estimates $\Pr(ES>GD_a)$. Equality counts as failure. This is the default mode because it returns the single probability used by the paper-compatible workflow.
 
-### Conditional PoS distribution: optional theoretical extension
+### Conditional PoS distribution
 
-> **Important:** `Conditional PoS distribution` is an optional extension implemented by the calculator. It is not the single-value PoS calculation described in the Yacraf paper. A result produced in this mode must be labeled as a Conditional PoS distribution, with the calculation mode and sample count reported.
+> **Important:** `Conditional PoS distribution` is an extension implemented by the calculator. It is not the single-value PoS calculation described in the Yacraf paper.
 
 #### Empirical survival function: what the calculator actually computes
 
@@ -324,19 +321,11 @@ $$
 
 so the mean of the Conditional PoS samples should approach the scalar PoS as the sample count grows. Their medians and other percentiles need not equal the scalar probability.
 
-If effort and difficulty are dependent—for example, if better-resourced attackers systematically choose harder routes—the correct quantity requires a joint model such as $\Pr(ES>g\mid GD_a=g)$. The current calculator does not model that dependence.
+If effort and difficulty are dependent—for example, if better-resourced attackers systematically choose harder routes—the correct quantity requires a joint model such as $\Pr(ES>g\mid GD_a=g)$. The current calculator does not model that dependence. Such dependence must be captured with new explicit modelling with updated values for the attack cost in the attack events.
 
 #### Appropriate use and reporting
 
-Use `Single success ratio` when a single paper-compatible PoS is required. Use Conditional PoS when variation in success probability across uncertain Global Difficulty is itself useful for sensitivity analysis, communication, or downstream distribution-valued risk.
-
-When reporting Conditional PoS, include:
-
-- the Effort Spent distribution and all Local Difficulty distributions;
-- the Monte Carlo sample count;
-- the Effort Spent–Global Difficulty independence assumption;
-- the displayed percentiles; and
-- both the mean, for comparison with scalar PoS, and the plotted empirical distribution where practical.
+It is suggested to use Conditional PoS as a default as it provides a more nuanced result for the overall risk. However, for more simplified calculations the `single success ratio` can be convenient.
 
 ## Results, percentiles, and repeated runs
 
