@@ -1,75 +1,130 @@
-# YACRAF calculator
+# Yacraf calculator
 
+## Background
 This is a graphical tool for doing calculations according to [Yacraf](https://link.springer.com/article/10.1007/s10207-023-00713-y) used in the KTH courses EP2790, EP2791, and EP279V.
 
 This tool allows calculations inherent to the threat modeling to be set up and calculated using graphical block diagrams, where one can place, drag, and connect different blocks across various `Views`. The tool aims to allow for (i) the automation of the calculation process, where any changes to any block automatically propagate through the system and (ii) the simulation/analysis of various system configurations.
 
-**Disclaimer**: The Yacraf calculator is a prototype software. It was not developed as a comercial product, fulfilling all the requirements that would come with that, but as a best effort prototype for education and research. It is intended assist practical use of Yacraf, but is by no means the only way to do Yacraf-based risk analysis. The code may contain bugs so using it is at your own risk, and all results needs to be cross-checeked. Known bugs are reported under Issues. Any help with improving any dimension of the tool is most welcome - looking forward to your pull request! :)  
-Having all that said - we hope you find the tool useful. 
+This README explains how to install and operate the calculator. In addition, we provide a set of short tutorial videos that walk you through the tool, from setup and basic navigation to running example workflows with Yacraf. **Note! The videos are recorded in an earlier tool version, so while details may be legacy the overall design remains the same.**
+- Video 1 - [First launch & pre-installed models](https://play.kth.se/media/YACRAF-tool-1/0_of3nc0sc)
+- Video 2 - [Workspace creation](https://play.kth.se/media/YACRAF-tool-2/0_mtn010dp)
+- Video 3 - [Creating attacker profiles & abuse cases](https://play.kth.se/media/YACRAF-tool-3/0_mkt2fuhc)
+- Video 4 - [Creating attack trees](https://play.kth.se/media/YACRAF-tool-4/0_yc4z3d9j)
+- Video 5 - [Metamodel editing](https://play.kth.se/media/YACRAF-tool-5/0_wa27pt27)
+
+Parameter definitions, equations, statistical assumptions are maintained in the course material's [Yacraf calculations and statistical extensions](../Course-material/lectures/Yacraf-calculations.md).
+
+> **Use the bundled metamodel as-is.** It is the calculator's implementation of the Yacraf metamodel. Normal use consists of adding instances, values, and connections in `System Views`; changing the `Metamodel Views` is neither expected nor required. Metamodel editing is documented only for maintainers and advanced experiments in [Advanced: changing or rebuilding the Yacraf metamodel](#advanced-changing-or-rebuilding-the-yacraf-metamodel) at the end of this README. The calculation reference clearly distinguishes paper-compatible behavior from calculator-specific statistical assumptions and the optional `Conditional PoS distribution` extension.
+
+**Disclaimer**: The Yacraf calculator is prototype software. It was not developed as a commercial product fulfilling all the requirements that would come with that, but as a best-effort prototype for education and research. It is intended to assist practical use of Yacraf, but is by no means the only way to do Yacraf-based risk analysis. The code may contain bugs, so using it is at your own risk and all results need to be cross-checked. Known bugs are reported under Issues. Any help with improving any dimension of the tool is most welcome—looking forward to your pull request! :)
+
+Having all that said, we hope you find the tool useful.
 
 # Table of Contents
+
 1. [Dependencies](#dependencies)
-2. [Running the YACRAF Calculator](#running-the-yacraf-calculator)
-3. [GUI Overview](#gui-overview)
+2. [Running the Yacraf Calculator](#running-the-yacraf-calculator)
+3. [Features in this version](#features-in-this-version)
+4. [GUI Overview](#gui-overview)
+   - [Parameter notation](#parameter-notation)
    - [View Switching](#views-switching)
-   - [Working with Metamodel Views](#working-with-metamodel-views)
-     - [Creating Classes and Attributes](#creating-classes-and-attributes)
-     - [Adding Calculation Inputs](#adding-calculation-inputs)
-     - [Connections](#connections)
    - [Working with System Views](#working-with-system-views)
      - [Adding Class Instances](#adding-class-instances)
      - [Adding Connections](#adding-connections)
      - [Calculating Values](#calculating-values)
-4. [Scripts and Customization](#scripts-and-customization)
-5. [Error Handling](#error-handling)
-6. [Explanation of the YACRAF Metamodel](#explanation-of-the-yacraf-metamodel-included-in-the-program)
-7. [Step-by-Step Video Walkthroughs](#step-by-step-video-walkthroughs)
-8. [Reporting bugs with the YACRAF tool](#reporting-bugs-with-the-yacraf-tool)
-9. [Contribute to YACRAF](#contribute-to-yacraf)
-10. [FAQ](#FAQ)
+5. [Using distribution-valued parameters](#using-distribution-valued-parameters)
+   - [Declaring input distributions](#declaring-input-distributions)
+   - [Settings](#distribution-calculation-settings)
+   - [Plotting distributions](#plotting-distributions)
+6. [Calculation theory and statistical assumptions](../Course-material/lectures/Yacraf-calculations.md)
+7. [Scripts and Customization](#scripts-and-customization)
+8. [Error Handling](#error-handling)
+9. [Step-by-Step Video Walkthroughs](#step-by-step-video-walkthroughs)
+10. [Reporting bugs with the Yacraf tool](#reporting-bugs-with-the-yacraf-tool)
+11. [Contribute to Yacraf](#contribute-to-yacraf)
+12. [FAQ](#faq)
+13. [Advanced: changing or rebuilding the Yacraf metamodel](#advanced-changing-or-rebuilding-the-yacraf-metamodel)
 
 
 ## Dependencies
 
-The program utilizes Tkinter for its GUI and NumPy for its calculations. If not already installed, Tkinter can on Debian-based Linux distributions (such as Ubuntu) be installed using:
+The program utilizes Tkinter for its GUI, NumPy for its calculations, and Matplotlib for distribution plots. If not already installed, Tkinter can on Debian-based Linux distributions (such as Ubuntu) be installed using:
 
 ```
 sudo apt install python3-tk
 ```
 
-NumPy can be installed using:
+The Python dependencies can be installed using:
 
 ```
-pip install numpy
+pip install -r requirements.txt
 ```
 
 Make sure the Python installation is not outdated. The known minimum requirement is Python 3.7, where 3.10 was used during the program's development. You may also need to update NumPy if you get an error related to it when booting the program.
 
-## Running the YACRAF calculator
+## Running the Yacraf calculator
 
 After navigating to the main directory, run the program using:
-
-```
-python3 main.py <save_name>
-```
-
-Specifying a save name that does not currently exist will create a completely new save. To see which saves currently exist, run:
 
 ```
 python3 main.py
 ```
 
-The default saves of the program contain examples of the YACRAF metamodel, including accompanying system-model examples. The following default saves exist:
+This opens `example_distribution`, a small distribution-valued attack graph described below. To open or create a different save, specify its name:
 
-1. `example_single`: Example based on the illustrative example found in Section 4 of the YACRAF paper, where the YACRAF metamodel is defined in the corresponding `Metamodel Views`, and the calculations are performed in the `System Views`.
-2. `example_triangle`: Same as `example_single`, except using triangle distributions whenever applicable.
-3. `Cloud`: A small example of a threat model for a cloud service provider, adapted from this [example](https://www.nccgroup.com/research-blog/threat-modelling-cloud-platform-services-by-example-google-cloud-storage/) and represented using the YACRAF metamodel. 
-4. `custom`: Same `Metamodel Views` as `exampel_triangle`, but with blank `System Views` to simplify the creation of a new threat model for a different system using the YACRAF metamodel.
+```
+python3 main.py <save_name>
+```
+
+Specifying a save name that does not currently exist creates a completely new save. To list the existing saves without opening the GUI, run `python3 main.py --list`.
+
+The default saves of the program contain examples of the Yacraf metamodel, including accompanying system-model examples. The following default saves exist:
+
+1. `example_distribution`: The default startup example. Two alternative attack events with `normal / 10 / 2` and `triangular / 5 / 10 / 15` local difficulty feed an AND event with `uniform / 1 / 3` local difficulty. An abuse case supplies `triangular / 20 / 25 / 30` effort, and the terminal event feeds a loss with `triangular / 100 / 500 / 1000` magnitude. The loss also receives the abuse case directly so its probability includes both threat-event probability and terminal PoS.
+2. `example_single`: Example based on the illustrative example found in Section 4 of the Yacraf paper, where the Yacraf metamodel is defined in the corresponding `Metamodel Views`, and the calculations are performed in the `System Views`.
+3. `example_triangle`: Same as `example_single`, except using triangle distributions whenever applicable.
+4. `Cloud`: A small example of a threat model for a cloud service provider, adapted from this [example](https://www.nccgroup.com/research-blog/threat-modelling-cloud-platform-services-by-example-google-cloud-storage/) and represented using the Yacraf metamodel.
+5. `custom`: Same `Metamodel Views` as `example_triangle`, but with blank `System Views` to simplify the creation of a new threat model for a different system using the Yacraf metamodel.
+
+## Features in this version
+
+This version retains the original scalar Yacraf workflow and adds distribution-valued analysis. The additions are summarized here; their mathematical definitions and assumptions are documented in [Yacraf calculations and statistical extensions](../Course-material/lectures/Yacraf-calculations.md).
+
+| Feature | What the end user can do |
+| --- | --- |
+| [Named input distributions](../Course-material/lectures/Yacraf-calculations.md#distribution-valued-inputs) | Use uniform, triangular, non-negative normal, lognormal, or exponential distributions for local attack difficulty, abuse-case effort, loss magnitude, loss risk, and aggregated actor risk. |
+| [Empirical Monte Carlo propagation](../Course-material/lectures/Yacraf-calculations.md#empirical-monte-carlo-propagation) | Calculate every downstream distribution from samples of the declared inputs instead of forcing an analytically fitted output family. |
+| [Attack-plan-aware cost aggregation](../Course-material/lectures/Yacraf-calculations.md#global-attack-difficulty) | Evaluate OR alternatives per sample, combine AND requirements, and count a shared prerequisite only once. |
+| Configurable sample count | Choose the number of Monte Carlo samples in `Settings`. |
+| Configurable result summaries | Display either `P0 / P50 / P100` or `P5 / P50 / P95` in calculated distribution fields. |
+| [Two attack-event PoS modes](../Course-material/lectures/Yacraf-calculations.md#probability-of-success-modes) | Retain the paper-compatible scalar success ratio or opt into a distribution of success probabilities conditional on uncertain global difficulty. |
+| [Distribution-valued losses](../Course-material/lectures/Yacraf-calculations.md#threat-event-probability-loss-probability-and-loss-risk) | Give loss magnitude a distribution and propagate scalar or distribution-valued probability into loss risk. |
+| [Multiple loss causes](../Course-material/lectures/Yacraf-calculations.md#several-abuse-cases-contributing-to-the-same-loss) | Combine independent, non-mutually-exclusive abuse-case contributions as a probability union. |
+| Full distribution plots | Plot an empirical density histogram and cumulative distribution for any distribution-valued parameter on any object, whether manually entered or calculated. |
+| Default worked example | Start directly in `example_distribution`, a five-node example connecting an abuse case, alternative attack steps, a terminal step, and a loss event. |
+| Compatibility and diagnostics | Load legacy three-number triangular values, avoid storing thousands of calculated samples in save files, and report invalid distribution/configuration inputs with calculation-specific warnings. |
+
+The distribution features require NumPy for sampling and Matplotlib for plots. General settings are stored with the save and take effect on the next calculation.
 
 
 ## GUI Overview
 
-The graphical interface consists of two types of `Views`: `Metamodel Views` (`Configuration Views`) defining the metamodel used during the threat modeling and `System Views` (`Setup Views`) where the specific analyzed system is defined based on the aforementioned metamodel. That is, `Class` blocks (for example, an attack event) and their `Attributes` (for example, the attack event's cost) are defined within `Metamodel Views`, including their connections and relationships to other `Attributes`. For instance, specifying that the cost `Attribute` of one attack event is dependent on that of another. Meanwhile, attack event instances (such as a DDoS attack) and their connections to other system-specific instances are configured in the `System Views`.
+The graphical interface contains `System Views` (`Setup Views`) for building the analyzed scenario and `Metamodel Views` (`Configuration Views`) containing the bundled Yacraf definition. End users normally work only in `System Views`: add an abuse case, attack events, loss events, and other instances; enter their values; connect them; and calculate. The metamodel views may be inspected to understand dependencies, but editing them is an advanced maintenance activity documented at the end of this README.
+
+### Parameter notation
+
+Parenthesized abbreviations in model blocks identify the **meaning of a parameter**, not its internal value type. For example, `Local difficulty (LD)` and `Global difficulty (GD)` may both be distribution-valued, while `Probability of success (PoS)` may be either a scalar or an empirical distribution depending on the selected calculation mode. The notation follows the [Yacraf summary framework](../Course-material/lectures/Risk_calculator_framework.png). Abbreviations marked with an asterisk are added by this calculator for parameters that are named but not abbreviated in that figure.
+
+| Object | Parameter abbreviations |
+| --- | --- |
+| Abuse case | Accessibility to Attack Surface (`AtAS`), Window of Opportunity (`WoO`), Ability to Repudiate (`AtR`), Perceived Deterrence (`PD`), Perceived Ease of Attack (`PEoA`), Perceived Benefit of Success (`PBoS`), Probability of Contact (`PoC`), Probability of Action (`PoA`), Threat Event Probability (`TEP`), Effort Spent (`ES`*) |
+| Attacker | Risk Tolerance (`RT`), Concern for Collateral Damage (`CfCD`), Skill (`Sk`*), Resources (`Res`*), Sponsorship (`Sp`*), Threat Capability (`TC`) |
+| Attack event | Local Difficulty (`LD`*), Global Difficulty (`GD`*), Probability of Success (`PoS`) |
+| Loss event | Loss Magnitude (`LM`*), Loss Probability (`LP`*), Loss Risk (`LR`*) |
+| Actor | Actor Risk (`AR`*) |
+| Defense mechanism | Defense Mechanism Cost (`DMC`*), Defense Mechanism Impact (`DMI`*), Defense Mechanism Existence (`DME`*) |
+
+Text fields and other parameters with no defined semantic abbreviation are shown without a parenthesized suffix. For a custom metamodel parameter, put any desired abbreviation in its name. Maintainers can still inspect or change the underlying value type in the advanced metamodel editor.
 
 
 ### Views Switching 
@@ -90,135 +145,126 @@ For a `System View`, one can:
 
 The save button in the bottom left corner ((3) in the below figure) saves the current state of all `Metamodel Views` and `System Views`, but also any changes to the general settings found by pressing the settings button. Any selected block within a `View` can be deleted by pressing backspace.
 
-![Image of a configured YACRAF metamodel within a metamodel view](img/configuration_view.svg)
-
-### Working with Metamodel Views
-
-**Note on the meta-model**: You generally should not change the meta-model, it encodes YACRAF out of the box. In almost all cases, your work should be done by adding/editing instances and values, not by altering classes/attributes. Please only consider a meta-model change with strong justification, and keep in mind that it can break examples and scripts. 
-
-So most likely you should skip over this section!
-
-#### Creating Classes and Attributes
-
-A new metamodel `Class` is created by pressing the add class button in the top left corner, as illustrated by (1) in the figure below. By pressing (2), one can add an `Attribute` to the created `Class` (result shown in (3)). Pressing an `Attribute` selects it, as shown by (4), where one can edit it by pressing E. Editing an `Attribute` allows the following to be configured:
-
-1. Its name
-2. Their displayed order in the `Class`
-3. The value type of the `Attribute`, such as a single number, probability, or a triangle distribution (the (T) at (4) indicates that the `Attribute` value is a triangle distribution)
-4. Hide it from the corresponding `System Views`, meaning it is only visible in the `Metamodel Views` (useful for calculations requiring several steps)
-
-Similarly, the `Class` itself can also be edited. In particular:
-
-1. Changing its name
-2. Creating a linked copy of this instance in another `Metamodel View` (allowing relations between blocks across multiple `Metamodel Views` - interpreting them as the same `Class` block), identified by a unique identifier in their upper right corner (see (11) in the figure below)
-
-![Image of a metamodel view where one creates classes and attributes, and subsequently connects them](img/configuration.svg)
-
-#### Adding Calculation Inputs
-
-By pressing the add input button in the top left corner (see (5) in the above figure), an `Input` block is created (see (6)). `Input` blocks take input values from one or more `Attributes` and, through a specified mathematical operation, outputs the calculated result to an adjacent `Attribute` that it has been dragged next to (see (7)). The `Input` block can be configured by selecting it and pressing E, where one can:
-
-1. Change its mathematical operation, for example, AND, OR, multiplication, etc (seen at (8) is the an `Input` block performing an AND operation between inputs)
-2. Add a scalar that multiplies the calculated input with a factor (see the number 2 at (10))
-3. Add an offset that is added after the scalar is applied (see the number 3 at (10))
-
-`Attributes` can be added as inputs by connecting them to the `Input` block by first right-clicking on the corresponding `Attribute` and then left or right-clicking the `Input` block, creating a `Connection` between the two, as illustrated by (9) in the above figure.
-
-Some mathematical operations are dependent on the order of their inputs. In such cases, the `Connections` will automatically be graphically enumerated by the order they were created.
-
-##### Connections
-
-Pressing E when the corner of a `Connection` is selected opens up its options, where one can:
-
-1. Set the `Connection` as external, meaning it will only be connected to `Attributes` of other class instances, ignoring internally connected ones, leading to, for example, an attack event only considering the corresponding `Attribute` value of other attack events and not its own (indicated by its lines becoming dashed)
-
-The corners of a `Connection` can be dragged around to customize its path.
+![Image of a configured Yacraf metamodel within a metamodel view](img/configuration_view.svg)
 
 ### Working with System Views
 
-Shown in the figure below is an example of a `System View` reflecting the system that the metamodel from the corresponding `Metamodel Views` has been applied to. The buttons at (1) in the figure are used to create `Connections` between `Classes` and calculate the final values, respectively. (2) shows buttons for running custom scripts that can calculate/simulate different scenarios throughout the `System Views`. Scripts are explained in detail later.
+The figure below shows an example model (following the Yacraf metamodel) in the `System View` (upper right corner, marked blue). The green buttons in the upper left add class instances, `Add connection` and `Calculate` are at the top centre, and view navigation is in the upper right. `Save` and `Settings` are in the lower left, while the lower-right buttons run or clear custom scripts. Scripts are explained in detail later.
 
-![Image of a system view](img/setup_view.svg)
+![Image of a system view](img/yacraf-system_view.png)
 
 #### Adding Class Instances
 
-An instance of a `Class` from a `Metamodel View` can be added to the current `System View` by pressing the corresponding button in the top left corner, as shown by (1) in the `System View` in the below figure. The `Class` instances can be configured by pressing E when selected, where one can:
+An instance of a `Class` from a `Metamodel View` can be added to the current `System View` by pressing the corresponding green button in the upper left. The `Class` instances can be configured by pressing `E` when selected, where one can:
 
 1. Change the name of the corresponding `Class` instance
-2. Create a linked copy of the instance to another `System View` (any calculated value takes all linked versions into account), identified by a marker in their upper right corner (see (3) in the figure below)
+2. Create a linked copy of the instance in another `System View` (any calculated value takes all linked versions into account). Linked copies are identified by a light-green marker in the instance's upper-right corner.
 
-![Image of a system view where classes from the metamodel views are added and connected based on the analyzed system](img/setup.svg)
 
 #### Adding Connections
 
-Pressing the add connection button at the top ((4) in the above figure) creates a directional `Connection` (see (5)) that can be attached to `Classes` (see (6)) by dragging its corresponding ends. The `Attributes` of the `Class` that the `Connection` points to may take input from the other `Class` if such `Attribute` relations have been configured in the `Metamodel Views`. Attaching a `Connection` to a `Class` will automatically disable `Attribute` entry fields if the corresponding value is dependent on at least one connected `Class`. By pressing E after selecting a corner on the directional `Connection`, one can:
+Pressing `Add connection` creates a directional `Connection` with a triangle at each end. Drag the triangles to attach the connection to its source and destination class instances. The `Attributes` of the destination `Class` may then take input from the source `Class` if those `Attribute` relations have been configured in the `Metamodel Views`. Attaching a `Connection` to a `Class` automatically disables an `Attribute` entry field when its value depends on at least one connected `Class`.
 
-1. Add a scalar that is applied to input values obtained through the `Connection`, where the appearing indicator (see (7)) can be dragged along the path of the `Connection`
+System-view connections pass values unchanged and do not have editable scalar multipliers. Fixed transformations required by Yacraf are part of the bundled metamodel calculations.
 
 #### Calculating Values
 
-The calculate button at the top (see (8)) calculates the values of all `Attributes` that do not have a manual input entry field. Calculated are the `Attributes` of all `Classes` in all `System Views`. In the case of the above figure, the `Attribute` indicated by (9) has been calculated using the corresponding `Attribute` values of its input `Classes`. The input `Attributes` in question are highlighted when the `Attribute` is selected.
+Pressing `Calculate` calculates every `Attribute` that does not have a manual input entry field, across all `Classes` in all `System Views`. In the example above, Global Difficulty (GD), Probability of Success (PoS), Loss Risk (LR), and Loss Probability (LP) are calculated downstream values. Distribution-valued results are shown using the percentile range selected in `Settings`. Selecting a calculated `Attribute` highlights the contributing input `Attributes` in orange. See [Yacraf calculations and statistical extensions](../Course-material/lectures/Yacraf-calculations.md) for the calculation sequence and interpretation of these results.
 
-#### Scripts and Customization
+## Using distribution-valued parameters
+
+### Declaring input distributions
+
+A distribution-valued parameter can represent local difficulty, global difficulty, effort spent, loss magnitude, loss risk, aggregated actor risk, or another uncertain quantity in a custom model. It may be entered as either a single fixed non-negative value or a distribution name followed by its parameters:
+
+```text
+fixed value, for example: 2
+uniform / minimum / maximum
+triangular / minimum / mode / maximum
+normal / mean / standard deviation
+lognormal / median / geometric standard deviation
+exponential / mean
+```
+
+This fixed-value form is accepted by every distribution-valued field on every object type. For example, entering `2` is the clearer deterministic equivalent of `uniform / 2 / 2`.
+
+An optional non-negative location shift can precede any named distribution:
+
+```text
+offset + distribution / parameters
+```
+
+For example, `1 + lognormal / 5 / 2` adds a fixed offset of 1 to values generated from the stated lognormal distribution. The offset is not another sampled input and does not change the named distribution's parameters. See the [calculation reference](../Course-material/lectures/Yacraf-calculations.md#distribution-valued-inputs) for its statistical interpretation.
+
+Other examples are `uniform / 2 / 5`, `triangular / 2 / 3 / 5`, `normal / 4 / 1`, `lognormal / 6 / 1.5`, and `exponential / 3`. All five represent non-negative quantities:
+
+- `uniform` gives equal density between its minimum and maximum.
+- `triangular` uses a minimum, most likely value (mode), and maximum.
+- `normal` uses an arithmetic mean and standard deviation and is truncated at zero by rejection sampling.
+- `lognormal` uses a median and geometric standard deviation; the geometric standard deviation must be at least 1.
+- `exponential` uses one strictly positive mean, also known as its scale. Its rate is the reciprocal of that mean.
+
+The offset must be finite and non-negative. For a shifted uniform or triangular distribution, the resulting lower bound is the offset plus the distribution's stated minimum. Normal inputs remain truncated at zero before the offset is added.
+
+Select a manually entered distribution-valued parameter and press `E` to choose a template in the GUI. The inserted template remains editable. Legacy three-number inputs such as `2 / 3 / 5` are interpreted as triangular distributions, and bundled triangle-based saves are migrated on load for attack difficulty, abuse-case effort, loss magnitude, loss risk, actor risk, and defense-mechanism cost and impact. A defense impact distribution is sampled like any other input distribution and is included in the connected attack event's empirical Global Difficulty (`GD`) calculation.
+
+### Distribution calculation settings
+
+Open `Settings` to configure:
+
+1. **Number of samples**: the Monte Carlo sample count, with a minimum of one. More samples normally make quantiles and probability estimates more stable but take more time and memory.
+2. **Distribution result percentiles**: either `P0 / P50 / P100` or `P5 / P50 / P95`. This changes the three reported values for calculated distributions and the markers in distribution plots; it does not change the underlying samples. `P0` and `P100` are sample extremes and are consequently more sensitive to sample count than `P5` and `P95`.
+3. **Attack-event PoS calculation**: `Single success ratio` or `Conditional PoS distribution`. The first is the paper-compatible scalar result. In the second, each sampled Global Difficulty is compared with all sampled Effort Spent values to obtain an empirical survival fraction; no closed-form survival equation is used. See the [worked empirical example](../Course-material/lectures/Yacraf-calculations.md#empirical-survival-function-what-the-calculator-actually-computes) and the explanation of this optional theoretical extension in the [calculation reference](../Course-material/lectures/Yacraf-calculations.md#probability-of-success-modes).
+
+Settings apply when `Calculate` is next pressed and are persisted when the save is saved. Calculated sample arrays are not persisted: they are regenerated from the declared input distributions, keeping save files small. Two calculations can therefore differ slightly because they contain new random draws.
+
+### Plotting distributions
+
+Select any distribution-valued parameter on any `System View` object, press `E`, and choose `Plot distribution`. For a calculated parameter, press `Calculate` first so that empirical samples exist. The plot window contains an empirical density histogram and the full empirical cumulative distribution function (CDF), with the selected result percentiles marked.
+
+Plot availability is determined by the parameter's value rather than by its object class. This includes distribution-valued parameters on attacker, abuse-case, attack-event, loss-event, actor, defense-mechanism, and custom objects. It also includes a parameter whose configured type is normally scalar, such as probability, when its current calculated result is an empirical distribution. A plot shows all finite empirical samples, not only the three values displayed inside the block.
+
+## Scripts and Customization
 
 Scripts to visualize or analyze different scenarios, such as finding the most optimal order of implementing defense mechanisms or enumerating and visualizing the easiest attack paths, can be created using Python scripts that interface to the tool. Scripts are created and explained in detail in the `scripts` directory.
-We provide three scripts: ``Attack_Paths.py``: marks, in a YACRAF view, the easiest previous attack step for a chosen attack event by scanning inputs and comparing global difficulty values. ``Disable_Defenses.py``: temporarily turns off all defense mechanisms by overriding their Impact values to zero, then recalculates outcome. ``Export to CSV.py``: exports YACRAF data for Loss events, Abuse cases, and Attackers to a CSV-style table (headers + rows) after recalculating values.
+We provide three scripts: ``Attack_Paths.py``: marks, in a Yacraf view, the easiest previous attack step for a chosen attack event by scanning inputs and comparing global difficulty values. ``Disable_Defenses.py``: temporarily turns off all defense mechanisms by overriding their Impact values to zero, then recalculates outcome. ``Export to CSV.py``: exports Yacraf data for Loss events, Abuse cases, and Attackers to a CSV-style table (headers + rows) after recalculating values.
 
 Note: Computationally heavy scripts could take some time to complete. The corresponding button will appear pressed (have changed color) while the script is running.
 
-### Error Handling
+## Error Handling
 
 Any errors found in the `Metamodel Views` or `System Views` upon calculating `Attribute` values are printed.
 
-## Explanation of the YACRAF Metamodel Included in the Program
-
-The attributes highlighted by (1) in the figure below have been configured to take an input between 0-10, where the sequence of &, 0.1, and 10 into a temporary (and hidden) `Attribute` is used to make a negative formulation of the `Attribute` into a positive one, or vice versa. For example, transform a 3 into 10 - 3 = 7.
-
-The calculation type Q (see (2)) implies a qualitative relation where no numerical calculation is performed. Instead, manual input is prompted. Thus, such connections merely highlight the relationship.
-
-![Image of a configuration view for the YACRAF metamodel](img/configuration_explanation.svg)
-
-## Step-by-Step Video Walkthroughs 
-
-We provide a set of short tutorial videos that walk you through the tool, from setup and basic navigation to running example workflows with YACRAF. Watch them in order for a quick onboarding. Links to each video are listed below
-
-- Video 1 - [First launch & pre-installed models](https://play.kth.se/media/YACRAF-tool-1/0_of3nc0sc)
-- Video 2 - [Workspace creation](https://play.kth.se/media/YACRAF-tool-2/0_mtn010dp)
-- Video 3 - [Creating attacker profiles & abuse cases](https://play.kth.se/media/YACRAF-tool-3/0_mkt2fuhc)
-- Video 4 - [Creating attack trees](https://play.kth.se/media/YACRAF-tool-4/0_yc4z3d9j)
-- Video 5 - [Metamodel editing](https://play.kth.se/media/YACRAF-tool-5/0_wa27pt27)
-
-
-## Reporting bugs with the YACRAF tool 
+## Reporting bugs with the Yacraf tool
 If you hit a bug while using the Yacraf calculator or examples, please open a **GitHub Issue** (preferred) or email us. **Before you file the issue**, please update to the **latest commit/release** and try again, and check **existing issues** to avoid duplicates.
 
 
-## Contribute to YACRAF
+## Contribute to Yacraf
 
 Improvements are welcome: refactoring, scripts, docs, examples, you name it. Fork the repo, make your changes, and open a pull request with a short description.
 
 ## FAQ 
-#### Q1: What exactly does the YACRAF Calculator calculate?
+#### Q1: What exactly does the Yacraf Calculator calculate?
 
-**A1:** The YACRAF Calculator performs automated cyber risk assessments based on the YACRAF framework. It uses block diagrams to represent a metamodel of threats, system attributes, and relationships. The tool calculates how changes in attributes (such as attack likelihood or impact) propagate through the system, generating risk scores or other evaluation metrics.
+**A1:** The Yacraf Calculator evaluates the attributes and relationships defined by the bundled Yacraf metamodel, including attack difficulty, probability, and risk. See [Yacraf calculations and statistical extensions](../Course-material/lectures/Yacraf-calculations.md) for the complete calculation sequence, equations, and assumptions.
 
 
 
-#### Q2: How is the YACRAF Calculator structured?
+#### Q2: How is the Yacraf Calculator structured?
 
-**A2:** The YACRAF Calculator is structured around two views: **Metamodel Views** and **System Views**. Metamodel Views define the YACRAF threat model, where `Class` blocks and `Attributes` are created, along with their relationships. System Views apply this model to specific scenarios, allowing users to configure instances, connect blocks, and run calculations. This structure separates the model design from its application.
+**A2:** The Yacraf Calculator is structured around two view types: **Metamodel Views** and **System Views**. The shipped Metamodel Views implement the Yacraf classes, attributes, and relations. System Views apply that fixed definition to a concrete scenario by adding instances, values, and connections. Normal end-user work takes place in System Views.
 
 
 
 #### Q3: Should I modify the metamodel provided in the custom example?
 
-**A3:** We recommend sticking to the provided YACRAF metamodel for consistency and reliable results. However, you can use a different model if needed.
+**A3:** No. The provided metamodel is the calculator's implementation of Yacraf and should normally remain unchanged. Editing it can invalidate examples, calculations, and scripts. Only maintainers or researchers deliberately experimenting with a different metamodel should use the advanced instructions at the end of this README.
 
 
 
-#### Q4: Can YACRAF handle multiple System Views for the same Metamodel?
+#### Q4: Can Yacraf handle multiple System Views for the same Metamodel?
 
-**A4:** Yes, YACRAF allows multiple System Views for the same Metamodel. You can create different system setups, such as modeling a DDoS attack in one view and a phishing attack in another, all while using the same underlying Metamodel.
+**A4:** Yes, Yacraf allows multiple System Views for the same Metamodel. You can create different system setups, such as modeling a DDoS attack in one view and a phishing attack in another, all while using the same underlying Metamodel.
 
 
 
@@ -226,11 +272,13 @@ Improvements are welcome: refactoring, scripts, docs, examples, you name it. For
 
 **A5:** We provide some System Views to help you get started:  
 
-- **example_single:** Based on Section 4 of the YACRAF paper.  
+- **example_single:** Based on Section 4 of the Yacraf paper.
 
 - **example_triangle:** Similar to `example_single` but with triangle distributions.  
 
-- **custom:** Blank System Views with the YACRAF metamodel for creating your own models.  
+- **example_distribution:** The default five-node distribution example, containing an abuse case, two alternative attack routes, a combined attack event, and a loss event.
+
+- **custom:** Blank System Views with the Yacraf metamodel for creating your own models.
 
 We recommend using the custom save to design your own threat models.
 
@@ -250,13 +298,16 @@ We recommend using the custom save to design your own threat models.
 
 #### Q7: How do I create and use connections between classes and attributes?
 
-**A7:** Connections between attributes or classes are made by right-clicking an attribute and then clicking on the destination block. These connections define the flow of information or dependencies between different blocks, such as linking the cost of one attack to another attack’s likelihood. You can further configure these connections, making them external or modifying the flow based on the system’s needs.
+**A7:** The procedure depends on the view type:
+
+- In a **System View**, press `Add connection`, then drag its endpoint triangles onto the source and destination class instances. These connections pass the values allowed by the bundled metamodel and have no editable scalar.
+- In a **Metamodel View**, right-click a source attribute and then click the destination `Input` block. This advanced workflow defines attribute dependencies; a metamodel attribute connection can also be marked external.
 
 
 
 #### Q8: What mathematical operations are available for calculations?
 
-**A8:** The YACRAF Calculator supports operations like AND/OR gates, multiplication, addition, and custom scalars or offsets. These can be defined within Input blocks to control how attributes interact.
+**A8:** Maintainers can configure operations such as mean, AND/addition, OR/minimum, multiplication, division, effort-versus-difficulty comparison, and qualitative input in Metamodel `Input` blocks. End users do not choose these operations while constructing a normal System View; they are already defined by the bundled metamodel. Their semantics are documented in [Yacraf calculations and statistical extensions](../Course-material/lectures/Yacraf-calculations.md).
 
 
 
@@ -272,7 +323,7 @@ We recommend using the custom save to design your own threat models.
 
 
 
-#### Q11: How do scalars and offsets work in Input blocks and Connections?
+#### Q11: How do scalars and offsets work in Metamodel Input blocks?
 
 **A11:**  
 
@@ -280,7 +331,9 @@ We recommend using the custom save to design your own threat models.
 
 - **Offsets:** Add a specified value after scaling.  
 
-- **Setting Scalars/Offsets:** Edit the Input block or Connection (select and press `E`) and enter the desired values.
+- **Setting Scalars/Offsets:** In a Metamodel View, select an `Input` block, press `E`, and enter the desired values.
+
+System View connections do not have editable scalars or offsets.
 
 
 
@@ -344,7 +397,7 @@ We recommend using the custom save to design your own threat models.
 
 
 
-#### Q21: What are scripts in the YACRAF Calculator?
+#### Q21: What are scripts in the Yacraf Calculator?
 
 **A21:** Scripts are Python files used to automate tasks, run simulations, or analyze scenarios within the tool. They interact with the model and system configurations.
 
@@ -354,9 +407,9 @@ We recommend using the custom save to design your own threat models.
 
 **A22:** The available scripts include:
 
- - ``Attack_Paths.py``: marks, in a YACRAF view, the easiest previous attack step for a chosen attack event by scanning inputs and comparing global difficulty values.
+ - ``Attack_Paths.py``: marks, in a Yacraf view, the easiest previous attack step for a chosen attack event by scanning inputs and comparing global difficulty values.
  - ``Disable_Defenses.py``: temporarily turns off all defense mechanisms by overriding their Impact values to zero, then recalculates outcome.
- - ``Export to CSV.py``: exports YACRAF data for Loss events, Abuse cases, and Attackers to a CSV-style table (headers + rows) after recalculating values.
+ - ``Export to CSV.py``: exports Yacraf data for Loss events, Abuse cases, and Attackers to a CSV-style table (headers + rows) after recalculating values.
 
 
 
@@ -366,8 +419,49 @@ We recommend using the custom save to design your own threat models.
 
 
 
-#### Q24: How do I activate scripts in the YACRAF calculator?
+#### Q24: How do I activate scripts in the Yacraf calculator?
 
 **A24:** Once the calculator is running, a button for each script will appear in the bottom right corner of the System Views. You can click the button to execute the script and see the results within the interface.
 
+## Advanced: changing or rebuilding the Yacraf metamodel
 
+> **This section is not part of the normal modeling workflow.** The bundled Metamodel Views encode the Yacraf metamodel and are expected to remain unchanged. Create scenarios in System Views instead. A metamodel change can alter the meaning and value type of existing attributes, break saved examples, and invalidate assumptions made by scripts. Make such a change only when intentionally maintaining the tool or researching a different metamodel, and work on a copy of the save.
+
+The selectable distribution settings and Conditional PoS mode do not require an end user to modify the metamodel. They are implemented by the calculator and the metamodel already bundled with this branch. See the [calculation reference](../Course-material/lectures/Yacraf-calculations.md) for their mathematical behavior and theoretical status.
+
+### Working with Metamodel Views
+
+`Metamodel Views` (`Configuration Views`) define the classes available in System Views and the dependencies between their attributes. For example, they define an attack-event class, its Local Difficulty and Global Difficulty attributes, and which connected attributes provide calculation inputs. Changes propagate to all System Views belonging to the save.
+
+![Image of a configured Yacraf metamodel within a metamodel view](img/configuration_view.svg)
+
+### Creating classes and attributes
+
+A new metamodel `Class` is created with the add-class button in the top left, illustrated by (1) below. Button (2) adds an `Attribute` to the class, producing (3). Select an attribute, as at (4), and press `E` to configure:
+
+1. its name;
+2. its displayed order in the class;
+3. its value type, such as a number, probability, legacy triangle distribution, or sampled distribution; and
+4. whether it is hidden from System Views, which is useful for intermediate calculation attributes.
+
+Select the class and press `E` to change its name or create a linked copy in another Metamodel View. Linked copies represent the same class across views and carry a shared identifier in the upper-right corner, shown at (11).
+
+![Image of a metamodel view where classes and attributes are created and connected](img/configuration.svg)
+
+### Adding calculation inputs
+
+The add-input button, shown at (5), creates an `Input` block such as (6). Drag the input next to its destination attribute, as at (7). Select it and press `E` to configure:
+
+1. the mathematical operation, including mean, AND/addition, OR/minimum, multiplication, division, effort-versus-cost comparison, or qualitative input;
+2. a scalar applied to the calculated input, shown as 2 at (10); and
+3. an offset added after scaling, shown as 3 at (10).
+
+Connect an attribute to the `Input` block by right-clicking the source attribute and then left- or right-clicking the input, as at (9). Operations such as division and effort-versus-cost comparison require a specific number and order of inputs; their connections are numbered automatically in creation order.
+
+### Metamodel attribute connections
+
+Select a connection corner and press `E` to mark the connection as external. An external connection, drawn dashed, accepts an attribute only from another class instance and ignores an internally connected attribute. This is how an attack event can consume the Global Difficulty of preceding attack-event instances without also consuming its own Global Difficulty. Connection corners can be dragged to improve the diagram layout.
+
+### Calculation reference for metamodel changes
+
+The bundled Metamodel Views encode the relationships described in [Yacraf calculations and statistical extensions](../Course-material/lectures/Yacraf-calculations.md#how-the-bundled-metamodel-implements-the-calculations). Consult that reference before changing an operation, scalar, offset, or qualitative relationship.
