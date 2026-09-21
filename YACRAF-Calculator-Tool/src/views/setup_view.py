@@ -5,7 +5,7 @@ from setup_class_gui import GUISetupClass
 from buttons_gui import TouchButton
 from connection_gui import GUIConnection
 from connection_with_blocks_gui import GUIConnectionWithBlocks
-from helper_functions_general import delete_all
+from helper_functions_general import convert_value_to_string, delete_all
 from config import *
 
 class SetupView(View):
