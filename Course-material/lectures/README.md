@@ -40,9 +40,7 @@ In this folder you’ll find links to the **course lecture videos**. Watch them 
 
     In this lecture, we’ll link weaknesses to attack paths (trees/graphs) and examine existing/proposed controls. You’ll prioritize vulnerabilities and understand where the system is fragile or resilient.
 
-    Related calculation references: [Global Attack Difficulty](Yacraf-calculations.md#global-attack-difficulty) and [Probability of Success](Yacraf-calculations.md#probability-of-success-modes).
-
-
+   
 
 - **Lecture 4a — Phase 4: MITRE ATT&CK → [Lecture video ▶](https://play.kth.se/playlist/dedicated/0_eeoaqjho/0_vj0fg4g3)**
 
@@ -53,6 +51,12 @@ In this folder you’ll find links to the **course lecture videos**. Watch them 
 - **Lecture 4b — Phase 4: STRIDE → [Lecture video ▶](https://play.kth.se/playlist/dedicated/0_eeoaqjho/0_tlec54a6)**
 
     In this lecture, we’ll apply STRIDE to your DFD elements to surface missing threats. You’ll use it as a structured cross-check so important categories aren’t overlooked.
+
+
+
+- **Lecture 4c — Phase 4: Conditional PoS → [Lecture video ▶](https://play.kth.se/media/Lecture+4c+-+Conditional+PoS/0_dau8407g)**
+
+   In this lecture, the extended calculations for attack Probability of Success in Yacraf as a conditional probability distribution is described. It covers the following calculation references: [Global Attack Difficulty](Yacraf-calculations.md#global-attack-difficulty) and [Probability of Success](Yacraf-calculations.md#probability-of-success-modes).
 
 
 
