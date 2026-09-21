@@ -1,5 +1,5 @@
 from general_gui import GUIModelingBlock
-from helper_functions_general import convert_grid_coordinate_to_actual, get_font, get_text_that_fits
+from helper_functions_general import convert_value_to_string, convert_string_to_value, convert_grid_coordinate_to_actual, get_font, get_text_that_fits
 from pressable_entry import PressableEntry
 from config import *
 
@@ -59,7 +59,9 @@ class GUISetupAttribute(GUIModelingBlock):
         self.set_input_attributes_highlight(True)
          
     def open_options(self):
-        pass
+        if self.supports_user_override() or self.can_plot_distribution():
+            from options import Options
+            return Options.setup_attribute(self.get_model(), self.get_view(), self)
         
     def unhighlight(self):
         super().unhighlight()
@@ -129,7 +131,110 @@ class GUISetupAttribute(GUIModelingBlock):
             
     def update_linked_entry_text(self):
         for linked_setup_attribute_gui in self.get_model().get_linked_setup_attributes_gui(self):
-        	linked_setup_attribute_gui.set_displayed_value(self.__entry_value.get_entry_text())
+            linked_setup_attribute_gui.set_displayed_value(self.__entry_value.get_entry_text())
+
+    def set_distribution_template(self, text, update_linked=True):
+        """Set a valid editable template selected from the distribution GUI."""
+        if self.__entry_value is not None:
+            self.__entry_value.set_entry_text(text)
+
+        if update_linked:
+            for linked_setup_attribute_gui in self.get_model().get_linked_setup_attributes_gui(self):
+                linked_setup_attribute_gui.set_distribution_template(text, False)
+
+    def can_plot_distribution(self):
+        # A temporary script override is the effective value and therefore
+        # also takes precedence when deciding what can be plotted.
+        if self.__setup_attribute.has_override_value():
+            return is_distribution_valued_attribute(
+                self.__configuration_attribute_gui.get_value_type(),
+                self.__setup_attribute.get_current_value(),
+            )
+
+        if self.__setup_attribute.has_user_override():
+            user_override = self.__setup_attribute.get_user_override()
+
+            # A one-number override is deliberately a scalar. Every other
+            # valid override form names a distribution and can be plotted.
+            if len(user_override) != 1 or not isinstance(user_override[0], (int, float)):
+                return True
+
+        return is_distribution_valued_attribute(
+            self.__configuration_attribute_gui.get_value_type(),
+            self.__setup_attribute.get_current_value(),
+        )
+
+    def supports_distribution_templates(self):
+        return self.__configuration_attribute_gui.get_value_type() == ValueTypeDistribution
+
+    def supports_user_override(self):
+        """Return whether this calculated attribute accepts analyst input."""
+        return self.__setup_attribute.allows_user_override()
+
+    def get_user_override_text(self):
+        """Return the persisted analyst input in the same syntax as the GUI."""
+        if not self.__setup_attribute.has_user_override():
+            return ""
+        return convert_value_to_string(self.__setup_attribute.get_user_override())
+
+    def set_user_override_text(self, text):
+        """Validate, persist, recalculate, and display an analyst override."""
+        self.__setup_attribute.set_user_override(convert_string_to_value(text))
+        self.get_model().calculate_values()
+        self.__refresh_linked_displays()
+
+    def reset_user_override(self):
+        """Return this attribute to its bundled arithmetic calculation."""
+        self.__setup_attribute.reset_user_override()
+        self.get_model().calculate_values()
+        self.__refresh_linked_displays()
+
+    def __refresh_linked_displays(self):
+        """Refresh this attribute in included, excluded, and linked views."""
+        for setup_attribute_gui in [self] + self.get_model().get_linked_setup_attributes_gui(self):
+            setup_attribute_gui.update_value_input_type(False)
+            setup_attribute_gui.display_calculated_value()
+
+    def restore_user_override(self, user_override):
+        """Restore an override from a save without recalculating per attribute."""
+        if user_override is not None:
+            self.__setup_attribute.set_user_override(tuple(user_override))
+
+    def get_distribution_value(self):
+        if self.__entry_value is not None:
+            value = convert_string_to_value(self.__entry_value.get_entry_text())
+        else:
+            value = self.__setup_attribute.get_current_value()
+
+        if value is not None and len(value) == 1 and isinstance(value[0], DistributionValue):
+            return value[0]
+
+        if self.__setup_attribute.has_override_value():
+            raise TypeError("The current temporary script override is a scalar, not a distribution")
+
+        if self.__setup_attribute.has_user_override():
+            materialized = materialize_probability_override(
+                self.__setup_attribute.get_user_override(),
+                settings.get_num_samples(),
+                id(self.__setup_attribute),
+            )
+            if len(materialized) == 1 and isinstance(materialized[0], DistributionValue):
+                return materialized[0]
+            raise TypeError("The current analyst override is a scalar, not a distribution")
+
+        return distribution_from_input(value, settings.get_num_samples(), id(self.__setup_attribute))
+
+    def plot_distribution(self):
+        from tkinter import messagebox
+
+        try:
+            from distribution_plot import plot_distribution
+
+            distribution_value = self.get_distribution_value()
+            title = f"{self.__setup_class_gui.get_configuration_name()}: {self.__setup_class_gui.get_name()} — {self.get_name()}"
+            plot_distribution(distribution_value, title, settings.get_distribution_percentiles())
+        except (ImportError, TypeError, ValueError) as error:
+            messagebox.showerror("Could not plot distribution", str(error))
         	
     def has_manually_entered_value(self):
         return self.__entry_value != None
@@ -172,8 +277,15 @@ class GUISetupAttribute(GUIModelingBlock):
         if self.__setup_attribute.has_override_value():
             self.switch_to_value_label(False)
             self.set_displayed_value(convert_value_to_string(self.__setup_attribute.get_override_value()), "red")
+        elif self.__setup_attribute.has_user_override():
+            self.switch_to_value_label(False)
+            value = self.__setup_attribute.get_value()
+            if value is None:
+                value = self.__setup_attribute.get_user_override()
+            self.set_displayed_value(convert_value_to_string(value), "dark orange")
         else:
-            self.set_displayed_value(convert_value_to_string(self.__setup_attribute.get_value()))
+            value = self.__setup_attribute.get_value()
+            self.set_displayed_value("-" if value is None else convert_value_to_string(value))
             
     def attempt_to_reset_override_value(self):
         """
@@ -182,10 +294,10 @@ class GUISetupAttribute(GUIModelingBlock):
         if self.__setup_attribute.has_override_value():
             self.__setup_attribute.reset_override_value()
             
-            # Update the displayed value for all linked copies
+            # Restore the correct label/entry type. The caller recalculates
+            # once after all matching overrides have been removed.
             for setup_attribute_gui in [self] + self.get_model().get_linked_setup_attributes_gui(self):
                 setup_attribute_gui.update_value_input_type(False)
-                setup_attribute_gui.display_calculated_value()
                 
             return True
             
@@ -205,4 +317,12 @@ class GUISetupAttribute(GUIModelingBlock):
         self.__setup_class_gui.remove_setup_attribute_gui(self)
         
     def save_state(self):
-        return super().save_state() | {"value": self.__setup_attribute.get_value()}
+        value = self.__setup_attribute.get_value()
+
+        # Calculated samples are regenerated on load. Persisting thousands of
+        # draws per attribute would make save files unnecessarily large.
+        if value is not None and len(value) == 1 and isinstance(value[0], DistributionValue):
+            value = (str(value[0]),)
+
+        user_override = self.__setup_attribute.get_user_override()
+        return super().save_state() | {"value": value, "user_override": user_override}

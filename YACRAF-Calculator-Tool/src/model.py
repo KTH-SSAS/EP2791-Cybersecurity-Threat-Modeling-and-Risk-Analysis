@@ -450,6 +450,12 @@ class Model:
         """
         Calculates the values of setup attributes
         """
+        # Manual local-cost distributions are sampled once per calculation and
+        # reused wherever the same attack step appears in the graph.
+        reset_distribution_sampling_cache()
+        configure_distribution_display(settings.get_distribution_percentiles())
+        configure_pos_calculation(settings.get_pos_calculation_mode())
+
         seen_instances = {} # Key: Instance name, Value: List of GUI setup classes
         seen_linked_groups = set()
         
@@ -492,6 +498,11 @@ class Model:
             for setup_class_gui in setup_view.get_setup_classes_gui():
                 if not setup_view.is_excluded():
                     setup_class_gui.calculate_values()
+                else:
+                    # Excluded views do not participate in the calculation,
+                    # but linked/script/user override state must not leave
+                    # their labels visually stale.
+                    setup_class_gui.display_calculated_values()
                     
     """
     def get_setup_view_names(self):
