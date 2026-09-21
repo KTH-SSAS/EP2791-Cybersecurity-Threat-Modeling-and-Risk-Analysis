@@ -22,7 +22,9 @@ The calculator supports both the paper-compatible single-value workflow and addi
 
 | Calculation or behavior | Status | Interpretation |
 | --- | --- | --- |
-| Bundled Yacraf metamodel, including $TEP=PoC\cdot PoA$, the single-value PoS result, $LR=LM\cdot LP$, and actor-risk aggregation | **Paper-compatible behavior** | Implements the ordinary Yacraf calculation chain represented by the bundled metamodel. |
+| Core Yacraf calculation chain, including $TEP=PoC\cdot PoA$, the single-value PoS result, $LR=LM\cdot LP$, and actor-risk aggregation | **Paper-compatible behavior** | Implements the ordinary Yacraf calculation chain represented by the bundled metamodel. |
+| Simplified, mean-centred default estimates for calculated $PoC$ and $PoA$ | **Calculator implementation** | Operationalizes the framework's qualitative prompts; it is not presented as the only valid analyst judgment. |
+| End-user override of calculated $PoC$ or $PoA$ | **Analyst judgment** | Replaces a simplified default estimate with the analyst's scalar probability or probability distribution while leaving the bundled metamodel unchanged. |
 | Empirical Monte Carlo propagation and attack-plan-aware Global Difficulty aggregation | **Calculator statistical implementation** | Propagates distribution-valued inputs without fitting an output distribution family. This is the calculator's numerical implementation for uncertain inputs. |
 | Independent union of several abuse-case contributions to one loss | **Explicit calculator assumption** | Assumes the separate loss causes are independent and not mutually exclusive. Dependence or mutual exclusivity must be modeled manually. |
 | Conditional PoS distribution | **Optional theoretical extension** | Returns a distribution of success probabilities conditional on realized Global Difficulty. It is not the single-value PoS calculation described in the Yacraf paper. |
@@ -66,7 +68,7 @@ All difficulty and effort quantities compared in the calculations must use compa
 
 ## Bundled Yacraf input calculations
 
-The bundled metamodel uses values from $0$ to $10$ for the contributing attacker and abuse-case assessments. The dotted or qualitative relationships in the framework are prompts for analyst judgment. In other words forming the calculations here are challenging. However, the tool implementation deploys simplified and mean-centred arithmetic formulas for these calculations. The values of the parameters calculated this way can also be overwritten by the end user to capture the analyst's own judgement. 
+The bundled metamodel uses values from $0$ to $10$ for the contributing attacker and abuse-case assessments. The dotted or qualitative relationships in the framework are prompts for analyst judgment, so forming numerical calculations from them is challenging. The tool therefore deploys simplified, mean-centred arithmetic formulas for these calculations. The $PoC$ and $PoA$ values calculated this way can also be overridden by the end user to capture the analyst's own judgment.
 
 Threat Capability is the arithmetic mean of attacker Skill, Resources, and Sponsorship:
 
@@ -95,7 +97,23 @@ $$
 TEP=PoC\cdot PoA.
 $$
 
-In particular, the bundled metamodel calculates $TC$ but leaves Effort Spent and Local Difficulty as manual assessments informed by the connected qualitative factors. Likewise, the model can use $TC$ to highlight relevant considerations without automatically converting it into $LD$, $AtAS$, or $ES$.
+These formulas remain the defaults. In particular, the bundled metamodel calculates $TC$ but leaves Effort Spent and Local Difficulty as manual assessments informed by the connected qualitative factors. Likewise, the model can use $TC$ to highlight relevant considerations without automatically converting it into $LD$, $AtAS$, or $ES$.
+
+### Analyst overrides for Probability of Contact and Probability of Action
+
+An analyst can replace either calculated $PoC$ or calculated $PoA$ on an abuse case without editing the bundled metamodel. In a `System View`, select the calculated attribute, press `E`, enter either a scalar probability from `0` through `1` or any [supported distribution specification](#distribution-valued-inputs), and choose `Apply override`. A scalar outside $[0,1]$ is rejected. Choose `Use calculated value` later to remove the analyst override and return to the applicable formula above.
+
+The override specification is persisted when the model is saved. A scalar remains fixed, while a distribution specification is sampled again on every `Calculate` run. Every realized distribution sample is clipped to $[0,1]$ before use; this is especially relevant to unbounded normal, lognormal, and exponential distributions. For example, `normal / 0.6 / 0.3` is a valid probability override even though the source distribution can generate values above $1$.
+
+The selected values replace the calculated parameter sample by sample in the ordinary calculation chain:
+
+$$
+TEP^{(s)}=PoC^{(s)}PoA^{(s)}.
+$$
+
+A scalar is broadcast across all samples. Consequently, a distribution-valued $PoC$ or $PoA$ produces distribution-valued $TEP$ and propagates through the loss-probability, loss-risk, and actor-risk calculations on aligned sample indices. The override's empirical distribution can be inspected with `Plot distribution` after it has been applied.
+
+A temporary override set by a custom script has higher precedence than a saved analyst override. Clearing the script override reveals the saved analyst override again; it does not silently return the attribute to the bundled formula. Report any override used in an analysis, because the result no longer follows the default $PoC$ or $PoA$ estimate.
 
 ## Distribution-valued inputs
 
@@ -117,7 +135,7 @@ For example, `1 + lognormal / 5 / 2` uses a lognormal distribution with median $
 
 These names describe the input distributions only. The calculator does not force a named distribution family on an aggregated result, and instead operates on numerical distributions based on sampling.
 
-In the bundled metamodel, named distributions are accepted for attack-event Local and Global Difficulty and their hidden intermediate values, abuse-case Effort Spent, Loss Magnitude and Loss Risk, Actor Risk, and Defense Mechanism Cost and Impact. Probability of Contact, Probability of Action, and Threat Event Probability remain scalar probability inputs or results. Probability of Success and Loss Probability can nevertheless become empirical distributions when Conditional PoS mode produces distribution-valued downstream results. A custom metamodel may assign the sampled-distribution value type to additional fields.
+In the bundled metamodel, named distributions are accepted for attack-event Local and Global Difficulty and their hidden intermediate values, abuse-case Effort Spent, Loss Magnitude and Loss Risk, Actor Risk, and Defense Mechanism Cost and Impact. Probability of Contact and Probability of Action are scalar results by default, but either can become distribution-valued through an analyst override. Threat Event Probability and downstream loss probabilities can then become empirical distributions through samplewise propagation. Probability of Success and Loss Probability can also become empirical distributions when Conditional PoS mode produces distribution-valued downstream results. A custom metamodel may assign the sampled-distribution value type to additional fields.
 
 ## Empirical Monte Carlo propagation
 
@@ -216,16 +234,22 @@ System-view connections are direct, not transitive. For each contribution, conne
 
 If the abuse cases are mutually exclusive, dependent, or otherwise require a different overlap model, the independent-union formula is not valid. Calculate the appropriate combined probability separately, override $LP$ manually—for example through a script—and document the chosen dependence assumption.
 
-In `Single success ratio` mode, the $p_j$ values and $LP$ are scalar. A distribution-valued Loss Magnitude still produces a distribution-valued Loss Risk:
+With the default scalar $PoC$ and $PoA$ calculations and `Single success ratio` mode, the $p_j$ values and $LP$ are scalar. A distribution-valued Loss Magnitude still produces a distribution-valued Loss Risk:
 
 $$
 LR^{(s)}=LM^{(s)}LP.
 $$
 
-In Conditional PoS mode, the union and Loss Risk are evaluated sample by sample:
+If an analyst supplies a distribution-valued $PoC$ or $PoA$, or if Conditional PoS mode supplies a distribution-valued PoS, the complete probability and risk chain is evaluated sample by sample. Scalar operands are broadcast across the samples:
 
 $$
-LP^{(s)}=1-\prod_j\left(1-TEP_j\,Q_j^{(s)}\right),
+TEP_j^{(s)}=PoC_j^{(s)}PoA_j^{(s)},
+\qquad
+p_j^{(s)}=TEP_j^{(s)}\mathrm{PoS}_{j,\mathrm{terminal}}^{(s)},
+$$
+
+$$
+LP^{(s)}=1-\prod_j\left(1-p_j^{(s)}\right),
 \qquad
 LR^{(s)}=LM^{(s)}LP^{(s)}.
 $$
@@ -331,7 +355,7 @@ It is suggested to use Conditional PoS as a default as it provides a more nuance
 
 Each press of `Calculate` clears the per-run sample cache and draws new samples from every manually declared distribution. A reused source keeps the same samples everywhere within that one run, but a later run draws a new realization. The calculator currently has no user-facing random-seed setting. Small differences between repeated results are therefore expected, especially at low sample counts or in distribution tails.
 
-Calculated sample arrays are not stored in save files; the selected sample count, percentile mode, and PoS mode are stored. Reopening and recalculating a save regenerates its empirical distributions.
+Calculated sample arrays are not stored in save files; the selected sample count, percentile mode, PoS mode, and any analyst-entered $PoC$ or $PoA$ override specifications are stored. Reopening and recalculating a save regenerates its empirical distributions, including distribution-valued probability overrides.
 
 The two display modes summarize empirical samples as follows:
 
@@ -340,7 +364,7 @@ The two display modes summarize empirical samples as follows:
 
 The selection changes only the three displayed values and percentile markers. It does not change sampling, downstream calculations, or the full empirical histogram and cumulative distribution available through `Plot distribution`.
 
-An explicit attribute override, normally applied through a custom script, takes precedence over the bundled calculation for that attribute. Downstream calculations then consume the overridden value. A reported result that uses an override must identify it, because the overridden attribute no longer follows the equation documented here.
+A saved analyst override of $PoC$ or $PoA$ takes precedence over the bundled calculation for that attribute. An explicit temporary attribute override applied through a custom script has still higher precedence. Downstream calculations consume whichever value has precedence. Clearing a script override exposes the saved analyst override again; choosing `Use calculated value` in the attribute dialog removes the saved override. A reported result that uses any override must identify it, because the overridden attribute no longer follows the default equation documented here.
 
 ## How the bundled metamodel implements the calculations
 

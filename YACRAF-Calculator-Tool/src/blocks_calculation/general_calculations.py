@@ -1,7 +1,4 @@
-import os
 import numpy as np
-from helper_functions_general import convert_value_to_string, convert_string_to_value
-from config import *
 
 
 _distribution_rng = np.random.default_rng()
@@ -380,6 +377,53 @@ def _distribution_from_input(input_value, num_samples, source_key, *, triangle_o
 def distribution_from_input(input_value, num_samples, source_key):
     """Return aligned samples for a manual distribution-valued attribute."""
     return _distribution_from_input(input_value, num_samples, source_key)
+
+
+def validate_probability_override(input_value):
+    """Validate and preserve a user-entered probability override specification."""
+    try:
+        input_value = tuple(input_value)
+    except TypeError as error:
+        raise ValueError(
+            "A probability override must be a scalar or distribution specification"
+        ) from error
+
+    if len(input_value) == 1 and isinstance(input_value[0], DistributionValue):
+        raise ValueError(
+            "A persistent probability override must use a scalar or named "
+            "distribution specification, not materialized samples"
+        )
+
+    if len(input_value) == 1 and _is_number(input_value[0]):
+        probability = float(input_value[0])
+        if not np.isfinite(probability) or not 0 <= probability <= 1:
+            raise ValueError("A scalar probability override must be finite and in [0, 1]")
+        return (probability,)
+
+    # Distribution parameters are validated by the same parser used for all
+    # other distribution-valued attributes. The raw specification is retained
+    # so a fresh empirical sample can be drawn for every calculation run.
+    parse_distribution_spec(input_value)
+    return input_value
+
+
+def materialize_probability_override(input_value, num_samples, source_key):
+    """Turn a scalar or distribution specification into a probability value.
+
+    Scalar probabilities remain scalar. Named distributions are sampled using
+    the shared Monte Carlo cache and clipped samplewise to [0, 1]. Clipping is
+    intentional: it lets an analyst use the same non-negative distributions as
+    elsewhere in the tool while keeping every realized value a probability.
+    """
+    input_value = validate_probability_override(input_value)
+
+    if len(input_value) == 1 and _is_number(input_value[0]):
+        return input_value
+
+    distribution_value = _distribution_from_input(
+        input_value, num_samples, source_key
+    ).clip_probability()
+    return (distribution_value,)
 
 
 def _as_distribution_value(value, num_samples):

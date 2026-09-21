@@ -214,6 +214,43 @@ class Options:
     @staticmethod
     def setup_attribute(model, view, setup_attribute_gui):
         """Offer distribution templates and plots where applicable."""
+        if setup_attribute_gui.supports_user_override():
+            from tkinter import messagebox
+
+            options = Options(model, view, 5, 2, "Probability override")
+            entry_text = tk.StringVar()
+            initial_text = setup_attribute_gui.get_user_override_text() or "0.5"
+            options.add_entry(
+                0,
+                0,
+                "Scalar or distribution override:",
+                initial_text,
+                lambda: None,
+                entry_text,
+            )
+
+            options.add_label(0, 1, "Examples (select, then apply):")
+            options.add_button(1, 1, "Scalar: 0.35", lambda: entry_text.set("0.35"))
+            options.add_button(
+                2,
+                1,
+                "Triangular: 0.1 / 0.3 / 0.6",
+                lambda: entry_text.set("triangular / 0.1 / 0.3 / 0.6"),
+            )
+
+            def apply_override():
+                try:
+                    setup_attribute_gui.set_user_override_text(entry_text.get())
+                except (TypeError, ValueError) as error:
+                    messagebox.showerror("Invalid probability override", str(error))
+
+            options.add_button(2, 0, "Apply override", apply_override)
+            options.add_button(3, 0, "Use calculated value", setup_attribute_gui.reset_user_override)
+            options.add_button(3, 1, "Plot distribution", setup_attribute_gui.plot_distribution)
+            options.add_label(4, 0, "Distribution samples are clipped to [0, 1].")
+            options.add_label(4, 1, "Overrides are stored when the model is saved.")
+            return options
+
         has_templates = setup_attribute_gui.has_manually_entered_value() and \
                         setup_attribute_gui.supports_distribution_templates()
         can_plot = setup_attribute_gui.can_plot_distribution()

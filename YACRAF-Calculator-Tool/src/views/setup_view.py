@@ -75,7 +75,13 @@ class SetupView(View):
                 
                 for setup_attribute_gui, setup_attribute_gui_copy in zip(setup_class_gui.get_setup_attributes_gui(), \
                                                                          setup_class_gui_copy.get_setup_attributes_gui()):
-                    setup_attribute_gui_copy.set_displayed_value(convert_value_to_string(setup_attribute_gui.get_setup_attribute().get_value()))
+                    value = setup_attribute_gui.get_setup_attribute().get_value()
+                    setup_attribute_gui_copy.set_displayed_value(
+                        "-" if value is None else convert_value_to_string(value)
+                    )
+                    setup_attribute_gui_copy.restore_user_override(
+                        setup_attribute_gui.get_setup_attribute().get_user_override()
+                    )
                     
         for connection_with_blocks in self.__connections_with_blocks:
             start_block = connection_with_blocks.get_start_block()
@@ -281,7 +287,12 @@ class SetupView(View):
                     setup_class_gui.set_name(saved_states_setup_class_gui["name"])
                     
                     for saved_states_setup_attribute_gui, setup_attribute_gui in zip(saved_states_setup_class_gui["setup_attributes_gui"], setup_class_gui.get_setup_attributes_gui()):
-                        setup_attribute_gui.set_displayed_value(convert_value_to_string(saved_states_setup_attribute_gui["value"]))
+                        value = saved_states_setup_attribute_gui["value"]
+                        setup_attribute_gui.set_displayed_value(
+                            "-" if value is None else convert_value_to_string(value)
+                        )
+                        # Older save files do not contain analyst overrides.
+                        setup_attribute_gui.restore_user_override(saved_states_setup_attribute_gui.get("user_override"))
                         
                 # Restore setup connections
                 for saved_states_connection_with_blocks in saved_states_connections_with_blocks:

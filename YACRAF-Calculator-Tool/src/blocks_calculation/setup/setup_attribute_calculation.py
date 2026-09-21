@@ -1,4 +1,8 @@
-from general_calculations import combine_values
+from general_calculations import (combine_values,
+                                  CalculationTypeQualitative,
+                                  materialize_probability_override,
+                                  validate_probability_override,
+                                  ValueTypeProbability)
 from config import *
 
 class SetupAttribute:
@@ -6,7 +10,8 @@ class SetupAttribute:
         self.__setup_class = setup_class
         self.__configuration_attribute = configuration_attribute
         self.__value = None # None or a tuple
-        self.__override_value = None # None or a tuple
+        self.__override_value = None # Temporary script override; None or a tuple
+        self.__user_override = None # Persistent analyst override specification
         
     def has_setup_class(self, setup_class):
         return self.__setup_class == setup_class
@@ -25,9 +30,16 @@ class SetupAttribute:
         
     def attempt_to_reset_value(self):
         """
-        Reset value so that the program knows it should calculate a new one, but only if there is no override value and there are input attributes as this attribute otherwise should take a manual input
+        Reset the calculated/materialized value before a new calculation run.
+
+        Temporary script overrides remain stored separately and still take
+        precedence. Calculated values are still cleared beneath them so a
+        formula result or user-distribution sample cannot become stale. A
+        manually entered value is retained while its entry is temporarily
+        hidden by a script override.
         """
-        if not self.has_override_value():
+        if not self.has_override_value() or self.has_user_override() or \
+           self.has_connected_setup_attributes():
             self.clear_value()
             
     def get_override_value(self):
@@ -41,6 +53,39 @@ class SetupAttribute:
         
     def reset_override_value(self):
         self.__override_value = None
+
+    def allows_user_override(self):
+        """Return whether this is a bundled calculated PoC or PoA attribute."""
+        return self.__setup_class.get_configuration_name().strip().casefold() == "abuse case" and \
+               self.get_name().strip().casefold() in (
+                   "probability of contact", "probability of action"
+               ) and \
+               self.get_value_type() == ValueTypeProbability and \
+               self.__configuration_attribute.get_calculation_type() not in (
+                   None, CalculationTypeQualitative
+               ) and \
+               len(self.__configuration_attribute.get_input_configuration_attributes()) > 0
+
+    def get_user_override(self):
+        return self.__user_override
+
+    def set_user_override(self, user_override):
+        """Persist a validated scalar or distribution PoC/PoA specification."""
+        if not self.allows_user_override():
+            raise ValueError(
+                "Only abuse-case Probability of contact and Probability of action "
+                "support analyst overrides"
+            )
+
+        self.__user_override = validate_probability_override(user_override)
+        self.clear_value()
+
+    def has_user_override(self):
+        return self.__user_override is not None
+
+    def reset_user_override(self):
+        self.__user_override = None
+        self.clear_value()
         
     def get_current_value(self):
         if self.has_override_value():
@@ -56,6 +101,25 @@ class SetupAttribute:
         Calculates the value based on input attributes
         """
         if self.__value != None:
+            return
+
+        # A temporary script override takes precedence over a persistent user
+        # override. It is already returned by get_current_value(), and no
+        # underlying value needs to be materialized until the script override
+        # is removed.
+        if self.has_override_value():
+            return
+
+        if self.has_user_override():
+            try:
+                self.__value = materialize_probability_override(
+                    self.__user_override,
+                    settings.get_num_samples(),
+                    id(self)
+                )
+            except ValueError as error:
+                print(f"Warning: {error}")
+                self.__value = ("SETUP ERROR",)
             return
             
         connected_setup_attributes = []

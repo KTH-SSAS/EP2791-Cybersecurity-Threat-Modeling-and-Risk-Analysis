@@ -241,7 +241,11 @@ class GUISetupClass(GUIClass):
         Calculates and shows the values of all setup attributes of this setup class
         """
         self.__setup_class.calculate_values()
-        
+
+        self.display_calculated_values()
+
+    def display_calculated_values(self):
+        """Refresh values without including this class in a calculation."""
         for setup_attribute_gui in self.__setup_attributes_gui:
             setup_attribute_gui.display_calculated_value()
             

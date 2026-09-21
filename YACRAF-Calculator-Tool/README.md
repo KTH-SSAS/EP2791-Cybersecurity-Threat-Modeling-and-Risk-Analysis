@@ -12,7 +12,7 @@ This README explains how to install and operate the calculator. In addition, we 
 - Video 4 - [Creating attack trees](https://play.kth.se/media/YACRAF-tool-4/0_yc4z3d9j)
 - Video 5 - [Metamodel editing](https://play.kth.se/media/YACRAF-tool-5/0_wa27pt27)
 
-Parameter definitions, equations, statistical assumptions are maintained in the course material's [Yacraf calculations and statistical extensions](../Course-material/lectures/Yacraf-calculations.md).
+Parameter definitions, equations, and statistical assumptions are maintained in the course material's [Yacraf calculations and statistical extensions](../Course-material/lectures/Yacraf-calculations.md).
 
 > **Use the bundled metamodel as-is.** It is the calculator's implementation of the Yacraf metamodel. Normal use consists of adding instances, values, and connections in `System Views`; changing the `Metamodel Views` is neither expected nor required. Metamodel editing is documented only for maintainers and advanced experiments in [Advanced: changing or rebuilding the Yacraf metamodel](#advanced-changing-or-rebuilding-the-yacraf-metamodel) at the end of this README. The calculation reference clearly distinguishes paper-compatible behavior from calculator-specific statistical assumptions and the optional `Conditional PoS distribution` extension.
 
@@ -32,6 +32,7 @@ Having all that said, we hope you find the tool useful.
      - [Adding Class Instances](#adding-class-instances)
      - [Adding Connections](#adding-connections)
      - [Calculating Values](#calculating-values)
+     - [Overriding calculated PoC and PoA](#overriding-calculated-poc-and-poa)
 5. [Using distribution-valued parameters](#using-distribution-valued-parameters)
    - [Declaring input distributions](#declaring-input-distributions)
    - [Settings](#distribution-calculation-settings)
@@ -92,9 +93,10 @@ This version retains the original scalar Yacraf workflow and adds distribution-v
 
 | Feature | What the end user can do |
 | --- | --- |
-| [Named input distributions](../Course-material/lectures/Yacraf-calculations.md#distribution-valued-inputs) | Use uniform, triangular, non-negative normal, lognormal, or exponential distributions for local attack difficulty, abuse-case effort, loss magnitude, loss risk, and aggregated actor risk. |
+| [Named input distributions](../Course-material/lectures/Yacraf-calculations.md#distribution-valued-inputs) | Use uniform, triangular, non-negative normal, lognormal, or exponential distributions for local attack difficulty, abuse-case effort, overridden PoC or PoA, loss magnitude, loss risk, and aggregated actor risk. |
 | [Empirical Monte Carlo propagation](../Course-material/lectures/Yacraf-calculations.md#empirical-monte-carlo-propagation) | Calculate every downstream distribution from samples of the declared inputs instead of forcing an analytically fitted output family. |
 | [Attack-plan-aware cost aggregation](../Course-material/lectures/Yacraf-calculations.md#global-attack-difficulty) | Evaluate OR alternatives per sample, combine AND requirements, and count a shared prerequisite only once. |
+| [Analyst overrides for calculated PoC and PoA](../Course-material/lectures/Yacraf-calculations.md#analyst-overrides-for-probability-of-contact-and-probability-of-action) | Replace either simplified, mean-centred default estimate with a scalar probability or supported distribution, without editing the metamodel. |
 | Configurable sample count | Choose the number of Monte Carlo samples in `Settings`. |
 | Configurable result summaries | Display either `P0 / P50 / P100` or `P5 / P50 / P95` in calculated distribution fields. |
 | [Two attack-event PoS modes](../Course-material/lectures/Yacraf-calculations.md#probability-of-success-modes) | Retain the paper-compatible scalar success ratio or opt into a distribution of success probabilities conditional on uncertain global difficulty. |
@@ -113,7 +115,7 @@ The graphical interface contains `System Views` (`Setup Views`) for building the
 
 ### Parameter notation
 
-Parenthesized abbreviations in model blocks identify the **meaning of a parameter**, not its internal value type. For example, `Local difficulty (LD)` and `Global difficulty (GD)` may both be distribution-valued, while `Probability of success (PoS)` may be either a scalar or an empirical distribution depending on the selected calculation mode. The notation follows the [Yacraf summary framework](../Course-material/lectures/Risk_calculator_framework.png). Abbreviations marked with an asterisk are added by this calculator for parameters that are named but not abbreviated in that figure.
+Parenthesized abbreviations in model blocks identify the **meaning of a parameter**, not its internal value type. For example, `Local difficulty (LD)` and `Global difficulty (GD)` may both be distribution-valued, while `Probability of contact (PoC)`, `Probability of action (PoA)`, and `Probability of success (PoS)` may be either scalars or empirical distributions when the corresponding override or calculation mode is used. The notation follows the [Yacraf summary framework](../Course-material/lectures/Risk_calculator_framework.png). Abbreviations marked with an asterisk are added by this calculator for parameters that are named but not abbreviated in that figure.
 
 | Object | Parameter abbreviations |
 | --- | --- |
@@ -171,11 +173,27 @@ System-view connections pass values unchanged and do not have editable scalar mu
 
 Pressing `Calculate` calculates every `Attribute` that does not have a manual input entry field, across all `Classes` in all `System Views`. In the example above, Global Difficulty (GD), Probability of Success (PoS), Loss Risk (LR), and Loss Probability (LP) are calculated downstream values. Distribution-valued results are shown using the percentile range selected in `Settings`. Selecting a calculated `Attribute` highlights the contributing input `Attributes` in orange. See [Yacraf calculations and statistical extensions](../Course-material/lectures/Yacraf-calculations.md) for the calculation sequence and interpretation of these results.
 
+The bundled metamodel uses values from `0` to `10` for the contributing attacker and abuse-case assessments. Its dotted or qualitative relationships are prompts for analyst judgment, which makes translating them into numerical calculations challenging. The implementation therefore supplies simplified, mean-centred arithmetic formulas for calculated PoC and PoA. These defaults can be overridden by the end user to capture the analyst's own judgment.
+
+#### Overriding calculated PoC and PoA
+
+To override a calculated Probability of Contact (`PoC`) or Probability of Action (`PoA`):
+
+1. Select the calculated PoC or PoA attribute on an abuse case and press `E`.
+2. Enter either a scalar from `0` through `1`, such as `0.35`, or a supported distribution specification, such as `triangular / 0.1 / 0.3 / 0.6`.
+3. Choose `Apply override`. The model recalculates immediately with the analyst-supplied value.
+
+A scalar outside `[0, 1]` is rejected. Distribution overrides use the same named syntax documented below. Their samples are clipped to `[0, 1]`, so unbounded distributions such as `normal`, `lognormal`, and `exponential` remain valid probability inputs. Choose `Use calculated value` in the same dialog to remove the override and restore the bundled formula.
+
+The override specification is stored with the save. A distribution override draws fresh samples on each `Calculate` run, and the resulting PoC or PoA values propagate sample by sample through Threat Event Probability (`TEP`), Loss Probability (`LP`), Loss Risk (`LR`), and Actor Risk (`AR`). Choose `Plot distribution` in the attribute dialog to inspect a distribution override.
+
+A temporary override applied by a custom script takes precedence over the saved analyst override. Clearing the temporary script override reveals the saved analyst override again. To return to the bundled PoC or PoA formula, choose `Use calculated value`.
+
 ## Using distribution-valued parameters
 
 ### Declaring input distributions
 
-A distribution-valued parameter can represent local difficulty, global difficulty, effort spent, loss magnitude, loss risk, aggregated actor risk, or another uncertain quantity in a custom model. It may be entered as either a single fixed non-negative value or a distribution name followed by its parameters:
+A distribution-valued parameter can represent local difficulty, global difficulty, effort spent, an overridden PoC or PoA, loss magnitude, loss risk, aggregated actor risk, or another uncertain quantity in a custom model. Except for PoC and PoA overrides, which use a scalar probability from `0` through `1`, it may be entered as either a single fixed non-negative value or a distribution name followed by its parameters:
 
 ```text
 fixed value, for example: 2

@@ -498,6 +498,11 @@ class Model:
             for setup_class_gui in setup_view.get_setup_classes_gui():
                 if not setup_view.is_excluded():
                     setup_class_gui.calculate_values()
+                else:
+                    # Excluded views do not participate in the calculation,
+                    # but linked/script/user override state must not leave
+                    # their labels visually stale.
+                    setup_class_gui.display_calculated_values()
                     
     """
     def get_setup_view_names(self):

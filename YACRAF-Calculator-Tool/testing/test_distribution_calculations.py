@@ -33,11 +33,15 @@ from general_calculations import (  # noqa: E402
     configure_distribution_display,
     configure_pos_calculation,
     is_distribution_valued_attribute,
+    materialize_probability_override,
     parse_distribution_spec,
     reset_distribution_sampling_cache,
 )
 from settings import Settings  # noqa: E402
 from setup_class_calculation import SetupClass  # noqa: E402
+from setup_attribute_calculation import SetupAttribute  # noqa: E402
+import setup_attribute_calculation  # noqa: E402
+from script_interface import ScriptInterface  # noqa: E402
 import helper_functions_general  # noqa: E402
 from yacraf_notation import format_parameter_name, get_parameter_abbreviation  # noqa: E402
 
@@ -68,6 +72,58 @@ class OutputAttribute:
     @staticmethod
     def get_input_offset():
         return 0
+
+
+class ProbabilityConfigurationAttributeStub:
+    def __init__(self, name, *, value_type=ValueTypeProbability,
+                 calculation_type=CalculationTypeMultiplication,
+                 input_attributes=()):
+        self.name = name
+        self.value_type = value_type
+        self.calculation_type = calculation_type
+        self.input_attributes = {
+            input_attribute: True for input_attribute in input_attributes
+        }
+
+    def get_name(self):
+        return self.name
+
+    def get_value_type(self):
+        return self.value_type
+
+    def get_calculation_type(self):
+        return self.calculation_type
+
+    def get_input_configuration_attributes(self):
+        return self.input_attributes
+
+    @staticmethod
+    def get_input_scalar():
+        return 1
+
+    @staticmethod
+    def get_input_offset():
+        return 0
+
+    @staticmethod
+    def is_hidden():
+        return False
+
+
+class ProbabilitySetupClassStub:
+    def __init__(self, configuration_name="Abuse case"):
+        self.configuration_name = configuration_name
+        self.attributes = []
+
+    def get_configuration_name(self):
+        return self.configuration_name
+
+    def get_setup_attributes(self):
+        return self.attributes
+
+    @staticmethod
+    def get_input_setup_classes():
+        return {}
 
 
 class SetupClassStub:
@@ -388,6 +444,303 @@ class TestDistributionSpecifications(unittest.TestCase):
             format_parameter_name("Custom class", "Unmapped distribution"),
             "Unmapped distribution",
         )
+
+
+class TestProbabilityOverrides(unittest.TestCase):
+    def setUp(self):
+        reset_distribution_sampling_cache(seed=17)
+
+    @staticmethod
+    def attribute(name, *, configuration_name="Abuse case",
+                  value_type=ValueTypeProbability):
+        setup_class = ProbabilitySetupClassStub(configuration_name)
+        input_configuration = ProbabilityConfigurationAttributeStub(
+            "Assessment input", value_type=ValueTypeNumber
+        )
+        configuration_attribute = ProbabilityConfigurationAttributeStub(
+            name, value_type=value_type, input_attributes=(input_configuration,)
+        )
+        input_attribute = SetupAttribute(setup_class, input_configuration)
+        input_attribute.set_value((0.5,))
+        setup_attribute = SetupAttribute(setup_class, configuration_attribute)
+        setup_class.attributes.extend((input_attribute, setup_attribute))
+        return setup_attribute
+
+    @staticmethod
+    def abuse_case_probability_graph():
+        setup_class = ProbabilitySetupClassStub()
+        assessment_configuration = ProbabilityConfigurationAttributeStub(
+            "Assessment input", value_type=ValueTypeNumber
+        )
+        contact_configuration = ProbabilityConfigurationAttributeStub(
+            "Probability of contact",
+            input_attributes=(assessment_configuration,),
+        )
+        action_configuration = ProbabilityConfigurationAttributeStub(
+            "Probability of action",
+            input_attributes=(assessment_configuration,),
+        )
+        tep_configuration = ProbabilityConfigurationAttributeStub(
+            "Threat event probability",
+            input_attributes=(contact_configuration, action_configuration),
+        )
+        contact = SetupAttribute(setup_class, contact_configuration)
+        action = SetupAttribute(setup_class, action_configuration)
+        tep = SetupAttribute(setup_class, tep_configuration)
+        setup_class.attributes.extend((contact, action, tep))
+        return contact, action, tep
+
+    @staticmethod
+    def calculate(attribute, num_samples=100):
+        sampling_settings = Settings()
+        sampling_settings.set_num_samples(num_samples)
+        with patch.object(
+            setup_attribute_calculation,
+            "settings",
+            sampling_settings,
+            create=True,
+        ):
+            attribute.calculate_value()
+
+    def test_scalar_probability_override_accepts_closed_interval_bounds(self):
+        self.assertEqual(
+            materialize_probability_override((0,), 5, "lower-bound"),
+            (0.0,),
+        )
+        self.assertEqual(
+            materialize_probability_override((1,), 5, "upper-bound"),
+            (1.0,),
+        )
+        self.assertEqual(
+            materialize_probability_override((0.375,), 5, "interior"),
+            (0.375,),
+        )
+
+    def test_scalar_probability_override_rejects_values_outside_bounds(self):
+        for invalid_value in (-0.001, 1.001, float("nan"), float("inf")):
+            with self.subTest(invalid_value=invalid_value):
+                with self.assertRaises(ValueError):
+                    materialize_probability_override(
+                        (invalid_value,), 5, "invalid-scalar"
+                    )
+
+    def test_persistent_override_rejects_materialized_samples(self):
+        samples = DistributionValue.empirical([0.2, 0.4, 0.6])
+
+        with self.assertRaises(ValueError):
+            materialize_probability_override(
+                (samples,), 3, "already-materialized"
+            )
+
+    def test_named_probability_distribution_is_sampled_and_clipped(self):
+        override = materialize_probability_override(
+            ("uniform", 1.2, 1.5), 37, "clipped-uniform"
+        )
+
+        self.assertEqual(len(override), 1)
+        self.assertIsInstance(override[0], DistributionValue)
+        self.assertEqual(len(override[0].get_samples()), 37)
+        np.testing.assert_array_equal(
+            override[0].get_samples(), np.ones(37)
+        )
+
+    def test_only_abuse_case_poc_and_poa_allow_user_overrides(self):
+        self.assertTrue(self.attribute("Probability of contact").allows_user_override())
+        self.assertTrue(self.attribute("Probability of action").allows_user_override())
+        self.assertFalse(self.attribute(
+            "Threat event probability"
+        ).allows_user_override())
+        self.assertFalse(self.attribute(
+            "Probability of action", configuration_name="Attacker"
+        ).allows_user_override())
+        self.assertFalse(self.attribute(
+            "Probability of contact", value_type=ValueTypeNumber
+        ).allows_user_override())
+
+        setup_class = ProbabilitySetupClassStub()
+        manual_configuration = ProbabilityConfigurationAttributeStub(
+            "Probability of contact", calculation_type=None
+        )
+        manual_attribute = SetupAttribute(setup_class, manual_configuration)
+        setup_class.attributes.append(manual_attribute)
+        self.assertFalse(manual_attribute.allows_user_override())
+
+    def test_user_override_lifecycle_preserves_the_input_specification(self):
+        attribute = self.attribute("Probability of contact")
+        specification = ("triangular", 0.1, 0.4, 1.3)
+
+        self.assertFalse(attribute.has_user_override())
+        self.assertIsNone(attribute.get_user_override())
+
+        attribute.set_user_override(specification)
+        self.assertTrue(attribute.has_user_override())
+        self.assertEqual(attribute.get_user_override(), specification)
+
+        attribute.reset_user_override()
+        self.assertFalse(attribute.has_user_override())
+        self.assertIsNone(attribute.get_user_override())
+
+    def test_unsupported_attribute_rejects_a_user_override(self):
+        attribute = self.attribute("Threat event probability")
+
+        with self.assertRaises(ValueError):
+            attribute.set_user_override((0.5,))
+
+    def test_temporary_script_override_takes_precedence(self):
+        attribute = self.attribute("Probability of action")
+        attribute.set_user_override((0.4,))
+
+        self.calculate(attribute)
+        self.assertEqual(attribute.get_current_value(), (0.4,))
+
+        attribute.set_override_value((0.9,))
+        attribute.attempt_to_reset_value()
+
+        self.calculate(attribute)
+        self.assertEqual(attribute.get_current_value(), (0.9,))
+        self.assertIsNone(attribute.get_value())
+        self.assertEqual(attribute.get_user_override(), (0.4,))
+
+        attribute.reset_override_value()
+        self.calculate(attribute)
+        self.assertEqual(attribute.get_current_value(), (0.4,))
+
+    def test_manual_value_is_retained_beneath_temporary_script_override(self):
+        setup_class = ProbabilitySetupClassStub()
+        configuration = ProbabilityConfigurationAttributeStub(
+            "Manual probability", calculation_type=None
+        )
+        attribute = SetupAttribute(setup_class, configuration)
+        setup_class.attributes.append(attribute)
+        attribute.set_value((0.6,))
+        attribute.set_override_value((0.9,))
+
+        attribute.attempt_to_reset_value()
+
+        self.assertEqual(attribute.get_value(), (0.6,))
+        self.assertEqual(attribute.get_current_value(), (0.9,))
+
+    def test_granular_script_reset_recalculates_once_after_batch(self):
+        class AttributeGUI:
+            def __init__(self):
+                self.reset_count = 0
+
+            def attempt_to_reset_override_value(self):
+                self.reset_count += 1
+                return True
+
+        class Helper:
+            @staticmethod
+            def check_type(values, expected_type):
+                return None
+
+            def __init__(self, attributes):
+                self.attributes = attributes
+
+            def get_setup_attributes_gui(self, *args):
+                return self.attributes
+
+        class Model:
+            def __init__(self):
+                self.calculate_count = 0
+
+            def calculate_values(self):
+                self.calculate_count += 1
+
+        attributes = [AttributeGUI(), AttributeGUI()]
+        model = Model()
+        interface = ScriptInterface.__new__(ScriptInterface)
+        interface._ScriptInterface__model = model
+        interface._ScriptInterface__script_helper = Helper(attributes)
+
+        interface.reset_override_attribute_values(class_type="Abuse case")
+
+        self.assertEqual([item.reset_count for item in attributes], [1, 1])
+        self.assertEqual(model.calculate_count, 1)
+
+    def test_scalar_overrides_propagate_into_tep_multiplication(self):
+        contact, action, tep = self.abuse_case_probability_graph()
+        contact.set_user_override((0.4,))
+        action.set_user_override((0.75,))
+
+        self.calculate(tep)
+
+        self.assertAlmostEqual(tep.get_current_value()[0], 0.3)
+
+    def test_distribution_override_propagates_into_tep_multiplication(self):
+        contact, action, tep = self.abuse_case_probability_graph()
+        contact.set_user_override(("uniform", 0.2, 0.8))
+        action.set_user_override((0.5,))
+
+        self.calculate(tep, num_samples=53)
+
+        contact_samples = contact.get_current_value()[0].get_samples()
+        tep_value = tep.get_current_value()[0]
+        self.assertIsInstance(tep_value, DistributionValue)
+        self.assertEqual(len(tep_value.get_samples()), 53)
+        np.testing.assert_allclose(
+            tep_value.get_samples(), contact_samples * 0.5
+        )
+
+        loss_probability = CalculationTypeMultiplication.calculate_output_value(
+            [tep_value, np.array([0.4])], 53
+        )
+        loss_risk = CalculationTypeMultiplication.calculate_output_value(
+            [loss_probability, np.array([100.0])], 53
+        )
+        np.testing.assert_allclose(
+            loss_probability.get_samples(), contact_samples * 0.5 * 0.4
+        )
+        np.testing.assert_allclose(
+            loss_risk.get_samples(), contact_samples * 0.5 * 0.4 * 100
+        )
+
+    def test_reset_user_override_recalculates_the_formula(self):
+        setup_class = ProbabilitySetupClassStub()
+        first_configuration = ProbabilityConfigurationAttributeStub("Assessment A")
+        second_configuration = ProbabilityConfigurationAttributeStub("Assessment B")
+        action_configuration = ProbabilityConfigurationAttributeStub(
+            "Probability of action",
+            input_attributes=(first_configuration, second_configuration),
+        )
+        first = SetupAttribute(setup_class, first_configuration)
+        second = SetupAttribute(setup_class, second_configuration)
+        action = SetupAttribute(setup_class, action_configuration)
+        setup_class.attributes.extend((first, second, action))
+        first.set_value((0.2,))
+        second.set_value((0.4,))
+
+        self.calculate(action)
+        self.assertAlmostEqual(action.get_current_value()[0], 0.08)
+
+        action.set_user_override((0.75,))
+        self.calculate(action)
+        self.assertEqual(action.get_current_value(), (0.75,))
+
+        # Formula inputs may change while hidden by the analyst override.
+        first.set_value((0.5,))
+        action.reset_user_override()
+        self.assertIsNone(action.get_current_value())
+        self.calculate(action)
+        self.assertAlmostEqual(action.get_current_value()[0], 0.2)
+
+    def test_distribution_override_uses_the_current_sample_count(self):
+        attribute = self.attribute("Probability of contact")
+        specification = ("uniform", 0.2, 0.8)
+        attribute.set_user_override(specification)
+
+        self.calculate(attribute, num_samples=7)
+        first_materialization = attribute.get_current_value()[0]
+        self.assertEqual(len(first_materialization.get_samples()), 7)
+
+        reset_distribution_sampling_cache(seed=23)
+        attribute.attempt_to_reset_value()
+        self.calculate(attribute, num_samples=13)
+        second_materialization = attribute.get_current_value()[0]
+
+        self.assertEqual(attribute.get_user_override(), specification)
+        self.assertEqual(len(second_materialization.get_samples()), 13)
+        self.assertIsNot(first_materialization, second_materialization)
 
 
 class TestAttackPlanAggregation(unittest.TestCase):
