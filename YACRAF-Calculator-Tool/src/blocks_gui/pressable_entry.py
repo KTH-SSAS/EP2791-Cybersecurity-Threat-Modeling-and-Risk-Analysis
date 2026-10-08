@@ -21,7 +21,7 @@ class PressableEntry(GUIModelingBlock):
         self.__entry = None # Entry field that appears when pressed
         self.__entry_window = None # Window that the Entry field is placed within so that it can be drawn on the canvas of the specified view
         
-        self.__entry_text.trace("w", lambda *args: self.write()) # Updated whenever writing in the Entry
+        self.__entry_text.trace_add("write", lambda *args: self.write()) # Updated whenever writing in the Entry
         
     def left_pressed(self, event):
         self.get_view().focus()
