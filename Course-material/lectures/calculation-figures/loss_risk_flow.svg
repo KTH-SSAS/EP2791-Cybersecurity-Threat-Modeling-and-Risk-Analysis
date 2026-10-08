@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="470" viewBox="0 0 1200 470" role="img" aria-labelledby="title desc">
+  <title id="title">Independent union of abuse-case loss contributions</title>
+  <desc id="desc">Each abuse case's threat event probability is paired with the probability of success of its terminal attack event. Their product is one loss-cause contribution. Independent contributions are combined by taking the complement of the probability that none causes the loss.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font: 700 24px system-ui, sans-serif; fill: #0f172a; }
+      .heading { font: 700 17px system-ui, sans-serif; fill: #0f172a; }
+      .body { font: 15px system-ui, sans-serif; fill: #334155; }
+      .small { font: 13px system-ui, sans-serif; fill: #475569; }
+      .node { stroke: #334155; stroke-width: 2; rx: 10; }
+      .edge { fill: none; stroke: #334155; stroke-width: 2.5; marker-end: url(#arrow); }
+      .direct { font: 700 13px system-ui, sans-serif; fill: #b45309; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="470" fill="#ffffff"/>
+  <text x="40" y="42" class="title">How multiple abuse cases enter loss probability and risk</text>
+
+  <rect x="45" y="84" width="255" height="118" class="node" fill="#dbeafe"/>
+  <text x="172" y="114" text-anchor="middle" class="heading">Abuse cases j = 1, …, k</text>
+  <text x="65" y="145" class="body">Probability of contact (PoC<tspan baseline-shift="sub" font-size="11">j</tspan>)</text>
+  <text x="65" y="174" class="body">Probability of action (PoA<tspan baseline-shift="sub" font-size="11">j</tspan>)</text>
+
+  <rect x="390" y="90" width="265" height="106" class="node" fill="#fef3c7"/>
+  <text x="522" y="123" text-anchor="middle" class="heading">Per-abuse threat probability</text>
+  <text x="522" y="160" text-anchor="middle" class="body">TEP<tspan baseline-shift="sub" font-size="11">j</tspan> = PoC<tspan baseline-shift="sub" font-size="11">j</tspan> · PoA<tspan baseline-shift="sub" font-size="11">j</tspan></text>
+
+  <rect x="45" y="264" width="255" height="126" class="node" fill="#dbeafe"/>
+  <text x="172" y="294" text-anchor="middle" class="heading">Terminal attack events a<tspan baseline-shift="sub" font-size="12">j</tspan></text>
+  <text x="65" y="327" class="body">Effort spent (ES<tspan baseline-shift="sub" font-size="11">j</tspan>): distribution</text>
+  <text x="65" y="356" class="body">Global difficulty (GD<tspan baseline-shift="sub" font-size="11">a_j</tspan>): distribution</text>
+
+  <rect x="390" y="270" width="265" height="114" class="node" fill="#fef3c7"/>
+  <text x="522" y="303" text-anchor="middle" class="heading">PoS per abuse case</text>
+  <text x="522" y="334" text-anchor="middle" class="body">ratio or conditional distribution</text>
+  <text x="522" y="361" text-anchor="middle" class="body">PoS<tspan baseline-shift="sub" font-size="11">j</tspan> derived from ES<tspan baseline-shift="sub" font-size="11">j</tspan> &gt; GD<tspan baseline-shift="sub" font-size="11">a_j</tspan></text>
+
+  <rect x="747" y="139" width="250" height="130" class="node" fill="#dcfce7"/>
+  <text x="872" y="172" text-anchor="middle" class="heading">Loss probability (LP)</text>
+  <text x="872" y="204" text-anchor="middle" class="body">p<tspan baseline-shift="sub" font-size="11">j</tspan> = TEP<tspan baseline-shift="sub" font-size="11">j</tspan> · PoS<tspan baseline-shift="sub" font-size="11">j</tspan></text>
+  <text x="872" y="233" text-anchor="middle" class="body">LP = 1 − ∏<tspan baseline-shift="sub" font-size="11">j</tspan>(1 − p<tspan baseline-shift="sub" font-size="11">j</tspan>)</text>
+  <text x="872" y="257" text-anchor="middle" class="small">independent-union assumption</text>
+
+  <rect x="747" y="325" width="220" height="76" class="node" fill="#fce7f3"/>
+  <text x="857" y="355" text-anchor="middle" class="heading">Loss magnitude (LM)</text>
+  <text x="857" y="381" text-anchor="middle" class="body">distribution-valued</text>
+
+  <rect x="1030" y="198" width="135" height="118" class="node" fill="#ede9fe"/>
+  <text x="1097" y="232" text-anchor="middle" class="heading">Loss risk (LR)</text>
+  <text x="1097" y="264" text-anchor="middle" class="body">LR = LM · LP</text>
+  <text x="1097" y="292" text-anchor="middle" class="small">empirical samples</text>
+
+  <path d="M300 143 L390 143" class="edge"/>
+  <path d="M300 327 L390 327" class="edge"/>
+  <path d="M655 143 C700 143 704 178 747 188" class="edge"/>
+  <path d="M655 327 C700 327 704 232 747 219" class="edge"/>
+  <path d="M997 204 L1030 239" class="edge"/>
+  <path d="M967 363 C1002 363 1005 292 1030 276" class="edge"/>
+
+  <text x="674" y="132" class="direct">direct abuse-case connections</text>
+  <text x="700" y="416" text-anchor="middle" class="direct">direct terminal-event connections</text>
+  <rect x="45" y="422" width="1120" height="34" rx="7" fill="#fff7ed" stroke="#fdba74"/>
+  <text x="605" y="445" text-anchor="middle" class="body">Each abuse case is paired with exactly one terminal event; separate loss-cause contributions are assumed independent.</text>
+</svg>

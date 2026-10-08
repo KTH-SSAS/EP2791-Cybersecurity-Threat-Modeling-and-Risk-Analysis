@@ -105,9 +105,15 @@ class ScriptInterface:
         Resets any override value of matching attributes
         """
         self.__script_helper.check_type([class_type, class_instance, attribute, view], str)
-        
+
+        did_reset_override = False
         for setup_attribute_gui in self.__script_helper.get_setup_attributes_gui(view, class_type, class_instance, attribute):
-            setup_attribute_gui.attempt_to_reset_override_value()
+            did_reset_override |= setup_attribute_gui.attempt_to_reset_override_value()
+
+        # Recompute once after the batch so the exposed analyst override or
+        # bundled formula is immediately current rather than None/stale.
+        if did_reset_override:
+            self.__model.calculate_values()
             
     def set_class_marker(self, value, color, *, class_type=None, class_instance=None, view=None):
         """

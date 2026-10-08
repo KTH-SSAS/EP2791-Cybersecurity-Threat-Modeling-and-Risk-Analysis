@@ -32,7 +32,7 @@ os.makedirs(SCRIPTS_PATH, exist_ok=True)
 
 
 # Available types of attribute values
-VALUE_TYPES = (ValueTypeString, ValueTypeNumber, ValueTypeProbability, ValueTypeTriangleDistribution)
+VALUE_TYPES = (ValueTypeString, ValueTypeNumber, ValueTypeProbability, ValueTypeTriangleDistribution, ValueTypeDistribution)
 
 # Available types of calculation operations between input attribute values
 CALCULATION_TYPES = (CalculationTypeMean, CalculationTypeAND, CalculationTypeOR, CalculationTypeMultiplication, CalculationTypeDivision, CalculationTypeSampleTriangle, CalculationTypeQualitative)

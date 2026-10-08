@@ -1,4 +1,4 @@
-from general_gui import GUIBlock, GUIModelingBlock
+from general_gui import GUIBlock
 from helper_functions_general import convert_grid_coordinate_to_actual, get_max_directions_movement, convert_direction_to_vector
 from default_coordinate_functions import get_block_start_coordinates
 from config import *
@@ -201,8 +201,6 @@ class GUIConnectionTriangle(GUIBlock):
                 
                 break
                 
-        self.__connection.correct_scalars_indicator_location()
-        
     def rotate_triangle(self, new_direction):
         """
         Rotates the triangle to point in the specified direction
@@ -276,7 +274,7 @@ class GUIConnectionTriangle(GUIBlock):
             end_setup_class = self.__connection.get_end_setup_class()
             
             if start_setup_class != None and end_setup_class != None:
-                end_setup_class.set_input_setup_class(start_setup_class, self.__connection.get_input_scalars())
+                end_setup_class.set_input_setup_class(start_setup_class)
                 self.__connection.get_end_setup_class_gui().update_value_input_types()
                 
     def attempt_to_disable_calculation_connection(self):
@@ -295,41 +293,3 @@ class GUIConnectionTriangle(GUIBlock):
             self.__connection.delete()
             
         super().delete()
-        
-class GUIConnectionScalarsIndicator(GUIModelingBlock):
-    """
-    Manages indicator that shows the input scalars for a directional connection in setup views
-    """
-    def __init__(self, model, view, connection):
-        super().__init__(model, view, connection.get_input_scalars_string(), \
-                                      INPUT_SCALARS_INDICATOR_WIDTH, \
-                                      INPUT_SCALARS_INDICATOR_HEIGHT, \
-                                      INPUT_SCALARS_INDICATOR_COLOR, \
-                                      position=connection.get_scalars_indicator_start_coordinate(), \
-                                      bind_left=MOUSE_DRAG, \
-                                      tags_rect=(TAG_INDICATOR,), \
-                                      tags_text=(TAG_INDICATOR_TEXT,))
-        self.__connection = connection
-        
-    def left_dragged(self, event):
-        allowed_movement_directions = self.__connection.allowed_scalars_indicator_movement_directions()
-        max_positive_move_x, max_negative_move_x, max_positive_move_y, max_negative_move_y = get_max_directions_movement(allowed_movement_directions)
-        
-        super().left_dragged(event, \
-                             max_positive_move_x=max_positive_move_x, \
-                             max_negative_move_x=max_negative_move_x, \
-                             max_positive_move_y=max_positive_move_y, \
-                             max_negative_move_y=max_negative_move_y, \
-                             single_direction=True)
-        
-    def open_options(self):
-        return self.__connection.open_options()
-        
-    def update_displayed_input_scalars(self):
-        self.set_text(self.__connection.get_input_scalars_string())
-        
-    def delete(self, manual_delete=False):
-        super().delete()
-        
-        if manual_delete:
-            self.__connection.reset_input_scalars()
