@@ -54,6 +54,10 @@ The program utilizes Tkinter for its GUI, NumPy for its calculations, and Matplo
 ```
 sudo apt install python3-tk
 ```
+For macOS-based installation use:
+```
+brew install python-tk
+```
 
 The Python dependencies can be installed using:
 
