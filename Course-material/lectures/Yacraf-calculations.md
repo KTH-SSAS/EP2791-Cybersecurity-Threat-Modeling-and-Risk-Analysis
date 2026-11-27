@@ -82,12 +82,12 @@ $$
 PoC=0.1\cdot\frac{AtAS+WoO}{2}.
 $$
 
-Probability of Action combines positively formulated inputs directly and reverses negatively formulated inputs with $10-x$ before taking and scaling the mean:
+Probability of Action combines positively formulated inputs directly and reverses negatively formulated inputs with $10-x$ before taking and scaling the mean. Ability to Repudiate is positively formulated: an attacker who can more easily deny an attack is more likely to act, so $AtR$ enters directly, while Perceived Deterrence and Concern for Collateral Damage are reversed:
 
 $$
 PoA
 =0.1\cdot\frac{
-PEoA+PBoS+RT+(10-AtR)+(10-PD)+(10-CfCD)
+PEoA+PBoS+RT+AtR+(10-PD)+(10-CfCD)
 }{6}.
 $$
 
